@@ -386,7 +386,7 @@ namespace NPhp.Codegen
 			}
 		}
 
-		public void CompareBinary(BinaryComparisonEnum Comparison)
+		public void CompareBinary(SafeBinaryComparison Comparison)
 		{
 			if (TrackStack)
 			{
@@ -402,16 +402,16 @@ namespace NPhp.Codegen
 			{
 				switch (Comparison)
 				{
-					case BinaryComparisonEnum.Equals: ILGenerator.Emit(OpCodes.Ceq); break;
-					case BinaryComparisonEnum.NotEquals: ILGenerator.Emit(OpCodes.Ceq); ILGenerator.Emit(OpCodes.Neg); break;
-					case BinaryComparisonEnum.GreaterThanSigned: ILGenerator.Emit(OpCodes.Cgt); break;
-					case BinaryComparisonEnum.GreaterThanUnsigned: ILGenerator.Emit(OpCodes.Cgt_Un); break;
-					case BinaryComparisonEnum.GreaterOrEqualSigned: ILGenerator.Emit(OpCodes.Clt); ILGenerator.Emit(OpCodes.Ldc_I4_0); ILGenerator.Emit(OpCodes.Ceq); break;
-					case BinaryComparisonEnum.GreaterOrEqualUnsigned: ILGenerator.Emit(OpCodes.Clt_Un); ILGenerator.Emit(OpCodes.Ldc_I4_0); ILGenerator.Emit(OpCodes.Ceq); break;
-					case BinaryComparisonEnum.LessThanSigned: ILGenerator.Emit(OpCodes.Clt); break;
-					case BinaryComparisonEnum.LessThanUnsigned: ILGenerator.Emit(OpCodes.Clt_Un); break;
-					case BinaryComparisonEnum.LessOrEqualSigned: ILGenerator.Emit(OpCodes.Cgt); ILGenerator.Emit(OpCodes.Ldc_I4_0); ILGenerator.Emit(OpCodes.Ceq); break;
-					case BinaryComparisonEnum.LessOrEqualUnsigned: ILGenerator.Emit(OpCodes.Cgt_Un); ILGenerator.Emit(OpCodes.Ldc_I4_0); ILGenerator.Emit(OpCodes.Ceq); break;
+					case SafeBinaryComparison.Equals: ILGenerator.Emit(OpCodes.Ceq); break;
+					case SafeBinaryComparison.NotEquals: ILGenerator.Emit(OpCodes.Ceq); ILGenerator.Emit(OpCodes.Neg); break;
+					case SafeBinaryComparison.GreaterThanSigned: ILGenerator.Emit(OpCodes.Cgt); break;
+					case SafeBinaryComparison.GreaterThanUnsigned: ILGenerator.Emit(OpCodes.Cgt_Un); break;
+					case SafeBinaryComparison.GreaterOrEqualSigned: ILGenerator.Emit(OpCodes.Clt); ILGenerator.Emit(OpCodes.Ldc_I4_0); ILGenerator.Emit(OpCodes.Ceq); break;
+					case SafeBinaryComparison.GreaterOrEqualUnsigned: ILGenerator.Emit(OpCodes.Clt_Un); ILGenerator.Emit(OpCodes.Ldc_I4_0); ILGenerator.Emit(OpCodes.Ceq); break;
+					case SafeBinaryComparison.LessThanSigned: ILGenerator.Emit(OpCodes.Clt); break;
+					case SafeBinaryComparison.LessThanUnsigned: ILGenerator.Emit(OpCodes.Clt_Un); break;
+					case SafeBinaryComparison.LessOrEqualSigned: ILGenerator.Emit(OpCodes.Cgt); ILGenerator.Emit(OpCodes.Ldc_I4_0); ILGenerator.Emit(OpCodes.Ceq); break;
+					case SafeBinaryComparison.LessOrEqualUnsigned: ILGenerator.Emit(OpCodes.Cgt_Un); ILGenerator.Emit(OpCodes.Ldc_I4_0); ILGenerator.Emit(OpCodes.Ceq); break;
 					default: throw (new NotImplementedException());
 				}
 			}
@@ -531,7 +531,7 @@ namespace NPhp.Codegen
 			}
 		}
 
-		public void BranchBinaryComparison(BinaryComparisonEnum Comparison, SafeLabel Label)
+		public void BranchBinaryComparison(SafeBinaryComparison Comparison, SafeLabel Label)
 		{
 			if (TrackStack)
 			{
@@ -545,18 +545,18 @@ namespace NPhp.Codegen
 			{
 				switch (Comparison)
 				{
-					case BinaryComparisonEnum.Equals: ILGenerator.Emit(OpCodes.Beq, Label.ReflectionLabel); break;
-					case BinaryComparisonEnum.NotEquals: ILGenerator.Emit(OpCodes.Bne_Un, Label.ReflectionLabel); break;
+					case SafeBinaryComparison.Equals: ILGenerator.Emit(OpCodes.Beq, Label.ReflectionLabel); break;
+					case SafeBinaryComparison.NotEquals: ILGenerator.Emit(OpCodes.Bne_Un, Label.ReflectionLabel); break;
 
-					case BinaryComparisonEnum.GreaterOrEqualSigned: ILGenerator.Emit(OpCodes.Bge, Label.ReflectionLabel); break;
-					case BinaryComparisonEnum.GreaterOrEqualUnsigned: ILGenerator.Emit(OpCodes.Bge_Un, Label.ReflectionLabel); break;
-					case BinaryComparisonEnum.GreaterThanSigned: ILGenerator.Emit(OpCodes.Bgt, Label.ReflectionLabel); break;
-					case BinaryComparisonEnum.GreaterThanUnsigned: ILGenerator.Emit(OpCodes.Bgt_Un, Label.ReflectionLabel); break;
+					case SafeBinaryComparison.GreaterOrEqualSigned: ILGenerator.Emit(OpCodes.Bge, Label.ReflectionLabel); break;
+					case SafeBinaryComparison.GreaterOrEqualUnsigned: ILGenerator.Emit(OpCodes.Bge_Un, Label.ReflectionLabel); break;
+					case SafeBinaryComparison.GreaterThanSigned: ILGenerator.Emit(OpCodes.Bgt, Label.ReflectionLabel); break;
+					case SafeBinaryComparison.GreaterThanUnsigned: ILGenerator.Emit(OpCodes.Bgt_Un, Label.ReflectionLabel); break;
 
-					case BinaryComparisonEnum.LessOrEqualSigned: ILGenerator.Emit(OpCodes.Ble, Label.ReflectionLabel); break;
-					case BinaryComparisonEnum.LessOrEqualUnsigned: ILGenerator.Emit(OpCodes.Ble_Un, Label.ReflectionLabel); break;
-					case BinaryComparisonEnum.LessThanSigned: ILGenerator.Emit(OpCodes.Blt, Label.ReflectionLabel); break;
-					case BinaryComparisonEnum.LessThanUnsigned: ILGenerator.Emit(OpCodes.Blt_Un, Label.ReflectionLabel); break;
+					case SafeBinaryComparison.LessOrEqualSigned: ILGenerator.Emit(OpCodes.Ble, Label.ReflectionLabel); break;
+					case SafeBinaryComparison.LessOrEqualUnsigned: ILGenerator.Emit(OpCodes.Ble_Un, Label.ReflectionLabel); break;
+					case SafeBinaryComparison.LessThanSigned: ILGenerator.Emit(OpCodes.Blt, Label.ReflectionLabel); break;
+					case SafeBinaryComparison.LessThanUnsigned: ILGenerator.Emit(OpCodes.Blt_Un, Label.ReflectionLabel); break;
 
 					default: throw (new NotImplementedException());
 				}

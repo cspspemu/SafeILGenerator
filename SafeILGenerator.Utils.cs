@@ -174,7 +174,7 @@ namespace NPhp.Codegen
 		Xor,
 	}
 
-	public enum BinaryComparisonEnum
+	public enum SafeBinaryComparison
 	{
 		Equals,
 		NotEquals,
