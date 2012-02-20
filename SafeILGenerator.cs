@@ -10,7 +10,7 @@ namespace NPhp.Codegen
 {
 	public partial class SafeILGenerator
 	{
-		public void UnaryOperation(UnaryOperatorEnum Operator)
+		public void UnaryOperation(SafeUnaryOperator Operator)
 		{
 			if (TrackStack)
 			{
@@ -26,8 +26,8 @@ namespace NPhp.Codegen
 			{
 				switch (Operator)
 				{
-					case UnaryOperatorEnum.Negate: ILGenerator.Emit(OpCodes.Neg); break;
-					case UnaryOperatorEnum.Not: ILGenerator.Emit(OpCodes.Not); break;
+					case SafeUnaryOperator.Negate: ILGenerator.Emit(OpCodes.Neg); break;
+					case SafeUnaryOperator.Not: ILGenerator.Emit(OpCodes.Not); break;
 					default: throw (new NotImplementedException());
 				}
 			}
@@ -88,9 +88,10 @@ namespace NPhp.Codegen
 					if (Type == typeof(sbyte) || Type == typeof(byte)) { ILGenerator.Emit(OpCodes.Stind_I1); break; }
 					if (Type == typeof(short) || Type == typeof(ushort)) { ILGenerator.Emit(OpCodes.Stind_I2); break; }
 					if (Type == typeof(int) || Type == typeof(uint)) {ILGenerator.Emit(OpCodes.Stind_I4); break; }
+					if (Type == typeof(long) || Type == typeof(ulong)) { ILGenerator.Emit(OpCodes.Stind_I8); break; }
 					if (Type == typeof(float)) { ILGenerator.Emit(OpCodes.Stind_R4); break; }
 					if (Type == typeof(double)) { ILGenerator.Emit(OpCodes.Stind_R8); break; }
-					throw(new NotImplementedException());
+					throw(new NotImplementedException("Can't store indirectly type '" + Type.Name + "'"));
 				}
 			}
 
@@ -200,7 +201,7 @@ namespace NPhp.Codegen
 			Unbox(typeof(TType));
 		}
 
-		public void SetPointerAttributes(PointerAttributesSet Attributes)
+		public void SetPointerAttributes(SafePointerAttributes Attributes)
 		{
 			if (TrackStack)
 			{
@@ -210,12 +211,12 @@ namespace NPhp.Codegen
 
 			if (DoEmit)
 			{
-				if ((Attributes & PointerAttributesSet.Unaligned) != 0)
+				if ((Attributes & SafePointerAttributes.Unaligned) != 0)
 				{
 					ILGenerator.Emit(OpCodes.Unaligned);
 				}
 
-				if ((Attributes & PointerAttributesSet.Volatile) != 0)
+				if ((Attributes & SafePointerAttributes.Volatile) != 0)
 				{
 					ILGenerator.Emit(OpCodes.Volatile);
 				}
@@ -313,20 +314,23 @@ namespace NPhp.Codegen
 			}
 		}
 
-		public void BinaryOperation(BinaryOperatorEnum Operator)
+		public void BinaryOperation(SafeBinaryOperator Operator)
 		{
 			if (TrackStack)
 			{
 				var TypeRight = TypeStack.Pop();
 				var TypeLeft = TypeStack.Pop();
 
-				if (TypeLeft != TypeRight)
+				if (CheckTypes)
 				{
-					throw (new InvalidOperationException(String.Format(
-						"Binary operation mismatch Left:{0} != Right:{1}",
-						TypeLeft.Name,
-						TypeRight.Name
-					)));
+					if (TypeLeft != TypeRight)
+					{
+						throw (new InvalidOperationException(String.Format(
+							"Binary operation mismatch Left:{0} != Right:{1}",
+							TypeLeft.Name,
+							TypeRight.Name
+						)));
+					}
 				}
 
 				TypeStack.Push(TypeRight);
@@ -336,22 +340,22 @@ namespace NPhp.Codegen
 			{
 				switch (Operator)
 				{
-					case BinaryOperatorEnum.AdditionSigned: ILGenerator.Emit(OverflowCheck ? OpCodes.Add_Ovf : OpCodes.Add); break;
-					case BinaryOperatorEnum.AdditionUnsigned: ILGenerator.Emit(OverflowCheck ? OpCodes.Add_Ovf_Un : OpCodes.Add); break;
-					case BinaryOperatorEnum.SubstractionSigned: ILGenerator.Emit(OverflowCheck ? OpCodes.Sub_Ovf : OpCodes.Sub); break;
-					case BinaryOperatorEnum.SubstractionUnsigned: ILGenerator.Emit(OverflowCheck ? OpCodes.Sub_Ovf_Un : OpCodes.Sub); break;
-					case BinaryOperatorEnum.DivideSigned: ILGenerator.Emit(OpCodes.Div); break;
-					case BinaryOperatorEnum.DivideUnsigned: ILGenerator.Emit(OpCodes.Div_Un); break;
-					case BinaryOperatorEnum.RemainingSigned: ILGenerator.Emit(OpCodes.Rem); break;
-					case BinaryOperatorEnum.RemainingUnsigned: ILGenerator.Emit(OpCodes.Rem_Un); break;
-					case BinaryOperatorEnum.MultiplySigned: ILGenerator.Emit(OverflowCheck ? OpCodes.Mul_Ovf : OpCodes.Mul); break;
-					case BinaryOperatorEnum.MultiplyUnsigned: ILGenerator.Emit(OverflowCheck ? OpCodes.Mul_Ovf_Un : OpCodes.Mul); break;
-					case BinaryOperatorEnum.And: ILGenerator.Emit(OpCodes.And); break;
-					case BinaryOperatorEnum.Or: ILGenerator.Emit(OpCodes.Or); break;
-					case BinaryOperatorEnum.Xor: ILGenerator.Emit(OpCodes.Xor); break;
-					case BinaryOperatorEnum.ShiftLeft: ILGenerator.Emit(OpCodes.Shl); break;
-					case BinaryOperatorEnum.ShiftRightSigned: ILGenerator.Emit(OpCodes.Shr); break;
-					case BinaryOperatorEnum.ShiftRightUnsigned: ILGenerator.Emit(OpCodes.Shr_Un); break;
+					case SafeBinaryOperator.AdditionSigned: ILGenerator.Emit(OverflowCheck ? OpCodes.Add_Ovf : OpCodes.Add); break;
+					case SafeBinaryOperator.AdditionUnsigned: ILGenerator.Emit(OverflowCheck ? OpCodes.Add_Ovf_Un : OpCodes.Add); break;
+					case SafeBinaryOperator.SubstractionSigned: ILGenerator.Emit(OverflowCheck ? OpCodes.Sub_Ovf : OpCodes.Sub); break;
+					case SafeBinaryOperator.SubstractionUnsigned: ILGenerator.Emit(OverflowCheck ? OpCodes.Sub_Ovf_Un : OpCodes.Sub); break;
+					case SafeBinaryOperator.DivideSigned: ILGenerator.Emit(OpCodes.Div); break;
+					case SafeBinaryOperator.DivideUnsigned: ILGenerator.Emit(OpCodes.Div_Un); break;
+					case SafeBinaryOperator.RemainingSigned: ILGenerator.Emit(OpCodes.Rem); break;
+					case SafeBinaryOperator.RemainingUnsigned: ILGenerator.Emit(OpCodes.Rem_Un); break;
+					case SafeBinaryOperator.MultiplySigned: ILGenerator.Emit(OverflowCheck ? OpCodes.Mul_Ovf : OpCodes.Mul); break;
+					case SafeBinaryOperator.MultiplyUnsigned: ILGenerator.Emit(OverflowCheck ? OpCodes.Mul_Ovf_Un : OpCodes.Mul); break;
+					case SafeBinaryOperator.And: ILGenerator.Emit(OpCodes.And); break;
+					case SafeBinaryOperator.Or: ILGenerator.Emit(OpCodes.Or); break;
+					case SafeBinaryOperator.Xor: ILGenerator.Emit(OpCodes.Xor); break;
+					case SafeBinaryOperator.ShiftLeft: ILGenerator.Emit(OpCodes.Shl); break;
+					case SafeBinaryOperator.ShiftRightSigned: ILGenerator.Emit(OpCodes.Shr); break;
+					case SafeBinaryOperator.ShiftRightUnsigned: ILGenerator.Emit(OpCodes.Shr_Un); break;
 					default: throw (new NotImplementedException());
 				}
 			}
@@ -402,12 +406,12 @@ namespace NPhp.Codegen
 					case BinaryComparisonEnum.NotEquals: ILGenerator.Emit(OpCodes.Ceq); ILGenerator.Emit(OpCodes.Neg); break;
 					case BinaryComparisonEnum.GreaterThanSigned: ILGenerator.Emit(OpCodes.Cgt); break;
 					case BinaryComparisonEnum.GreaterThanUnsigned: ILGenerator.Emit(OpCodes.Cgt_Un); break;
-					case BinaryComparisonEnum.GreaterOrEqualSigned: ILGenerator.Emit(OpCodes.Clt); ILGenerator.Emit(OpCodes.Neg); break;
-					case BinaryComparisonEnum.GreaterOrEqualUnsigned: ILGenerator.Emit(OpCodes.Clt_Un); ILGenerator.Emit(OpCodes.Neg); break;
+					case BinaryComparisonEnum.GreaterOrEqualSigned: ILGenerator.Emit(OpCodes.Clt); ILGenerator.Emit(OpCodes.Ldc_I4_0); ILGenerator.Emit(OpCodes.Ceq); break;
+					case BinaryComparisonEnum.GreaterOrEqualUnsigned: ILGenerator.Emit(OpCodes.Clt_Un); ILGenerator.Emit(OpCodes.Ldc_I4_0); ILGenerator.Emit(OpCodes.Ceq); break;
 					case BinaryComparisonEnum.LessThanSigned: ILGenerator.Emit(OpCodes.Clt); break;
 					case BinaryComparisonEnum.LessThanUnsigned: ILGenerator.Emit(OpCodes.Clt_Un); break;
-					case BinaryComparisonEnum.LessOrEqualSigned: ILGenerator.Emit(OpCodes.Cgt); ILGenerator.Emit(OpCodes.Neg); break;
-					case BinaryComparisonEnum.LessOrEqualUnsigned: ILGenerator.Emit(OpCodes.Cgt_Un); ILGenerator.Emit(OpCodes.Neg); break;
+					case BinaryComparisonEnum.LessOrEqualSigned: ILGenerator.Emit(OpCodes.Cgt); ILGenerator.Emit(OpCodes.Ldc_I4_0); ILGenerator.Emit(OpCodes.Ceq); break;
+					case BinaryComparisonEnum.LessOrEqualUnsigned: ILGenerator.Emit(OpCodes.Cgt_Un); ILGenerator.Emit(OpCodes.Ldc_I4_0); ILGenerator.Emit(OpCodes.Ceq); break;
 					default: throw (new NotImplementedException());
 				}
 			}
@@ -564,21 +568,27 @@ namespace NPhp.Codegen
 			}
 		}
 
-		private void _BranchUnaryComparison(UnaryComparisonEnum Comparison, SafeLabel Label)
+		public void BranchUnaryComparison(SafeUnaryComparison Comparison, SafeLabel Label)
 		{
 			if (TrackStack)
 			{
 				var Type = TypeStack.Pop();
 
-				if (Type != typeof(bool)) throw (new InvalidOperationException("Required boolean value"));
+				if (CheckTypes)
+				{
+					if (Type != typeof(bool))
+					{
+						throw (new InvalidOperationException("Required boolean value"));
+					}
+				}
 			}
 
 			if (DoEmit)
 			{
 				switch (Comparison)
 				{
-					case UnaryComparisonEnum.False: ILGenerator.Emit(OpCodes.Brfalse, Label.ReflectionLabel); break;
-					case UnaryComparisonEnum.True: ILGenerator.Emit(OpCodes.Brtrue, Label.ReflectionLabel); break;
+					case SafeUnaryComparison.False: ILGenerator.Emit(OpCodes.Brfalse, Label.ReflectionLabel); break;
+					case SafeUnaryComparison.True: ILGenerator.Emit(OpCodes.Brtrue, Label.ReflectionLabel); break;
 					default: throw (new NotImplementedException());
 				}
 			}
@@ -591,12 +601,23 @@ namespace NPhp.Codegen
 
 		public void BranchIfTrue(SafeLabel Label)
 		{
-			_BranchUnaryComparison(UnaryComparisonEnum.True, Label);
+			BranchUnaryComparison(SafeUnaryComparison.True, Label);
 		}
 
 		public void BranchIfFalse(SafeLabel Label)
 		{
-			_BranchUnaryComparison(UnaryComparisonEnum.False, Label);
+			BranchUnaryComparison(SafeUnaryComparison.False, Label);
+		}
+
+		static private Type GetCommonType(Type Type)
+		{
+			if (Type == typeof(byte)) return typeof(sbyte);
+			if (Type == typeof(ushort)) return typeof(short);
+			if (Type == typeof(uint)) return typeof(int);
+			if (Type == typeof(ulong)) return typeof(long);
+			if (Type.IsPointer) return typeof(void*);
+			if (Type.IsEnum)  return typeof(int);
+			return Type;
 		}
 
 		private void _Jmp_Call(OpCode OpCode, MethodInfo MethodInfo)
@@ -617,14 +638,20 @@ namespace NPhp.Codegen
 					if (FunctionParameterType == typeof(bool)) FunctionParameterType = typeof(int);
 					if (StackParameterType == typeof(bool)) StackParameterType = typeof(int);
 
-					if (FunctionParameterType != StackParameterType)
+					if (CheckTypes)
 					{
-						throw (new InvalidOperationException(
-							String.Format(
-								"Type mismatch : Argument{0}. Expected: '{1}' but found on Stack: '{2}'",
-								CurrentArgumentIndex, FunctionParameterType.Name, StackParameterType.Name
-							)
-						));
+						if (FunctionParameterType != StackParameterType)
+						{
+							if (GetCommonType(FunctionParameterType) != GetCommonType(StackParameterType))
+							{
+								throw (new InvalidOperationException(
+									String.Format(
+										"Type mismatch : Argument{0}. Expected: '{1}' but found on Stack: '{2}'",
+										CurrentArgumentIndex, FunctionParameterType.Name, StackParameterType.Name
+									)
+								));
+							}
+						}
 					}
 					CurrentArgumentIndex++;
 				}
@@ -657,6 +684,11 @@ namespace NPhp.Codegen
 		{
 			ResetStack();
 			_Jmp_Call(OpCodes.Jmp, MethodInfo);
+		}
+
+		public void Call(Delegate Delegate)
+		{
+			Call(Delegate.Method);
 		}
 
 		public void Call(MethodInfo MethodInfo)
@@ -908,11 +940,30 @@ namespace NPhp.Codegen
 			_LoadElement_Reference_Address(OpCodes.Ldelem_Ref);
 		}
 
-		private void _LoadField_Address(OpCode OpCode)
+		public void StoreField(FieldInfo FieldInfo)
 		{
 			if (TrackStack)
 			{
-				var FieldInfoType = TypeStack.Pop();
+				var ValueType = TypeStack.Pop();
+				var ObjectType = TypeStack.Pop();
+			}
+
+			if (DoEmit)
+			{
+				ILGenerator.Emit(OpCodes.Stfld, FieldInfo);
+			}
+
+			if (DoDebug)
+			{
+				Debug.WriteLine(String.Format("StoreField({0}) :: Stack -> {1}", FieldInfo, TypeStack.Count));
+			}
+		}
+
+		private void _LoadField_Address(OpCode OpCode, FieldInfo FieldInfo)
+		{
+			if (TrackStack)
+			{
+				//var FieldInfoType = TypeStack.Pop();
 				var ObjectType = TypeStack.Pop();
 
 				// @TODO: Field reference
@@ -921,7 +972,7 @@ namespace NPhp.Codegen
 	
 			if (DoEmit)
 			{
-				ILGenerator.Emit(OpCodes.Ldfld);
+				ILGenerator.Emit(OpCodes.Ldfld, FieldInfo);
 			}
 
 			if (DoDebug)
@@ -930,14 +981,14 @@ namespace NPhp.Codegen
 			}
 		}
 
-		public void LoadField()
+		public void LoadField(FieldInfo FieldInfo)
 		{
-			_LoadField_Address(OpCodes.Ldfld);
+			_LoadField_Address(OpCodes.Ldfld, FieldInfo);
 		}
 
-		public void LoadFieldAddress()
+		public void LoadFieldAddress(FieldInfo FieldInfo)
 		{
-			_LoadField_Address(OpCodes.Ldflda);
+			_LoadField_Address(OpCodes.Ldflda, FieldInfo);
 		}
 
 		public void LoadMethodAddress()
@@ -1047,6 +1098,11 @@ namespace NPhp.Codegen
 			}
 		}
 
+		public void LoadIndirect<TType>()
+		{
+			LoadIndirect(typeof(TType));
+		}
+
 		public void LoadIndirect(Type Type)
 		{
 			if (TrackStack)
@@ -1127,6 +1183,30 @@ namespace NPhp.Codegen
 		public void Push(ulong Value)
 		{
 			Push(unchecked((long)Value));
+		}
+
+		public void EmitWriteLine(String Value)
+		{
+			ILGenerator.EmitWriteLine(Value);
+		}
+
+		public void CastClass(Type Type)
+		{
+			if (TrackStack)
+			{
+				var ObjectType = TypeStack.Pop();
+				TypeStack.Push(Type);
+			}
+
+			if (DoEmit)
+			{
+				ILGenerator.Emit(OpCodes.Castclass, Type);
+			}
+
+			if (DoDebug)
+			{
+				Debug.WriteLine(String.Format("CastClass({0}) :: Stack -> {1}", Type, TypeStack.Count));
+			}
 		}
 	}
 }
