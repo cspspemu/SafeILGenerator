@@ -17,7 +17,10 @@ namespace NPhp.Codegen
 				var TypeRight = TypeStack.Pop();
 				var TypeLeft = TypeStack.Pop();
 
-				if (TypeLeft != TypeRight) throw (new InvalidOperationException("Binary operation mismatch"));
+				if (CheckTypes)
+				{
+					if (TypeLeft != TypeRight) throw (new InvalidOperationException("Binary operation mismatch"));
+				}
 
 				TypeStack.Push(TypeRight);
 			}
@@ -393,7 +396,10 @@ namespace NPhp.Codegen
 				var TypeRight = TypeStack.Pop();
 				var TypeLeft = TypeStack.Pop();
 
-				if (TypeLeft != TypeRight) throw (new InvalidOperationException("Binary operation mismatch"));
+				if (CheckTypes)
+				{
+					if (TypeLeft != TypeRight) throw (new InvalidOperationException("Binary operation mismatch"));
+				}
 
 				TypeStack.Push(typeof(bool));
 			}
@@ -403,7 +409,7 @@ namespace NPhp.Codegen
 				switch (Comparison)
 				{
 					case SafeBinaryComparison.Equals: ILGenerator.Emit(OpCodes.Ceq); break;
-					case SafeBinaryComparison.NotEquals: ILGenerator.Emit(OpCodes.Ceq); ILGenerator.Emit(OpCodes.Neg); break;
+					case SafeBinaryComparison.NotEquals: ILGenerator.Emit(OpCodes.Ceq); ILGenerator.Emit(OpCodes.Ldc_I4_0); ILGenerator.Emit(OpCodes.Ceq); break;
 					case SafeBinaryComparison.GreaterThanSigned: ILGenerator.Emit(OpCodes.Cgt); break;
 					case SafeBinaryComparison.GreaterThanUnsigned: ILGenerator.Emit(OpCodes.Cgt_Un); break;
 					case SafeBinaryComparison.GreaterOrEqualSigned: ILGenerator.Emit(OpCodes.Clt); ILGenerator.Emit(OpCodes.Ldc_I4_0); ILGenerator.Emit(OpCodes.Ceq); break;
@@ -538,7 +544,10 @@ namespace NPhp.Codegen
 				var TypeRight = TypeStack.Pop();
 				var TypeLeft = TypeStack.Pop();
 
-				if (TypeLeft != TypeRight) throw (new InvalidOperationException("Binary operation mismatch"));
+				if (CheckTypes)
+				{
+					if (TypeLeft != TypeRight) throw (new InvalidOperationException("Binary operation mismatch"));
+				}
 			}
 
 			if (DoEmit)
@@ -972,7 +981,7 @@ namespace NPhp.Codegen
 	
 			if (DoEmit)
 			{
-				ILGenerator.Emit(OpCodes.Ldfld, FieldInfo);
+				ILGenerator.Emit(OpCode, FieldInfo);
 			}
 
 			if (DoDebug)
