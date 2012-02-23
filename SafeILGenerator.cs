@@ -18,7 +18,10 @@ namespace NPhp.Codegen
 				var TypeRight = TypeStack.Pop();
 				var TypeLeft = TypeStack.Pop();
 
-				if (TypeLeft != TypeRight) throw (new InvalidOperationException("Binary operation mismatch"));
+				if (CheckTypes)
+				{
+					if (TypeLeft != TypeRight) throw (new InvalidOperationException("Binary operation mismatch"));
+				}
 
 				TypeStack.Push(TypeRight);
 			}
@@ -399,7 +402,10 @@ namespace NPhp.Codegen
 				var TypeRight = TypeStack.Pop();
 				var TypeLeft = TypeStack.Pop();
 
-				if (TypeLeft != TypeRight) throw (new InvalidOperationException("Binary operation mismatch"));
+				if (CheckTypes)
+				{
+					if (TypeLeft != TypeRight) throw (new InvalidOperationException("Binary operation mismatch"));
+				}
 
 				TypeStack.Push(typeof(bool));
 			}
@@ -544,7 +550,10 @@ namespace NPhp.Codegen
 				var TypeRight = TypeStack.Pop();
 				var TypeLeft = TypeStack.Pop();
 
-				if (TypeLeft != TypeRight) throw (new InvalidOperationException("Binary operation mismatch"));
+				if (CheckTypes)
+				{
+					if (TypeLeft != TypeRight) throw (new InvalidOperationException("Binary operation mismatch"));
+				}
 			}
 
 			if (DoEmit)
@@ -984,7 +993,7 @@ namespace NPhp.Codegen
 	
 			if (DoEmit)
 			{
-				ILGenerator.Emit(OpCodes.Ldfld, FieldInfo);
+				ILGenerator.Emit(OpCode, FieldInfo);
 			}
 
 			if (DoDebug)
