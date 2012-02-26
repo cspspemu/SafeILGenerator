@@ -464,7 +464,6 @@ namespace NPhp.Codegen
 					if (Type == typeof(ulong)) { ILGenerator.Emit(OverflowCheck ? OpCodes.Conv_Ovf_U8 : OpCodes.Conv_U8); break; }
 					if (Type == typeof(float)) { ILGenerator.Emit(OpCodes.Conv_R4); break; }
 					if (Type == typeof(double)) { ILGenerator.Emit(OpCodes.Conv_R8); break; }
-
 					throw (new NotImplementedException());
 				}
 			}
@@ -630,6 +629,7 @@ namespace NPhp.Codegen
 			if (Type == typeof(ushort)) return typeof(short);
 			if (Type == typeof(uint)) return typeof(int);
 			if (Type == typeof(ulong)) return typeof(long);
+			if (Type == null) return typeof(object);
 			if (Type.IsPointer) return typeof(void*);
 			if (Type.IsEnum)  return typeof(int);
 			return Type;
