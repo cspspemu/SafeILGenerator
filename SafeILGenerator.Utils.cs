@@ -96,14 +96,9 @@ namespace NPhp.Codegen
 			throw (new NotImplementedException());
 		}
 
-		public LocalBuilder DeclareLocal<TType>(string Name = null)
+		public LocalBuilder DeclareLocal<TType>()
 		{
-			var Local = ILGenerator.DeclareLocal(typeof(TType));
-			if (Name != null)
-			{
-				//Local.SetLocalSymInfo(Name);
-			}
-			return Local;
+			return ILGenerator.DeclareLocal(typeof(TType));
 		}
 
 		public void CheckAndFinalize()
@@ -265,7 +260,6 @@ namespace NPhp.Codegen
 
 		public Type GetLastest()
 		{
-			if (Stack.Count == 0) return null;
 			return Stack.First.Value;
 		}
 

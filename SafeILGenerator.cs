@@ -5,7 +5,6 @@ using System.Text;
 using System.Reflection.Emit;
 using System.Reflection;
 using System.Diagnostics;
-using System.Diagnostics.SymbolStore;
 
 namespace NPhp.Codegen
 {
@@ -40,11 +39,6 @@ namespace NPhp.Codegen
 			{
 				Debug.WriteLine(String.Format("UnaryOperation({0}) :: Stack -> {1}", Operator, TypeStack.Count));
 			}
-		}
-
-		public void MarkSequencePoint(ISymbolDocumentWriter Document, int StartLine, int StartColumn, int EndLine, int EndColumn)
-		{
-			ILGenerator.MarkSequencePoint(Document, StartLine, StartColumn, EndLine, EndColumn);
 		}
 
 		public void StoreElement(Type Type)
@@ -120,7 +114,7 @@ namespace NPhp.Codegen
 			if (TrackStack)
 			{
 				var StoreValueType = TypeStack.Pop();
-				if (StoreValueType != Local.LocalType) throw (new InvalidOperationException(String.Format("Type {0} != {1}", StoreValueType, Local.LocalType)));
+				if (StoreValueType != Local.LocalType) throw(new InvalidOperationException());
 			}
 
 			if (DoEmit)
@@ -415,7 +409,7 @@ namespace NPhp.Codegen
 				switch (Comparison)
 				{
 					case SafeBinaryComparison.Equals: ILGenerator.Emit(OpCodes.Ceq); break;
-					case SafeBinaryComparison.NotEquals: ILGenerator.Emit(OpCodes.Ceq); ILGenerator.Emit(OpCodes.Neg); break;
+					case SafeBinaryComparison.NotEquals: ILGenerator.Emit(OpCodes.Ceq); ILGenerator.Emit(OpCodes.Ldc_I4_0); ILGenerator.Emit(OpCodes.Ceq); break;
 					case SafeBinaryComparison.GreaterThanSigned: ILGenerator.Emit(OpCodes.Cgt); break;
 					case SafeBinaryComparison.GreaterThanUnsigned: ILGenerator.Emit(OpCodes.Cgt_Un); break;
 					case SafeBinaryComparison.GreaterOrEqualSigned: ILGenerator.Emit(OpCodes.Clt); ILGenerator.Emit(OpCodes.Ldc_I4_0); ILGenerator.Emit(OpCodes.Ceq); break;
@@ -464,6 +458,7 @@ namespace NPhp.Codegen
 					if (Type == typeof(ulong)) { ILGenerator.Emit(OverflowCheck ? OpCodes.Conv_Ovf_U8 : OpCodes.Conv_U8); break; }
 					if (Type == typeof(float)) { ILGenerator.Emit(OpCodes.Conv_R4); break; }
 					if (Type == typeof(double)) { ILGenerator.Emit(OpCodes.Conv_R8); break; }
+
 					throw (new NotImplementedException());
 				}
 			}
@@ -629,7 +624,6 @@ namespace NPhp.Codegen
 			if (Type == typeof(ushort)) return typeof(short);
 			if (Type == typeof(uint)) return typeof(int);
 			if (Type == typeof(ulong)) return typeof(long);
-			if (Type == null) return typeof(object);
 			if (Type.IsPointer) return typeof(void*);
 			if (Type.IsEnum)  return typeof(int);
 			return Type;
@@ -637,11 +631,6 @@ namespace NPhp.Codegen
 
 		private void _Jmp_Call(OpCode OpCode, MethodInfo MethodInfo)
 		{
-			if (MethodInfo == null)
-			{
-				throw(new ArgumentNullException("MethodInfo can't be null!"));
-			}
-
 			if (DoDebug)
 			{
 				Debug.WriteLine(String.Format("_Jmp_Call({0}, {1}) :: Stack -> {2}", OpCode.Name, MethodInfo, TypeStack.Count));
@@ -666,8 +655,8 @@ namespace NPhp.Codegen
 							{
 								throw (new InvalidOperationException(
 									String.Format(
-										"Type mismatch : Argument{0}. Expected: '{1}' but found on Stack: '{2}' on function '{3}.{4}'",
-										CurrentArgumentIndex, FunctionParameterType.Name, StackParameterType.Name, MethodInfo.DeclaringType.Name, MethodInfo.Name
+										"Type mismatch : Argument{0}. Expected: '{1}' but found on Stack: '{2}'",
+										CurrentArgumentIndex, FunctionParameterType.Name, StackParameterType.Name
 									)
 								));
 							}
@@ -689,7 +678,6 @@ namespace NPhp.Codegen
 
 			if (DoEmit)
 			{
-				//Console.WriteLine(OpCode);
 				ILGenerator.Emit(OpCode, MethodInfo);
 			}
 		}
@@ -714,7 +702,7 @@ namespace NPhp.Codegen
 
 		public void Call(MethodInfo MethodInfo)
 		{
-			_Jmp_Call(MethodInfo.IsVirtual ? OpCodes.Callvirt : OpCodes.Call, MethodInfo);
+			_Jmp_Call(OpCodes.Call, MethodInfo);
 		}
 
 		public void Break()
@@ -1209,11 +1197,6 @@ namespace NPhp.Codegen
 		public void EmitWriteLine(String Value)
 		{
 			ILGenerator.EmitWriteLine(Value);
-		}
-
-		public void CastClass<TType>()
-		{
-			CastClass(typeof(TType));
 		}
 
 		public void CastClass(Type Type)
