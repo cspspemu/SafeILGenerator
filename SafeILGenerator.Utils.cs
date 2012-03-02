@@ -174,7 +174,7 @@ namespace NPhp.Codegen
 		Xor,
 	}
 
-	public enum BinaryComparisonEnum
+	public enum SafeBinaryComparison
 	{
 		Equals,
 		NotEquals,
@@ -237,7 +237,7 @@ namespace NPhp.Codegen
 			}
 			else
 			{
-				Console.Error.WriteLine("SafeTypeStack.Pop with no elements!");
+				Debug.WriteLine("SafeTypeStack.Pop with no elements!");
 				return null;
 			}
 		}
