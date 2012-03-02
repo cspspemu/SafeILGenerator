@@ -1,3 +1,5 @@
 
-/SafeILGenerator/bin
-/SafeILGenerator/obj
+bin
+obj
+TestResults
+*.suo

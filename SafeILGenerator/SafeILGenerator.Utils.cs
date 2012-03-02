@@ -5,7 +5,7 @@ using System.Text;
 using System.Reflection.Emit;
 using System.Diagnostics;
 
-namespace NPhp.Codegen
+namespace Codegen
 {
 	public partial class SafeILGenerator
 	{
@@ -17,6 +17,18 @@ namespace NPhp.Codegen
 		bool TrackStack = true;
 		bool CheckTypes = true;
 		public bool DoDebug { get; private set; }
+
+		static public TDelegate Generate<TDelegate>(Action<SafeILGenerator> Generator)
+		{
+			var MethodInfo = typeof(TDelegate).GetMethod("Invoke");
+			var DynamicMethod = new DynamicMethod("", MethodInfo.ReturnType, MethodInfo.GetParameters().Select(Parameter => Parameter.ParameterType).ToArray());
+			var ILGenerator = DynamicMethod.GetILGenerator();
+			var SafeILGenerator = new SafeILGenerator(ILGenerator, CheckTypes: true, DoDebug: true);
+			{
+				Generator(SafeILGenerator);
+			}
+			return (TDelegate)(object)DynamicMethod.CreateDelegate(typeof(TDelegate));
+		}
 
 		public SafeILGenerator(ILGenerator ILGenerator, bool CheckTypes, bool DoDebug)
 		{
@@ -96,7 +108,7 @@ namespace NPhp.Codegen
 			throw (new NotImplementedException());
 		}
 
-		public LocalBuilder DeclareLocal<TType>()
+		public LocalBuilder DeclareLocal<TType>(string Name)
 		{
 			return ILGenerator.DeclareLocal(typeof(TType));
 		}

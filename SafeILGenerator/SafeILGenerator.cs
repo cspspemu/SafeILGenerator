@@ -6,7 +6,7 @@ using System.Reflection.Emit;
 using System.Reflection;
 using System.Diagnostics;
 
-namespace NPhp.Codegen
+namespace Codegen
 {
 	public partial class SafeILGenerator
 	{
@@ -237,14 +237,72 @@ namespace NPhp.Codegen
 			//ILGenerator.Emit(OpCodes.Tailcall);
 		}
 
+		public void Switch<TType>(IEnumerable<TType> ListEnumerable, Func<TType, int> IntKeySelector, Action<TType> CaseGenerate, Action DefaultGenerate)
+		{
+			var SwitchEndLabel = DefineLabel("SwitchEndLabel");
+			var SwitchDefaultLabel = DefineLabel("SwitchDefaultLabel");
+			var Labels = new List<SafeLabel>();
+			var Dictionary = new Dictionary<int, SafeLabel>();
+			var List = ListEnumerable.ToArray();
+
+			// Generate dictionary and labels
+			foreach (var Item in List)
+			{
+				var IntKey = IntKeySelector(Item);
+				var Label = DefineLabel("SwitchCase" + Item);
+				Labels.Add(Label);
+				Dictionary.Add(IntKey, Label);
+			}
+
+			// Switch
+			// {
+			Switch(Dictionary, SwitchDefaultLabel);
+
+			for (int n = 0; n < List.Length; n++)
+			{
+				// case Item:
+				var Label = Labels[n];
+				var Item = List[n];
+				Label.Mark();
+				{
+					CaseGenerate(Item);
+				}
+				BranchAlways(SwitchEndLabel); // break;
+			}
+
+			// Default:
+			SwitchDefaultLabel.Mark();
+			{
+				if (DefaultGenerate != null) DefaultGenerate();
+			}
+			BranchAlways(SwitchEndLabel); // break;
+
+			// }
+			SwitchEndLabel.Mark();
+		}
+
 		public void Switch(Dictionary<int, SafeLabel> Labels, SafeLabel DefaultLabel)
 		{
+#if true
+			// SwitchReferenceValue = <expression>
+			var SwitchReferenceValue = DeclareLocal<int>("SwitchReferenceValue");
+			StoreLocal(SwitchReferenceValue);
+
+			foreach (var Pair in Labels)
+			{
+				LoadLocal(SwitchReferenceValue);
+				Push(Pair.Key);
+				BranchBinaryComparison(SafeBinaryComparison.Equals, Pair.Value);
+			}
+			BranchAlways(DefaultLabel);
+#else
 			var MinKey = Labels.Keys.Min();
 			var MaxKey = Labels.Keys.Max();
 			var Length = MaxKey - MinKey;
 
 			BranchAlways(DefaultLabel);
 			throw (new NotImplementedException());
+#endif
 		}
 
 		public void Switch(SafeLabel[] Labels)
