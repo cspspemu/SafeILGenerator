@@ -108,7 +108,7 @@ namespace Codegen
 			throw (new NotImplementedException());
 		}
 
-		public LocalBuilder DeclareLocal<TType>(string Name)
+		public LocalBuilder DeclareLocal<TType>(string Name = "")
 		{
 			return ILGenerator.DeclareLocal(typeof(TType));
 		}
