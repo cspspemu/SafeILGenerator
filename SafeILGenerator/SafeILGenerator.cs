@@ -136,7 +136,17 @@ namespace Codegen
 			}
 		}
 
+		public void StoreArgument(SafeArgument Argument)
+		{
+			StoreArgument(Argument.Type, Argument.Index);
+		}
+
 		public void StoreArgument<TType>(int ArgumentIndex)
+		{
+			StoreArgument(typeof(TType), ArgumentIndex);
+		}
+
+		public void StoreArgument(Type Type, int ArgumentIndex)
 		{
 			if (TrackStack)
 			{
@@ -151,7 +161,7 @@ namespace Codegen
 
 			if (DoDebug)
 			{
-				Debug.WriteLine(String.Format("StoreArgument<{0}>({1}) :: Stack -> {2}", typeof(TType).Name, ArgumentIndex, TypeStack.Count));
+				Debug.WriteLine(String.Format("StoreArgument<{0}>({1}) :: Stack -> {2}", Type.Name, ArgumentIndex, TypeStack.Count));
 			}
 		}
 
@@ -807,11 +817,35 @@ namespace Codegen
 			}
 		}
 
+		public SafeArgument DeclareArgument(Type Type, int ArgumentIndex)
+		{
+			return new SafeArgument(Type, ArgumentIndex);
+		}
+
+		public void LoadStoreArgument(SafeArgument Argument, Action Action)
+		{
+			LoadArgument(Argument);
+			{
+				Action();
+			}
+			StoreArgument(Argument);
+		}
+
+		public void LoadArgument(SafeArgument Argument)
+		{
+			LoadArgument(Argument.Type, Argument.Index);
+		}
+
 		public void LoadArgument<TType>(int ArgumentIndex)
+		{
+			LoadArgument(typeof(TType), ArgumentIndex);
+		}
+
+		public void LoadArgument(Type Type, int ArgumentIndex)
 		{
 			if (TrackStack)
 			{
-				TypeStack.Push(typeof(TType));
+				TypeStack.Push(Type);
 			}
 
 			if (DoEmit)
@@ -828,9 +862,10 @@ namespace Codegen
 
 			if (DoDebug)
 			{
-				Debug.WriteLine(String.Format("LoadArgument<{0}>({1}) :: Stack -> {2}", typeof(TType).Name, ArgumentIndex,  TypeStack.Count));
+				Debug.WriteLine(String.Format("LoadArgument<{0}>({1}) :: Stack -> {2}", Type.Name, ArgumentIndex, TypeStack.Count));
 			}
 		}
+
 
 		public void LoadArgumentFromIndexAtStack()
 		{
@@ -1274,6 +1309,30 @@ namespace Codegen
 			{
 				Debug.WriteLine(String.Format("CastClass({0}) :: Stack -> {1}", Type, TypeStack.Count));
 			}
+		}
+
+		static public Type GetIntegralTypeByDescription(int Size, bool Signed)
+		{
+			switch (Size)
+			{
+				case 1: return Signed ? typeof(sbyte) : typeof(byte);
+				case 2: return Signed ? typeof(short) : typeof(ushort);
+				case 4: return Signed ? typeof(int) : typeof(uint);
+				case 8: return Signed ? typeof(long) : typeof(ulong);
+				default: throw(new NotImplementedException("Not Integral Type"));
+			}
+		}
+	}
+
+	public class SafeArgument
+	{
+		internal Type Type;
+		internal int Index;
+
+		internal SafeArgument(Type Type, int Index)
+		{
+			this.Type = Type;
+			this.Index = Index;
 		}
 	}
 }

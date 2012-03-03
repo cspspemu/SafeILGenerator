@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Reflection.Emit;
 using System.Diagnostics;
+using System.Reflection;
 
 namespace Codegen
 {
@@ -18,12 +19,17 @@ namespace Codegen
 		bool CheckTypes = true;
 		public bool DoDebug { get; private set; }
 
-		static public TDelegate Generate<TDelegate>(Action<SafeILGenerator> Generator)
+		static public TDelegate Generate<TDelegate>(string MethodName, Action<SafeILGenerator> Generator, bool CheckTypes = true, bool DoDebug = false)
 		{
 			var MethodInfo = typeof(TDelegate).GetMethod("Invoke");
-			var DynamicMethod = new DynamicMethod("", MethodInfo.ReturnType, MethodInfo.GetParameters().Select(Parameter => Parameter.ParameterType).ToArray());
+			var DynamicMethod = new DynamicMethod(
+				MethodName,
+				MethodInfo.ReturnType,
+				MethodInfo.GetParameters().Select(Parameter => Parameter.ParameterType).ToArray(),
+				Assembly.GetExecutingAssembly().ManifestModule
+			);
 			var ILGenerator = DynamicMethod.GetILGenerator();
-			var SafeILGenerator = new SafeILGenerator(ILGenerator, CheckTypes: true, DoDebug: true);
+			var SafeILGenerator = new SafeILGenerator(ILGenerator, CheckTypes, DoDebug);
 			{
 				Generator(SafeILGenerator);
 			}

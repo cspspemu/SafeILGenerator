@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Codegen.Tests
@@ -9,7 +10,7 @@ namespace Codegen.Tests
 		[TestMethod]
 		public void TestGenerate()
 		{
-			var Adder = SafeILGenerator.Generate<Func<int, int, int>>((Generator) =>
+			var Adder = SafeILGenerator.Generate<Func<int, int, int>>("TestGenerate", (Generator) =>
 			{
 				Generator.LoadArgument<int>(0);
 				Generator.LoadArgument<int>(1);
@@ -22,16 +23,16 @@ namespace Codegen.Tests
 		[TestMethod]
 		public void TestSwitch()
 		{
-			var Switcher = SafeILGenerator.Generate<Func<int, int>>((Generator) =>
+			var Switcher = SafeILGenerator.Generate<Func<int, int>>("TestSwitch", (Generator) =>
 			{
 				var Local = Generator.DeclareLocal<int>("Value");
-				Generator.Push((int)-2);
+				Generator.Push((int)-33);
 				Generator.StoreLocal(Local);
 
 				Generator.LoadArgument<int>(0);
 				Generator.Switch(
 					// List
-					new int[] { 0, 3, 5 },
+					new int[] { 0, 2, 3 },
 					// Integer Selector
 					(Value) => Value,
 					// Case
@@ -43,14 +44,17 @@ namespace Codegen.Tests
 					// Default
 					() =>
 					{
-						Generator.Push(-1);
+						Generator.Push(-99);
 						Generator.StoreLocal(Local);
 					}
 				);
 				Generator.LoadLocal(Local);
 				Generator.Return();
 			});
-			Assert.AreEqual(3, Switcher(3));
+
+			var ExpectedItems = new int[] { -99, 0, -99, 2, 3, -99 };
+			var GeneratedItems = new int[] { -1, 0, 1, 2, 3, 4 }.Select(Item => Switcher(Item));
+			CollectionAssert.AreEquivalent(ExpectedItems.ToArray(), GeneratedItems.ToArray());
 		}
 	}
 }
