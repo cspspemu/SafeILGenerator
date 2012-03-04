@@ -1063,6 +1063,11 @@ namespace Codegen
 
 		private void _LoadField_Address(OpCode OpCode, FieldInfo FieldInfo)
 		{
+			if (FieldInfo == null)
+			{
+				throw(new ArgumentNullException("FieldInfo can't be null"));
+			}
+
 			if (TrackStack)
 			{
 				//var FieldInfoType = TypeStack.Pop();
