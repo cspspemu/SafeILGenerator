@@ -25,21 +25,24 @@ namespace Codegen
 		{
 			foreach (var Params in EmittedInstructions)
 			{
-				yield return String.Format("{0}", String.Join(", ", Params)).Trim();
+				if (Params.Length > 0)
+				{
+					yield return String.Format("{0}", String.Join(", ", Params)).Trim();
+				}
 			}
 		}
 
-		protected void EmitHook(params object[] Params)
+		internal void EmitHook(params object[] Params)
 		{
-			//if (DoLog)
+			if (DoLog)
 			{
 				EmittedInstructions.Add(Params);
 			}
 		}
 
-		protected void EmitHookWriteLine(string String)
+		internal void EmitHookWriteLine(string String)
 		{
-			//if (DoLog)
+			if (DoLog)
 			{
 				EmittedInstructions.Add(new object[] { String });
 			}
@@ -53,12 +56,23 @@ namespace Codegen
 		protected void Emit(OpCode opcode) { EmitHook(opcode); __ILGenerator.Emit(opcode); }
 		protected void Emit(OpCode opcode, Type Param) { EmitHook(opcode, Param); __ILGenerator.Emit(opcode, Param); }
 		protected void Emit(OpCode opcode, LocalBuilder Param) { EmitHook(opcode, Param); __ILGenerator.Emit(opcode, Param); }
+		
+		protected void Emit(OpCode opcode, byte Param) { EmitHook(opcode, Param); __ILGenerator.Emit(opcode, Param); }
+		protected void Emit(OpCode opcode, ushort Param) { EmitHook(opcode, Param); __ILGenerator.Emit(opcode, Param); }
+		protected void Emit(OpCode opcode, uint Param) { EmitHook(opcode, Param); __ILGenerator.Emit(opcode, Param); }
+		protected void Emit(OpCode opcode, ulong Param) { EmitHook(opcode, Param); __ILGenerator.Emit(opcode, Param); }
+
+		protected void Emit(OpCode opcode, sbyte Param) { EmitHook(opcode, Param); __ILGenerator.Emit(opcode, Param); }
+		protected void Emit(OpCode opcode, short Param) { EmitHook(opcode, Param); __ILGenerator.Emit(opcode, Param); }
 		protected void Emit(OpCode opcode, int Param) { EmitHook(opcode, Param); __ILGenerator.Emit(opcode, Param); }
+		protected void Emit(OpCode opcode, long Param) { EmitHook(opcode, Param); __ILGenerator.Emit(opcode, Param); }
+
 		protected void Emit(OpCode opcode, string Param) { EmitHook(opcode, Param); __ILGenerator.Emit(opcode, Param); }
 		protected void Emit(OpCode opcode, double Param) { EmitHook(opcode, Param); __ILGenerator.Emit(opcode, Param); }
 		protected void Emit(OpCode opcode, float Param) { EmitHook(opcode, Param); __ILGenerator.Emit(opcode, Param); }
-		protected void Emit(OpCode opcode, Label Param) { EmitHook(opcode, Param); __ILGenerator.Emit(opcode, Param); }
-		protected void Emit(OpCode opcode, Label[] Param) { EmitHook(opcode, Param); __ILGenerator.Emit(opcode, Param); }
+
+		protected void Emit(OpCode opcode, SafeLabel Param) { EmitHook(opcode, Param); __ILGenerator.Emit(opcode, Param.ReflectionLabel); }
+		protected void Emit(OpCode opcode, SafeLabel[] Param) { EmitHook(opcode, Param); __ILGenerator.Emit(opcode, Param.Select(Label => Label.ReflectionLabel).ToArray()); }
 		protected void Emit(OpCode opcode, FieldInfo Param) { EmitHook(opcode, Param); __ILGenerator.Emit(opcode, Param); }
 		protected void Emit(OpCode opcode, MethodInfo Param) { EmitHook(opcode, Param); __ILGenerator.Emit(opcode, Param); }
 
@@ -331,7 +345,7 @@ namespace Codegen
 	public class SafeLabel
 	{
 		private SafeILGenerator SafeILGenerator;
-		internal System.Reflection.Emit.Label ReflectionLabel { get; private set; }
+		internal Label ReflectionLabel { get; private set; }
 		public bool Marked { get; private set; }
 		public string Name;
 
@@ -345,6 +359,7 @@ namespace Codegen
 		public void Mark()
 		{
 			if (Marked) throw(new InvalidOperationException("Can't mark label twice"));
+			SafeILGenerator.EmitHookWriteLine(":" + Name);
 			SafeILGenerator.__ILGenerator.MarkLabel(ReflectionLabel);
 			Marked = true;
 		}

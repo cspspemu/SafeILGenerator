@@ -324,7 +324,7 @@ namespace Codegen
 
 			if (DoEmit)
 			{
-				Emit(OpCodes.Switch, Labels.Select(Label => Label.ReflectionLabel).ToArray());
+				Emit(OpCodes.Switch, Labels);
 			}
 
 			if (DoDebug)
@@ -622,18 +622,18 @@ namespace Codegen
 			{
 				switch (Comparison)
 				{
-					case SafeBinaryComparison.Equals: Emit(OpCodes.Beq, Label.ReflectionLabel); break;
-					case SafeBinaryComparison.NotEquals: Emit(OpCodes.Bne_Un, Label.ReflectionLabel); break;
+					case SafeBinaryComparison.Equals: Emit(OpCodes.Beq, Label); break;
+					case SafeBinaryComparison.NotEquals: Emit(OpCodes.Bne_Un, Label); break;
 
-					case SafeBinaryComparison.GreaterOrEqualSigned: Emit(OpCodes.Bge, Label.ReflectionLabel); break;
-					case SafeBinaryComparison.GreaterOrEqualUnsigned: Emit(OpCodes.Bge_Un, Label.ReflectionLabel); break;
-					case SafeBinaryComparison.GreaterThanSigned: Emit(OpCodes.Bgt, Label.ReflectionLabel); break;
-					case SafeBinaryComparison.GreaterThanUnsigned: Emit(OpCodes.Bgt_Un, Label.ReflectionLabel); break;
+					case SafeBinaryComparison.GreaterOrEqualSigned: Emit(OpCodes.Bge, Label); break;
+					case SafeBinaryComparison.GreaterOrEqualUnsigned: Emit(OpCodes.Bge_Un, Label); break;
+					case SafeBinaryComparison.GreaterThanSigned: Emit(OpCodes.Bgt, Label); break;
+					case SafeBinaryComparison.GreaterThanUnsigned: Emit(OpCodes.Bgt_Un, Label); break;
 
-					case SafeBinaryComparison.LessOrEqualSigned: Emit(OpCodes.Ble, Label.ReflectionLabel); break;
-					case SafeBinaryComparison.LessOrEqualUnsigned: Emit(OpCodes.Ble_Un, Label.ReflectionLabel); break;
-					case SafeBinaryComparison.LessThanSigned: Emit(OpCodes.Blt, Label.ReflectionLabel); break;
-					case SafeBinaryComparison.LessThanUnsigned: Emit(OpCodes.Blt_Un, Label.ReflectionLabel); break;
+					case SafeBinaryComparison.LessOrEqualSigned: Emit(OpCodes.Ble, Label); break;
+					case SafeBinaryComparison.LessOrEqualUnsigned: Emit(OpCodes.Ble_Un, Label); break;
+					case SafeBinaryComparison.LessThanSigned: Emit(OpCodes.Blt, Label); break;
+					case SafeBinaryComparison.LessThanUnsigned: Emit(OpCodes.Blt_Un, Label); break;
 
 					default: throw (new NotImplementedException());
 				}
@@ -664,8 +664,8 @@ namespace Codegen
 			{
 				switch (Comparison)
 				{
-					case SafeUnaryComparison.False: Emit(OpCodes.Brfalse, Label.ReflectionLabel); break;
-					case SafeUnaryComparison.True: Emit(OpCodes.Brtrue, Label.ReflectionLabel); break;
+					case SafeUnaryComparison.False: Emit(OpCodes.Brfalse, Label); break;
+					case SafeUnaryComparison.True: Emit(OpCodes.Brtrue, Label); break;
 					default: throw (new NotImplementedException());
 				}
 			}
@@ -790,7 +790,7 @@ namespace Codegen
 		{
 			if (DoEmit)
 			{
-				Emit(OpCodes.Br, Label.ReflectionLabel);
+				Emit(OpCodes.Br, Label);
 			}
 
 			if (DoDebug)
