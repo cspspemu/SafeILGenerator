@@ -29,8 +29,8 @@ namespace Codegen
 			{
 				switch (Operator)
 				{
-					case SafeUnaryOperator.Negate: ILGenerator.Emit(OpCodes.Neg); break;
-					case SafeUnaryOperator.Not: ILGenerator.Emit(OpCodes.Not); break;
+					case SafeUnaryOperator.Negate: Emit(OpCodes.Neg); break;
+					case SafeUnaryOperator.Not: Emit(OpCodes.Not); break;
 					default: throw (new NotImplementedException());
 				}
 			}
@@ -54,12 +54,12 @@ namespace Codegen
 			{
 				while (true)
 				{
-					if (Type == typeof(bool)) { ILGenerator.Emit(OpCodes.Stelem_I); break; }
-					if (Type == typeof(sbyte) || Type == typeof(byte)) { ILGenerator.Emit(OpCodes.Stelem_I1); break; }
-					if (Type == typeof(short) || Type == typeof(ushort)) { ILGenerator.Emit(OpCodes.Stelem_I2); break; }
-					if (Type == typeof(int) || Type == typeof(uint)) { ILGenerator.Emit(OpCodes.Stelem_I4); break; }
-					if (Type == typeof(float)) { ILGenerator.Emit(OpCodes.Stelem_R4); break; }
-					if (Type == typeof(double)) { ILGenerator.Emit(OpCodes.Stelem_R8); break; }
+					if (Type == typeof(bool)) { Emit(OpCodes.Stelem_I); break; }
+					if (Type == typeof(sbyte) || Type == typeof(byte)) { Emit(OpCodes.Stelem_I1); break; }
+					if (Type == typeof(short) || Type == typeof(ushort)) { Emit(OpCodes.Stelem_I2); break; }
+					if (Type == typeof(int) || Type == typeof(uint)) { Emit(OpCodes.Stelem_I4); break; }
+					if (Type == typeof(float)) { Emit(OpCodes.Stelem_R4); break; }
+					if (Type == typeof(double)) { Emit(OpCodes.Stelem_R8); break; }
 					throw (new NotImplementedException());
 				}
 			}
@@ -87,13 +87,13 @@ namespace Codegen
 			{
 				while (true)
 				{
-					if (Type == typeof(bool)) { ILGenerator.Emit(OpCodes.Stind_I); break; }
-					if (Type == typeof(sbyte) || Type == typeof(byte)) { ILGenerator.Emit(OpCodes.Stind_I1); break; }
-					if (Type == typeof(short) || Type == typeof(ushort)) { ILGenerator.Emit(OpCodes.Stind_I2); break; }
-					if (Type == typeof(int) || Type == typeof(uint)) {ILGenerator.Emit(OpCodes.Stind_I4); break; }
-					if (Type == typeof(long) || Type == typeof(ulong)) { ILGenerator.Emit(OpCodes.Stind_I8); break; }
-					if (Type == typeof(float)) { ILGenerator.Emit(OpCodes.Stind_R4); break; }
-					if (Type == typeof(double)) { ILGenerator.Emit(OpCodes.Stind_R8); break; }
+					if (Type == typeof(bool)) { Emit(OpCodes.Stind_I); break; }
+					if (Type == typeof(sbyte) || Type == typeof(byte)) { Emit(OpCodes.Stind_I1); break; }
+					if (Type == typeof(short) || Type == typeof(ushort)) { Emit(OpCodes.Stind_I2); break; }
+					if (Type == typeof(int) || Type == typeof(uint)) {Emit(OpCodes.Stind_I4); break; }
+					if (Type == typeof(long) || Type == typeof(ulong)) { Emit(OpCodes.Stind_I8); break; }
+					if (Type == typeof(float)) { Emit(OpCodes.Stind_R4); break; }
+					if (Type == typeof(double)) { Emit(OpCodes.Stind_R8); break; }
 					throw(new NotImplementedException("Can't store indirectly type '" + Type.Name + "'"));
 				}
 			}
@@ -122,11 +122,11 @@ namespace Codegen
 				int LocalIndex = Local.LocalIndex;
 				switch (LocalIndex)
 				{
-					case 0: ILGenerator.Emit(OpCodes.Stloc_0); break;
-					case 1: ILGenerator.Emit(OpCodes.Stloc_1); break;
-					case 2: ILGenerator.Emit(OpCodes.Stloc_2); break;
-					case 3: ILGenerator.Emit(OpCodes.Stloc_3); break;
-					default: ILGenerator.Emit(((int)(byte)LocalIndex == (int)LocalIndex) ? OpCodes.Stloc_S : OpCodes.Stloc, Local); break;
+					case 0: Emit(OpCodes.Stloc_0); break;
+					case 1: Emit(OpCodes.Stloc_1); break;
+					case 2: Emit(OpCodes.Stloc_2); break;
+					case 3: Emit(OpCodes.Stloc_3); break;
+					default: Emit(((int)(byte)LocalIndex == (int)LocalIndex) ? OpCodes.Stloc_S : OpCodes.Stloc, Local); break;
 				}
 			}
 
@@ -156,7 +156,7 @@ namespace Codegen
 
 			if (DoEmit)
 			{
-				ILGenerator.Emit(((int)(byte)ArgumentIndex == (int)ArgumentIndex) ? OpCodes.Starg_S : OpCodes.Starg, ArgumentIndex);
+				Emit(((int)(byte)ArgumentIndex == (int)ArgumentIndex) ? OpCodes.Starg_S : OpCodes.Starg, ArgumentIndex);
 			}
 
 			if (DoDebug)
@@ -181,7 +181,7 @@ namespace Codegen
 
 			if (DoEmit)
 			{
-				ILGenerator.Emit(OpCodes.Box, Type);
+				Emit(OpCodes.Box, Type);
 			}
 
 			if (DoDebug)
@@ -200,7 +200,7 @@ namespace Codegen
 
 			if (DoEmit)
 			{
-				ILGenerator.Emit(OpCodes.Unbox);
+				Emit(OpCodes.Unbox);
 			}
 
 			if (DoDebug)
@@ -226,12 +226,12 @@ namespace Codegen
 			{
 				if ((Attributes & SafePointerAttributes.Unaligned) != 0)
 				{
-					ILGenerator.Emit(OpCodes.Unaligned);
+					Emit(OpCodes.Unaligned);
 				}
 
 				if ((Attributes & SafePointerAttributes.Volatile) != 0)
 				{
-					ILGenerator.Emit(OpCodes.Volatile);
+					Emit(OpCodes.Volatile);
 				}
 			}
 
@@ -244,7 +244,7 @@ namespace Codegen
 		public void Tailcall()
 		{
 			throw (new NotImplementedException());
-			//ILGenerator.Emit(OpCodes.Tailcall);
+			//Emit(OpCodes.Tailcall);
 		}
 
 		public void Switch<TType>(IEnumerable<TType> ListEnumerable, Func<TType, int> IntKeySelector, Action<TType> CaseGenerate, Action DefaultGenerate)
@@ -324,7 +324,7 @@ namespace Codegen
 
 			if (DoEmit)
 			{
-				ILGenerator.Emit(OpCodes.Switch, Labels.Select(Label => Label.ReflectionLabel).ToArray());
+				Emit(OpCodes.Switch, Labels.Select(Label => Label.ReflectionLabel).ToArray());
 			}
 
 			if (DoDebug)
@@ -343,7 +343,7 @@ namespace Codegen
 
 			if (DoEmit)
 			{
-				ILGenerator.Emit(OpCodes.Sizeof);
+				Emit(OpCodes.Sizeof);
 			}
 
 			if (DoDebug)
@@ -363,7 +363,7 @@ namespace Codegen
 
 			if (DoEmit)
 			{
-				ILGenerator.Emit(OpCodes.Ret);
+				Emit(OpCodes.Ret);
 			}
 
 			if (DoDebug)
@@ -376,7 +376,7 @@ namespace Codegen
 		{
 			if (DoEmit)
 			{
-				ILGenerator.Emit(OpCodes.Nop);
+				Emit(OpCodes.Nop);
 			}
 
 			if (DoDebug)
@@ -411,22 +411,22 @@ namespace Codegen
 			{
 				switch (Operator)
 				{
-					case SafeBinaryOperator.AdditionSigned: ILGenerator.Emit(OverflowCheck ? OpCodes.Add_Ovf : OpCodes.Add); break;
-					case SafeBinaryOperator.AdditionUnsigned: ILGenerator.Emit(OverflowCheck ? OpCodes.Add_Ovf_Un : OpCodes.Add); break;
-					case SafeBinaryOperator.SubstractionSigned: ILGenerator.Emit(OverflowCheck ? OpCodes.Sub_Ovf : OpCodes.Sub); break;
-					case SafeBinaryOperator.SubstractionUnsigned: ILGenerator.Emit(OverflowCheck ? OpCodes.Sub_Ovf_Un : OpCodes.Sub); break;
-					case SafeBinaryOperator.DivideSigned: ILGenerator.Emit(OpCodes.Div); break;
-					case SafeBinaryOperator.DivideUnsigned: ILGenerator.Emit(OpCodes.Div_Un); break;
-					case SafeBinaryOperator.RemainingSigned: ILGenerator.Emit(OpCodes.Rem); break;
-					case SafeBinaryOperator.RemainingUnsigned: ILGenerator.Emit(OpCodes.Rem_Un); break;
-					case SafeBinaryOperator.MultiplySigned: ILGenerator.Emit(OverflowCheck ? OpCodes.Mul_Ovf : OpCodes.Mul); break;
-					case SafeBinaryOperator.MultiplyUnsigned: ILGenerator.Emit(OverflowCheck ? OpCodes.Mul_Ovf_Un : OpCodes.Mul); break;
-					case SafeBinaryOperator.And: ILGenerator.Emit(OpCodes.And); break;
-					case SafeBinaryOperator.Or: ILGenerator.Emit(OpCodes.Or); break;
-					case SafeBinaryOperator.Xor: ILGenerator.Emit(OpCodes.Xor); break;
-					case SafeBinaryOperator.ShiftLeft: ILGenerator.Emit(OpCodes.Shl); break;
-					case SafeBinaryOperator.ShiftRightSigned: ILGenerator.Emit(OpCodes.Shr); break;
-					case SafeBinaryOperator.ShiftRightUnsigned: ILGenerator.Emit(OpCodes.Shr_Un); break;
+					case SafeBinaryOperator.AdditionSigned: Emit(OverflowCheck ? OpCodes.Add_Ovf : OpCodes.Add); break;
+					case SafeBinaryOperator.AdditionUnsigned: Emit(OverflowCheck ? OpCodes.Add_Ovf_Un : OpCodes.Add); break;
+					case SafeBinaryOperator.SubstractionSigned: Emit(OverflowCheck ? OpCodes.Sub_Ovf : OpCodes.Sub); break;
+					case SafeBinaryOperator.SubstractionUnsigned: Emit(OverflowCheck ? OpCodes.Sub_Ovf_Un : OpCodes.Sub); break;
+					case SafeBinaryOperator.DivideSigned: Emit(OpCodes.Div); break;
+					case SafeBinaryOperator.DivideUnsigned: Emit(OpCodes.Div_Un); break;
+					case SafeBinaryOperator.RemainingSigned: Emit(OpCodes.Rem); break;
+					case SafeBinaryOperator.RemainingUnsigned: Emit(OpCodes.Rem_Un); break;
+					case SafeBinaryOperator.MultiplySigned: Emit(OverflowCheck ? OpCodes.Mul_Ovf : OpCodes.Mul); break;
+					case SafeBinaryOperator.MultiplyUnsigned: Emit(OverflowCheck ? OpCodes.Mul_Ovf_Un : OpCodes.Mul); break;
+					case SafeBinaryOperator.And: Emit(OpCodes.And); break;
+					case SafeBinaryOperator.Or: Emit(OpCodes.Or); break;
+					case SafeBinaryOperator.Xor: Emit(OpCodes.Xor); break;
+					case SafeBinaryOperator.ShiftLeft: Emit(OpCodes.Shl); break;
+					case SafeBinaryOperator.ShiftRightSigned: Emit(OpCodes.Shr); break;
+					case SafeBinaryOperator.ShiftRightUnsigned: Emit(OpCodes.Shr_Un); break;
 					default: throw (new NotImplementedException());
 				}
 			}
@@ -448,7 +448,7 @@ namespace Codegen
 
 			if (DoEmit)
 			{
-				ILGenerator.Emit(OpCodes.Dup);
+				Emit(OpCodes.Dup);
 			}
 
 			if (DoDebug)
@@ -476,16 +476,16 @@ namespace Codegen
 			{
 				switch (Comparison)
 				{
-					case SafeBinaryComparison.Equals: ILGenerator.Emit(OpCodes.Ceq); break;
-					case SafeBinaryComparison.NotEquals: ILGenerator.Emit(OpCodes.Ceq); ILGenerator.Emit(OpCodes.Ldc_I4_0); ILGenerator.Emit(OpCodes.Ceq); break;
-					case SafeBinaryComparison.GreaterThanSigned: ILGenerator.Emit(OpCodes.Cgt); break;
-					case SafeBinaryComparison.GreaterThanUnsigned: ILGenerator.Emit(OpCodes.Cgt_Un); break;
-					case SafeBinaryComparison.GreaterOrEqualSigned: ILGenerator.Emit(OpCodes.Clt); ILGenerator.Emit(OpCodes.Ldc_I4_0); ILGenerator.Emit(OpCodes.Ceq); break;
-					case SafeBinaryComparison.GreaterOrEqualUnsigned: ILGenerator.Emit(OpCodes.Clt_Un); ILGenerator.Emit(OpCodes.Ldc_I4_0); ILGenerator.Emit(OpCodes.Ceq); break;
-					case SafeBinaryComparison.LessThanSigned: ILGenerator.Emit(OpCodes.Clt); break;
-					case SafeBinaryComparison.LessThanUnsigned: ILGenerator.Emit(OpCodes.Clt_Un); break;
-					case SafeBinaryComparison.LessOrEqualSigned: ILGenerator.Emit(OpCodes.Cgt); ILGenerator.Emit(OpCodes.Ldc_I4_0); ILGenerator.Emit(OpCodes.Ceq); break;
-					case SafeBinaryComparison.LessOrEqualUnsigned: ILGenerator.Emit(OpCodes.Cgt_Un); ILGenerator.Emit(OpCodes.Ldc_I4_0); ILGenerator.Emit(OpCodes.Ceq); break;
+					case SafeBinaryComparison.Equals: Emit(OpCodes.Ceq); break;
+					case SafeBinaryComparison.NotEquals: Emit(OpCodes.Ceq); Emit(OpCodes.Ldc_I4_0); Emit(OpCodes.Ceq); break;
+					case SafeBinaryComparison.GreaterThanSigned: Emit(OpCodes.Cgt); break;
+					case SafeBinaryComparison.GreaterThanUnsigned: Emit(OpCodes.Cgt_Un); break;
+					case SafeBinaryComparison.GreaterOrEqualSigned: Emit(OpCodes.Clt); Emit(OpCodes.Ldc_I4_0); Emit(OpCodes.Ceq); break;
+					case SafeBinaryComparison.GreaterOrEqualUnsigned: Emit(OpCodes.Clt_Un); Emit(OpCodes.Ldc_I4_0); Emit(OpCodes.Ceq); break;
+					case SafeBinaryComparison.LessThanSigned: Emit(OpCodes.Clt); break;
+					case SafeBinaryComparison.LessThanUnsigned: Emit(OpCodes.Clt_Un); break;
+					case SafeBinaryComparison.LessOrEqualSigned: Emit(OpCodes.Cgt); Emit(OpCodes.Ldc_I4_0); Emit(OpCodes.Ceq); break;
+					case SafeBinaryComparison.LessOrEqualUnsigned: Emit(OpCodes.Cgt_Un); Emit(OpCodes.Ldc_I4_0); Emit(OpCodes.Ceq); break;
 					default: throw (new NotImplementedException());
 				}
 			}
@@ -515,17 +515,17 @@ namespace Codegen
 			{
 				while (true)
 				{
-					if (Type == typeof(bool)) { ILGenerator.Emit(OverflowCheck ? OpCodes.Conv_Ovf_I : OpCodes.Conv_I); break; }
-					if (Type == typeof(sbyte)) { ILGenerator.Emit(OverflowCheck ? OpCodes.Conv_Ovf_I1 : OpCodes.Conv_I1); break; }
-					if (Type == typeof(byte)) { ILGenerator.Emit(OverflowCheck ? OpCodes.Conv_Ovf_U1 : OpCodes.Conv_U1); break; }
-					if (Type == typeof(short)) { ILGenerator.Emit(OverflowCheck ? OpCodes.Conv_Ovf_I2 : OpCodes.Conv_I2); break; }
-					if (Type == typeof(ushort)) { ILGenerator.Emit(OverflowCheck ? OpCodes.Conv_Ovf_U2 : OpCodes.Conv_U2); break; }
-					if (Type == typeof(int)) { ILGenerator.Emit(OverflowCheck ? OpCodes.Conv_Ovf_I4 : OpCodes.Conv_I4); break; }
-					if (Type == typeof(uint)) { ILGenerator.Emit(OverflowCheck ? OpCodes.Conv_Ovf_U4 : OpCodes.Conv_U4); break; }
-					if (Type == typeof(long)) { ILGenerator.Emit(OverflowCheck ? OpCodes.Conv_Ovf_I8 : OpCodes.Conv_I8); break; }
-					if (Type == typeof(ulong)) { ILGenerator.Emit(OverflowCheck ? OpCodes.Conv_Ovf_U8 : OpCodes.Conv_U8); break; }
-					if (Type == typeof(float)) { ILGenerator.Emit(OpCodes.Conv_R4); break; }
-					if (Type == typeof(double)) { ILGenerator.Emit(OpCodes.Conv_R8); break; }
+					if (Type == typeof(bool)) { Emit(OverflowCheck ? OpCodes.Conv_Ovf_I : OpCodes.Conv_I); break; }
+					if (Type == typeof(sbyte)) { Emit(OverflowCheck ? OpCodes.Conv_Ovf_I1 : OpCodes.Conv_I1); break; }
+					if (Type == typeof(byte)) { Emit(OverflowCheck ? OpCodes.Conv_Ovf_U1 : OpCodes.Conv_U1); break; }
+					if (Type == typeof(short)) { Emit(OverflowCheck ? OpCodes.Conv_Ovf_I2 : OpCodes.Conv_I2); break; }
+					if (Type == typeof(ushort)) { Emit(OverflowCheck ? OpCodes.Conv_Ovf_U2 : OpCodes.Conv_U2); break; }
+					if (Type == typeof(int)) { Emit(OverflowCheck ? OpCodes.Conv_Ovf_I4 : OpCodes.Conv_I4); break; }
+					if (Type == typeof(uint)) { Emit(OverflowCheck ? OpCodes.Conv_Ovf_U4 : OpCodes.Conv_U4); break; }
+					if (Type == typeof(long)) { Emit(OverflowCheck ? OpCodes.Conv_Ovf_I8 : OpCodes.Conv_I8); break; }
+					if (Type == typeof(ulong)) { Emit(OverflowCheck ? OpCodes.Conv_Ovf_U8 : OpCodes.Conv_U8); break; }
+					if (Type == typeof(float)) { Emit(OpCodes.Conv_R4); break; }
+					if (Type == typeof(double)) { Emit(OpCodes.Conv_R8); break; }
 
 					throw (new NotImplementedException());
 				}
@@ -548,7 +548,7 @@ namespace Codegen
 
 			if (DoEmit)
 			{
-				ILGenerator.Emit(OpCodes.Cpblk);
+				Emit(OpCodes.Cpblk);
 			}
 
 			if (DoDebug)
@@ -563,7 +563,7 @@ namespace Codegen
 		{
 			if (DoEmit)
 			{
-				ILGenerator.Emit(OpCodes.Cpobj);
+				Emit(OpCodes.Cpobj);
 			}
 
 			if (DoDebug)
@@ -578,7 +578,7 @@ namespace Codegen
 		{
 			if (DoEmit)
 			{
-				ILGenerator.Emit(OpCodes.Constrained);
+				Emit(OpCodes.Constrained);
 			}
 
 			if (DoDebug)
@@ -596,7 +596,7 @@ namespace Codegen
 
 			if (DoEmit)
 			{
-				ILGenerator.Emit(OpCodes.Ckfinite);
+				Emit(OpCodes.Ckfinite);
 			}
 
 			if (DoDebug)
@@ -622,18 +622,18 @@ namespace Codegen
 			{
 				switch (Comparison)
 				{
-					case SafeBinaryComparison.Equals: ILGenerator.Emit(OpCodes.Beq, Label.ReflectionLabel); break;
-					case SafeBinaryComparison.NotEquals: ILGenerator.Emit(OpCodes.Bne_Un, Label.ReflectionLabel); break;
+					case SafeBinaryComparison.Equals: Emit(OpCodes.Beq, Label.ReflectionLabel); break;
+					case SafeBinaryComparison.NotEquals: Emit(OpCodes.Bne_Un, Label.ReflectionLabel); break;
 
-					case SafeBinaryComparison.GreaterOrEqualSigned: ILGenerator.Emit(OpCodes.Bge, Label.ReflectionLabel); break;
-					case SafeBinaryComparison.GreaterOrEqualUnsigned: ILGenerator.Emit(OpCodes.Bge_Un, Label.ReflectionLabel); break;
-					case SafeBinaryComparison.GreaterThanSigned: ILGenerator.Emit(OpCodes.Bgt, Label.ReflectionLabel); break;
-					case SafeBinaryComparison.GreaterThanUnsigned: ILGenerator.Emit(OpCodes.Bgt_Un, Label.ReflectionLabel); break;
+					case SafeBinaryComparison.GreaterOrEqualSigned: Emit(OpCodes.Bge, Label.ReflectionLabel); break;
+					case SafeBinaryComparison.GreaterOrEqualUnsigned: Emit(OpCodes.Bge_Un, Label.ReflectionLabel); break;
+					case SafeBinaryComparison.GreaterThanSigned: Emit(OpCodes.Bgt, Label.ReflectionLabel); break;
+					case SafeBinaryComparison.GreaterThanUnsigned: Emit(OpCodes.Bgt_Un, Label.ReflectionLabel); break;
 
-					case SafeBinaryComparison.LessOrEqualSigned: ILGenerator.Emit(OpCodes.Ble, Label.ReflectionLabel); break;
-					case SafeBinaryComparison.LessOrEqualUnsigned: ILGenerator.Emit(OpCodes.Ble_Un, Label.ReflectionLabel); break;
-					case SafeBinaryComparison.LessThanSigned: ILGenerator.Emit(OpCodes.Blt, Label.ReflectionLabel); break;
-					case SafeBinaryComparison.LessThanUnsigned: ILGenerator.Emit(OpCodes.Blt_Un, Label.ReflectionLabel); break;
+					case SafeBinaryComparison.LessOrEqualSigned: Emit(OpCodes.Ble, Label.ReflectionLabel); break;
+					case SafeBinaryComparison.LessOrEqualUnsigned: Emit(OpCodes.Ble_Un, Label.ReflectionLabel); break;
+					case SafeBinaryComparison.LessThanSigned: Emit(OpCodes.Blt, Label.ReflectionLabel); break;
+					case SafeBinaryComparison.LessThanUnsigned: Emit(OpCodes.Blt_Un, Label.ReflectionLabel); break;
 
 					default: throw (new NotImplementedException());
 				}
@@ -664,8 +664,8 @@ namespace Codegen
 			{
 				switch (Comparison)
 				{
-					case SafeUnaryComparison.False: ILGenerator.Emit(OpCodes.Brfalse, Label.ReflectionLabel); break;
-					case SafeUnaryComparison.True: ILGenerator.Emit(OpCodes.Brtrue, Label.ReflectionLabel); break;
+					case SafeUnaryComparison.False: Emit(OpCodes.Brfalse, Label.ReflectionLabel); break;
+					case SafeUnaryComparison.True: Emit(OpCodes.Brtrue, Label.ReflectionLabel); break;
 					default: throw (new NotImplementedException());
 				}
 			}
@@ -746,7 +746,7 @@ namespace Codegen
 
 			if (DoEmit)
 			{
-				ILGenerator.Emit(OpCode, MethodInfo);
+				Emit(OpCode, MethodInfo);
 			}
 		}
 
@@ -777,7 +777,7 @@ namespace Codegen
 		{
 			if (DoEmit)
 			{
-				ILGenerator.Emit(OpCodes.Break);
+				Emit(OpCodes.Break);
 			}
 
 			if (DoDebug)
@@ -790,7 +790,7 @@ namespace Codegen
 		{
 			if (DoEmit)
 			{
-				ILGenerator.Emit(OpCodes.Br, Label.ReflectionLabel);
+				Emit(OpCodes.Br, Label.ReflectionLabel);
 			}
 
 			if (DoDebug)
@@ -808,7 +808,7 @@ namespace Codegen
 
 			if (DoEmit)
 			{
-				ILGenerator.Emit(OpCodes.Pop);
+				Emit(OpCodes.Pop);
 			}
 
 			if (DoDebug)
@@ -852,11 +852,11 @@ namespace Codegen
 			{
 				switch (ArgumentIndex)
 				{
-					case 0: ILGenerator.Emit(OpCodes.Ldarg_0); break;
-					case 1: ILGenerator.Emit(OpCodes.Ldarg_1); break;
-					case 2: ILGenerator.Emit(OpCodes.Ldarg_2); break;
-					case 3: ILGenerator.Emit(OpCodes.Ldarg_3); break;
-					default: ILGenerator.Emit(((int)(byte)ArgumentIndex == (int)ArgumentIndex) ? OpCodes.Ldarg_S : OpCodes.Ldarg, ArgumentIndex); break;
+					case 0: Emit(OpCodes.Ldarg_0); break;
+					case 1: Emit(OpCodes.Ldarg_1); break;
+					case 2: Emit(OpCodes.Ldarg_2); break;
+					case 3: Emit(OpCodes.Ldarg_3); break;
+					default: Emit(((int)(byte)ArgumentIndex == (int)ArgumentIndex) ? OpCodes.Ldarg_S : OpCodes.Ldarg, ArgumentIndex); break;
 				}
 			}
 
@@ -880,7 +880,7 @@ namespace Codegen
 
 			if (DoEmit)
 			{
-				ILGenerator.Emit(OpCodes.Ldarg_S);
+				Emit(OpCodes.Ldarg_S);
 			}
 
 			if (DoDebug)
@@ -900,24 +900,24 @@ namespace Codegen
 			{
 				switch (Value)
 				{
-					case -1: ILGenerator.Emit(OpCodes.Ldc_I4_M1); break;
-					case 0: ILGenerator.Emit(OpCodes.Ldc_I4_0); break;
-					case 1: ILGenerator.Emit(OpCodes.Ldc_I4_1); break;
-					case 2: ILGenerator.Emit(OpCodes.Ldc_I4_2); break;
-					case 3: ILGenerator.Emit(OpCodes.Ldc_I4_3); break;
-					case 4: ILGenerator.Emit(OpCodes.Ldc_I4_4); break;
-					case 5: ILGenerator.Emit(OpCodes.Ldc_I4_5); break;
-					case 6: ILGenerator.Emit(OpCodes.Ldc_I4_6); break;
-					case 7: ILGenerator.Emit(OpCodes.Ldc_I4_7); break;
-					case 8: ILGenerator.Emit(OpCodes.Ldc_I4_8); break;
+					case -1: Emit(OpCodes.Ldc_I4_M1); break;
+					case 0: Emit(OpCodes.Ldc_I4_0); break;
+					case 1: Emit(OpCodes.Ldc_I4_1); break;
+					case 2: Emit(OpCodes.Ldc_I4_2); break;
+					case 3: Emit(OpCodes.Ldc_I4_3); break;
+					case 4: Emit(OpCodes.Ldc_I4_4); break;
+					case 5: Emit(OpCodes.Ldc_I4_5); break;
+					case 6: Emit(OpCodes.Ldc_I4_6); break;
+					case 7: Emit(OpCodes.Ldc_I4_7); break;
+					case 8: Emit(OpCodes.Ldc_I4_8); break;
 					default:
 						if ((int)(sbyte)Value == (int)Value)
 						{
-							ILGenerator.Emit(OpCodes.Ldc_I4_S, (sbyte)Value);
+							Emit(OpCodes.Ldc_I4_S, (sbyte)Value);
 						}
 						else
 						{
-							ILGenerator.Emit(OpCodes.Ldc_I4, Value);
+							Emit(OpCodes.Ldc_I4, Value);
 						}
 						break;
 				}
@@ -948,7 +948,7 @@ namespace Codegen
 
 			if (DoEmit)
 			{
-				ILGenerator.Emit(OpCodes.Ldc_I8, Value);
+				Emit(OpCodes.Ldc_I8, Value);
 			}
 
 			if (DoDebug)
@@ -966,7 +966,7 @@ namespace Codegen
 
 			if (DoEmit)
 			{
-				ILGenerator.Emit(OpCodes.Ldc_R4, Value);
+				Emit(OpCodes.Ldc_R4, Value);
 			}
 
 			if (DoDebug)
@@ -984,7 +984,7 @@ namespace Codegen
 
 			if (DoEmit)
 			{
-				ILGenerator.Emit(OpCodes.Ldc_R8, Value);
+				Emit(OpCodes.Ldc_R8, Value);
 			}
 
 			if (DoDebug)
@@ -1002,7 +1002,7 @@ namespace Codegen
 
 			if (DoEmit)
 			{
-				ILGenerator.Emit(OpCodes.Ldstr, Value);
+				Emit(OpCodes.Ldstr, Value);
 			}
 
 			if (DoDebug)
@@ -1023,7 +1023,7 @@ namespace Codegen
 			}
 			if (DoEmit)
 			{
-				ILGenerator.Emit(OpCode);
+				Emit(OpCode);
 			}
 
 			if (DoDebug)
@@ -1052,7 +1052,7 @@ namespace Codegen
 
 			if (DoEmit)
 			{
-				ILGenerator.Emit(OpCodes.Stfld, FieldInfo);
+				Emit(OpCodes.Stfld, FieldInfo);
 			}
 
 			if (DoDebug)
@@ -1079,7 +1079,7 @@ namespace Codegen
 	
 			if (DoEmit)
 			{
-				ILGenerator.Emit(OpCode, FieldInfo);
+				Emit(OpCode, FieldInfo);
 			}
 
 			if (DoDebug)
@@ -1111,7 +1111,7 @@ namespace Codegen
 
 			if (DoEmit)
 			{
-				ILGenerator.Emit(OpCodes.Ldftn);
+				Emit(OpCodes.Ldftn);
 			}
 
 			if (DoDebug)
@@ -1131,7 +1131,7 @@ namespace Codegen
 
 			if (DoEmit)
 			{
-				ILGenerator.Emit(OpCodes.Ldlen); 
+				Emit(OpCodes.Ldlen); 
 			}
 
 			if (DoDebug)
@@ -1152,11 +1152,11 @@ namespace Codegen
 				int LocalIndex = Local.LocalIndex;
 				switch (Local.LocalIndex)
 				{
-					case 0: ILGenerator.Emit(OpCodes.Ldloc_0); break;
-					case 1: ILGenerator.Emit(OpCodes.Ldloc_1); break;
-					case 2: ILGenerator.Emit(OpCodes.Ldloc_2); break;
-					case 3: ILGenerator.Emit(OpCodes.Ldloc_3); break;
-					default: ILGenerator.Emit(((int)(byte)LocalIndex == (int)LocalIndex) ? OpCodes.Ldloc_S : OpCodes.Ldloc, Local); break;
+					case 0: Emit(OpCodes.Ldloc_0); break;
+					case 1: Emit(OpCodes.Ldloc_1); break;
+					case 2: Emit(OpCodes.Ldloc_2); break;
+					case 3: Emit(OpCodes.Ldloc_3); break;
+					default: Emit(((int)(byte)LocalIndex == (int)LocalIndex) ? OpCodes.Ldloc_S : OpCodes.Ldloc, Local); break;
 				}
 			}
 
@@ -1178,7 +1178,7 @@ namespace Codegen
 			{
 				int LocalIndex = Local.LocalIndex;
 
-				ILGenerator.Emit(((int)(byte)LocalIndex == (int)LocalIndex) ? OpCodes.Ldloca_S : OpCodes.Ldloca);
+				Emit(((int)(byte)LocalIndex == (int)LocalIndex) ? OpCodes.Ldloca_S : OpCodes.Ldloca);
 			}
 
 			if (DoDebug)
@@ -1196,7 +1196,7 @@ namespace Codegen
 
 			if (DoEmit)
 			{
-				ILGenerator.Emit(OpCodes.Ldnull);
+				Emit(OpCodes.Ldnull);
 			}
 
 			if (DoDebug)
@@ -1222,17 +1222,17 @@ namespace Codegen
 			{
 				while (true)
 				{
-					if (Type == typeof(bool)) { ILGenerator.Emit(OpCodes.Ldind_I); break; }
-					if (Type == typeof(sbyte)) { ILGenerator.Emit(OpCodes.Ldind_I1); break; }
-					if (Type == typeof(short)) { ILGenerator.Emit(OpCodes.Ldind_I2); break; }
-					if (Type == typeof(int)) { ILGenerator.Emit(OpCodes.Ldind_I4); break; }
-					if (Type == typeof(long)) { ILGenerator.Emit(OpCodes.Ldind_I8); break; }
-					if (Type == typeof(float)) { ILGenerator.Emit(OpCodes.Ldind_R4); break; }
-					if (Type == typeof(double)) { ILGenerator.Emit(OpCodes.Ldind_R8); break; }
-					if (Type == typeof(byte)) { ILGenerator.Emit(OpCodes.Ldind_U1); break; }
-					if (Type == typeof(ushort)) { ILGenerator.Emit(OpCodes.Ldind_U2); break; }
-					if (Type == typeof(uint)) { ILGenerator.Emit(OpCodes.Ldind_U4); break; }
-					//ILGenerator.Emit(OpCodes.Ldelem);
+					if (Type == typeof(bool)) { Emit(OpCodes.Ldind_I); break; }
+					if (Type == typeof(sbyte)) { Emit(OpCodes.Ldind_I1); break; }
+					if (Type == typeof(short)) { Emit(OpCodes.Ldind_I2); break; }
+					if (Type == typeof(int)) { Emit(OpCodes.Ldind_I4); break; }
+					if (Type == typeof(long)) { Emit(OpCodes.Ldind_I8); break; }
+					if (Type == typeof(float)) { Emit(OpCodes.Ldind_R4); break; }
+					if (Type == typeof(double)) { Emit(OpCodes.Ldind_R8); break; }
+					if (Type == typeof(byte)) { Emit(OpCodes.Ldind_U1); break; }
+					if (Type == typeof(ushort)) { Emit(OpCodes.Ldind_U2); break; }
+					if (Type == typeof(uint)) { Emit(OpCodes.Ldind_U4); break; }
+					//Emit(OpCodes.Ldelem);
 					throw (new NotImplementedException());
 				}
 			}
@@ -1256,17 +1256,17 @@ namespace Codegen
 			{
 				while (true)
 				{
-					if (Type == typeof(bool)) { ILGenerator.Emit(OpCodes.Ldelem_I); break; }
-					if (Type == typeof(sbyte)) { ILGenerator.Emit(OpCodes.Ldelem_I1); break; }
-					if (Type == typeof(short)) { ILGenerator.Emit(OpCodes.Ldelem_I2); break; }
-					if (Type == typeof(int)) { ILGenerator.Emit(OpCodes.Ldelem_I4); break; }
-					if (Type == typeof(long)) { ILGenerator.Emit(OpCodes.Ldelem_I8); break; }
-					if (Type == typeof(float)) { ILGenerator.Emit(OpCodes.Ldelem_R4); break; }
-					if (Type == typeof(double)) { ILGenerator.Emit(OpCodes.Ldelem_R8); break; }
-					if (Type == typeof(byte)) { ILGenerator.Emit(OpCodes.Ldelem_U1); break; }
-					if (Type == typeof(ushort)) { ILGenerator.Emit(OpCodes.Ldelem_U2); break; }
-					if (Type == typeof(uint)) { ILGenerator.Emit(OpCodes.Ldelem_U4); break; }
-					//ILGenerator.Emit(OpCodes.Ldelem);
+					if (Type == typeof(bool)) { Emit(OpCodes.Ldelem_I); break; }
+					if (Type == typeof(sbyte)) { Emit(OpCodes.Ldelem_I1); break; }
+					if (Type == typeof(short)) { Emit(OpCodes.Ldelem_I2); break; }
+					if (Type == typeof(int)) { Emit(OpCodes.Ldelem_I4); break; }
+					if (Type == typeof(long)) { Emit(OpCodes.Ldelem_I8); break; }
+					if (Type == typeof(float)) { Emit(OpCodes.Ldelem_R4); break; }
+					if (Type == typeof(double)) { Emit(OpCodes.Ldelem_R8); break; }
+					if (Type == typeof(byte)) { Emit(OpCodes.Ldelem_U1); break; }
+					if (Type == typeof(ushort)) { Emit(OpCodes.Ldelem_U2); break; }
+					if (Type == typeof(uint)) { Emit(OpCodes.Ldelem_U4); break; }
+					//Emit(OpCodes.Ldelem);
 					throw (new NotImplementedException());
 				}
 			}
@@ -1294,7 +1294,8 @@ namespace Codegen
 
 		public void EmitWriteLine(String Value)
 		{
-			ILGenerator.EmitWriteLine(Value);
+			EmitHookWriteLine(Value);
+			__ILGenerator.EmitWriteLine(Value);
 		}
 
 		public void CastClass(Type Type)
@@ -1307,7 +1308,7 @@ namespace Codegen
 
 			if (DoEmit)
 			{
-				ILGenerator.Emit(OpCodes.Castclass, Type);
+				Emit(OpCodes.Castclass, Type);
 			}
 
 			if (DoDebug)

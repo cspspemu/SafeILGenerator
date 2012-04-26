@@ -21,6 +21,35 @@ namespace Codegen.Tests
 		}
 
 		[TestMethod]
+		public void TestLog()
+		{
+			SafeILGenerator SafeILGenerator = null;
+
+			var AdderPlus16 = SafeILGenerator.Generate<Func<int, int, int>>("TestGenerate", (Generator) =>
+			{
+				SafeILGenerator = Generator;
+				Generator.LoadArgument<int>(0);
+				Generator.LoadArgument<int>(1);
+				Generator.BinaryOperation(SafeBinaryOperator.AdditionSigned);
+				Generator.Push((int)16);
+				Generator.BinaryOperation(SafeBinaryOperator.AdditionSigned);
+				Generator.Return();
+			}, DoLog: true);
+
+			Assert.AreEqual(
+				String.Join("\r\n", new string[] {
+					"Op.ldarg.0",
+					"Op.ldarg.1",
+					"Op.add",
+					"Op.ldc.i4.s 16",
+					"Op.add",
+					"Op.ret",
+				}),
+				String.Join("\r\n", SafeILGenerator.EmittedInstructions)
+			);
+		}
+
+		[TestMethod]
 		public void TestSwitch()
 		{
 			var Switcher = SafeILGenerator.Generate<Func<int, int>>("TestSwitch", (Generator) =>

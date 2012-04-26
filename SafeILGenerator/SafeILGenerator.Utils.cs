@@ -10,7 +10,7 @@ namespace Codegen
 {
 	public partial class SafeILGenerator
 	{
-		internal ILGenerator ILGenerator;
+		internal ILGenerator __ILGenerator;
 		SafeTypeStack TypeStack;
 		List<SafeLabel> Labels = new List<SafeLabel>();
 		bool OverflowCheck = false;
@@ -18,8 +18,38 @@ namespace Codegen
 		bool TrackStack = true;
 		bool CheckTypes = true;
 		public bool DoDebug { get; private set; }
+		public bool DoLog { get; set; }
+		public List<string> EmittedInstructions = new List<string>();
 
-		static public TDelegate Generate<TDelegate>(string MethodName, Action<SafeILGenerator> Generator, bool CheckTypes = true, bool DoDebug = false)
+		protected void EmitHook(OpCode opcode, params object[] Params)
+		{
+			if (DoLog)
+			{
+				EmittedInstructions.Add(String.Format("Op.{0} {1}", opcode, String.Join(", ", Params)).Trim());
+			}
+		}
+
+		protected void EmitHookWriteLine(string String)
+		{
+			if (DoLog)
+			{
+				EmittedInstructions.Add(String.Format("Writeline \"{0}\"", String).Trim());
+			}
+		}
+
+		protected void Emit(OpCode opcode) { EmitHook(opcode); __ILGenerator.Emit(opcode); }
+		protected void Emit(OpCode opcode, Type Param) { EmitHook(opcode, Param); __ILGenerator.Emit(opcode, Param); }
+		protected void Emit(OpCode opcode, LocalBuilder Param) { EmitHook(opcode, Param); __ILGenerator.Emit(opcode, Param); }
+		protected void Emit(OpCode opcode, int Param) { EmitHook(opcode, Param); __ILGenerator.Emit(opcode, Param); }
+		protected void Emit(OpCode opcode, string Param) { EmitHook(opcode, Param); __ILGenerator.Emit(opcode, Param); }
+		protected void Emit(OpCode opcode, double Param) { EmitHook(opcode, Param); __ILGenerator.Emit(opcode, Param); }
+		protected void Emit(OpCode opcode, float Param) { EmitHook(opcode, Param); __ILGenerator.Emit(opcode, Param); }
+		protected void Emit(OpCode opcode, Label Param) { EmitHook(opcode, Param); __ILGenerator.Emit(opcode, Param); }
+		protected void Emit(OpCode opcode, Label[] Param) { EmitHook(opcode, Param); __ILGenerator.Emit(opcode, Param); }
+		protected void Emit(OpCode opcode, FieldInfo Param) { EmitHook(opcode, Param); __ILGenerator.Emit(opcode, Param); }
+		protected void Emit(OpCode opcode, MethodInfo Param) { EmitHook(opcode, Param); __ILGenerator.Emit(opcode, Param); }
+
+		static public TDelegate Generate<TDelegate>(string MethodName, Action<SafeILGenerator> Generator, bool CheckTypes = true, bool DoDebug = false, bool DoLog = false)
 		{
 			var MethodInfo = typeof(TDelegate).GetMethod("Invoke");
 			var DynamicMethod = new DynamicMethod(
@@ -29,19 +59,20 @@ namespace Codegen
 				Assembly.GetExecutingAssembly().ManifestModule
 			);
 			var ILGenerator = DynamicMethod.GetILGenerator();
-			var SafeILGenerator = new SafeILGenerator(ILGenerator, CheckTypes, DoDebug);
+			var SafeILGenerator = new SafeILGenerator(ILGenerator, CheckTypes, DoDebug, DoLog);
 			{
 				Generator(SafeILGenerator);
 			}
 			return (TDelegate)(object)DynamicMethod.CreateDelegate(typeof(TDelegate));
 		}
 
-		public SafeILGenerator(ILGenerator ILGenerator, bool CheckTypes, bool DoDebug)
+		public SafeILGenerator(ILGenerator ILGenerator, bool CheckTypes, bool DoDebug, bool DoLog)
 		{
-			this.ILGenerator = ILGenerator;
+			this.__ILGenerator = ILGenerator;
 			this.TypeStack = new SafeTypeStack(this);
 			this.CheckTypes = CheckTypes;
 			this.DoDebug = DoDebug;
+			this.DoLog = DoLog;
 		}
 
 		public SafeTypeStack GetCurrentTypeStack()
@@ -116,7 +147,7 @@ namespace Codegen
 
 		public LocalBuilder DeclareLocal<TType>(string Name = "")
 		{
-			return ILGenerator.DeclareLocal(typeof(TType));
+			return __ILGenerator.DeclareLocal(typeof(TType));
 		}
 
 		public void CheckAndFinalize()
@@ -297,14 +328,14 @@ namespace Codegen
 		internal SafeLabel(SafeILGenerator SafeILGenerator, string Name)
 		{
 			this.SafeILGenerator = SafeILGenerator;
-			this.ReflectionLabel = SafeILGenerator.ILGenerator.DefineLabel();
+			this.ReflectionLabel = SafeILGenerator.__ILGenerator.DefineLabel();
 			this.Name = Name;
 		}
 
 		public void Mark()
 		{
 			if (Marked) throw(new InvalidOperationException("Can't mark label twice"));
-			SafeILGenerator.ILGenerator.MarkLabel(ReflectionLabel);
+			SafeILGenerator.__ILGenerator.MarkLabel(ReflectionLabel);
 			Marked = true;
 		}
 
