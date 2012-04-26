@@ -19,22 +19,35 @@ namespace Codegen
 		bool CheckTypes = true;
 		public bool DoDebug { get; private set; }
 		public bool DoLog { get; set; }
-		public List<string> EmittedInstructions = new List<string>();
+		private List<object[]> EmittedInstructions = new List<object[]>();
 
-		protected void EmitHook(OpCode opcode, params object[] Params)
+		public IEnumerable<string> GetEmittedInstructions()
 		{
-			if (DoLog)
+			foreach (var Params in EmittedInstructions)
 			{
-				EmittedInstructions.Add(String.Format("Op.{0} {1}", opcode, String.Join(", ", Params)).Trim());
+				yield return String.Format("{0}", String.Join(", ", Params)).Trim();
+			}
+		}
+
+		protected void EmitHook(params object[] Params)
+		{
+			//if (DoLog)
+			{
+				EmittedInstructions.Add(Params);
 			}
 		}
 
 		protected void EmitHookWriteLine(string String)
 		{
-			if (DoLog)
+			//if (DoLog)
 			{
-				EmittedInstructions.Add(String.Format("Writeline \"{0}\"", String).Trim());
+				EmittedInstructions.Add(new object[] { String });
 			}
+		}
+
+		public void Comment(string Comment)
+		{
+			EmittedInstructions.Add(new object[] { "; " + Comment });
 		}
 
 		protected void Emit(OpCode opcode) { EmitHook(opcode); __ILGenerator.Emit(opcode); }
@@ -159,10 +172,6 @@ namespace Codegen
 			ResetStack();
 		}
 
-		public void Comment(string Comment)
-		{
-		}
-
 		public int StackCount
 		{
 			get
@@ -269,12 +278,13 @@ namespace Codegen
 
 		public Type Pop()
 		{
-			if (SafeILGenerator.DoDebug)
-			{
-				Debug.WriteLine(String.Format("## TypeStackClass.Pop: {0}", Stack.First.Value.Name));
-			}
 			if (Stack.Count > 0)
 			{
+				if (SafeILGenerator.DoDebug)
+				{
+					Debug.WriteLine(String.Format("## TypeStackClass.Pop: {0}", Stack.First.Value.Name));
+				}
+
 				try
 				{
 					return Stack.First.Value;
