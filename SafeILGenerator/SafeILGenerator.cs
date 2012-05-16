@@ -8,6 +8,24 @@ using System.Diagnostics;
 
 namespace Codegen
 {
+	public class SafeMethodTypeInfo
+	{
+		public Type ReturnType;
+		public Type[] Parameters;
+		public bool IsStatic;
+
+		public SafeMethodTypeInfo()
+		{
+		}
+
+		public SafeMethodTypeInfo(MethodInfo MethodInfo)
+		{
+			this.IsStatic = MethodInfo.IsStatic;
+			this.ReturnType = MethodInfo.ReturnType;
+			this.Parameters = MethodInfo.GetParameters().Select(Item => Item.ParameterType).ToArray();
+		}
+	}
+
 	public partial class SafeILGenerator
 	{
 		public void UnaryOperation(SafeUnaryOperator Operator)
@@ -697,8 +715,12 @@ namespace Codegen
 			return Type;
 		}
 
-		private void _Jmp_Call(OpCode OpCode, MethodInfo MethodInfo)
+		private void _Jmp_Call(OpCode OpCode, MethodInfo MethodInfo, SafeMethodTypeInfo SafeMethodTypeInfo)
 		{
+			if (SafeMethodTypeInfo == null)
+			{
+				SafeMethodTypeInfo = new SafeMethodTypeInfo(MethodInfo);
+			}
 			if (DoDebug)
 			{
 				Debug.WriteLine(String.Format("_Jmp_Call({0}, {1}) :: Stack -> {2}", OpCode.Name, MethodInfo, TypeStack.Count));
@@ -707,9 +729,9 @@ namespace Codegen
 			if (TrackStack)
 			{
 				int CurrentArgumentIndex = 0;
-				foreach (var Parameter in MethodInfo.GetParameters().Reverse())
+				foreach (var ParameterParameterType in SafeMethodTypeInfo.Parameters.Reverse())
 				{
-					var FunctionParameterType = Parameter.ParameterType;
+					var FunctionParameterType = ParameterParameterType;
 					var StackParameterType = TypeStack.Pop();
 					
 					if (FunctionParameterType == typeof(bool)) FunctionParameterType = typeof(int);
@@ -733,14 +755,14 @@ namespace Codegen
 					CurrentArgumentIndex++;
 				}
 
-				if (!MethodInfo.IsStatic)
+				if (!SafeMethodTypeInfo.IsStatic)
 				{
 					var ThisType = TypeStack.Pop();
 				}
 
-				if (MethodInfo.ReturnType != typeof(void))
+				if (SafeMethodTypeInfo.ReturnType != typeof(void))
 				{
-					TypeStack.Push(MethodInfo.ReturnType);
+					TypeStack.Push(SafeMethodTypeInfo.ReturnType);
 				}
 			}
 
@@ -757,10 +779,10 @@ namespace Codegen
 			for (int n = 0; n > StackCount; n++) Pop();
 		}
 
-		public void Jmp(MethodInfo MethodInfo)
+		public void Jmp(MethodInfo MethodInfo, SafeMethodTypeInfo SafeMethodTypeInfo = null)
 		{
 			ResetStack();
-			_Jmp_Call(OpCodes.Jmp, MethodInfo);
+			_Jmp_Call(OpCodes.Jmp, MethodInfo, SafeMethodTypeInfo);
 		}
 
 		public void Call(Delegate Delegate)
@@ -768,9 +790,9 @@ namespace Codegen
 			Call(Delegate.Method);
 		}
 
-		public void Call(MethodInfo MethodInfo)
+		public void Call(MethodInfo MethodInfo, SafeMethodTypeInfo SafeMethodTypeInfo = null)
 		{
-			_Jmp_Call(OpCodes.Call, MethodInfo);
+			_Jmp_Call(OpCodes.Call, MethodInfo, SafeMethodTypeInfo);
 		}
 
 		public void Break()
