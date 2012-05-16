@@ -545,7 +545,13 @@ namespace Codegen
 					if (Type == typeof(float)) { Emit(OpCodes.Conv_R4); break; }
 					if (Type == typeof(double)) { Emit(OpCodes.Conv_R8); break; }
 
-					throw (new NotImplementedException());
+					if (Type.IsPointer)
+					{
+						// Do nothing?
+						break;
+					}
+
+					throw (new NotImplementedException(String.Format("Can't conver to type '{0}'", Type)));
 				}
 			}
 
@@ -663,7 +669,7 @@ namespace Codegen
 			}
 		}
 
-		public void BranchUnaryComparison(SafeUnaryComparison Comparison, SafeLabel Label)
+		public void BranchUnaryComparison(SafeUnaryComparison Comparison, SafeLabel Label, bool Short = false)
 		{
 			if (TrackStack)
 			{
@@ -682,8 +688,8 @@ namespace Codegen
 			{
 				switch (Comparison)
 				{
-					case SafeUnaryComparison.False: Emit(OpCodes.Brfalse, Label); break;
-					case SafeUnaryComparison.True: Emit(OpCodes.Brtrue, Label); break;
+					case SafeUnaryComparison.False: Emit(Short ? OpCodes.Brfalse_S : OpCodes.Brfalse, Label); break;
+					case SafeUnaryComparison.True: Emit(Short ? OpCodes.Brtrue_S : OpCodes.Brtrue, Label); break;
 					default: throw (new NotImplementedException());
 				}
 			}
@@ -694,14 +700,14 @@ namespace Codegen
 			}
 		}
 
-		public void BranchIfTrue(SafeLabel Label)
+		public void BranchIfTrue(SafeLabel Label, bool Short = false)
 		{
-			BranchUnaryComparison(SafeUnaryComparison.True, Label);
+			BranchUnaryComparison(SafeUnaryComparison.True, Label, Short);
 		}
 
-		public void BranchIfFalse(SafeLabel Label)
+		public void BranchIfFalse(SafeLabel Label, bool Short = false)
 		{
-			BranchUnaryComparison(SafeUnaryComparison.False, Label);
+			BranchUnaryComparison(SafeUnaryComparison.False, Label, Short);
 		}
 
 		static private Type GetCommonType(Type Type)
@@ -808,11 +814,11 @@ namespace Codegen
 			}
 		}
 
-		public void BranchAlways(SafeLabel Label)
+		public void BranchAlways(SafeLabel Label, bool Short = false)
 		{
 			if (DoEmit)
 			{
-				Emit(OpCodes.Br, Label);
+				Emit(Short ? OpCodes.Br_S : OpCodes.Br, Label);
 			}
 
 			if (DoDebug)
