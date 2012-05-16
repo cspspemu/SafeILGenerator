@@ -799,6 +799,11 @@ namespace Codegen
 			}
 		}
 
+		public void PopLeft()
+		{
+			while (TypeStack.Count > 0) Pop();
+		}
+
 		public void Pop()
 		{
 			if (TrackStack)
@@ -1044,20 +1049,40 @@ namespace Codegen
 
 		public void StoreField(FieldInfo FieldInfo)
 		{
-			if (TrackStack)
+			if (FieldInfo.IsStatic)
 			{
-				var ValueType = TypeStack.Pop();
-				var ObjectType = TypeStack.Pop();
-			}
+				if (TrackStack)
+				{
+					var ValueType = TypeStack.Pop();
+				}
 
-			if (DoEmit)
-			{
-				Emit(OpCodes.Stfld, FieldInfo);
-			}
+				if (DoEmit)
+				{
+					Emit(OpCodes.Stsfld, FieldInfo);
+				}
 
-			if (DoDebug)
+				if (DoDebug)
+				{
+					Debug.WriteLine(String.Format("StoreField({0}) :: Stack -> {1}", FieldInfo, TypeStack.Count));
+				}
+			}
+			else
 			{
-				Debug.WriteLine(String.Format("StoreField({0}) :: Stack -> {1}", FieldInfo, TypeStack.Count));
+				if (TrackStack)
+				{
+					var ValueType = TypeStack.Pop();
+					var ObjectType = TypeStack.Pop();
+				}
+
+				if (DoEmit)
+				{
+					Emit(OpCodes.Stfld, FieldInfo);
+				}
+
+				if (DoDebug)
+				{
+					Debug.WriteLine(String.Format("StoreField({0}) :: Stack -> {1}", FieldInfo, TypeStack.Count));
+				}
 			}
 		}
 
@@ -1090,12 +1115,12 @@ namespace Codegen
 
 		public void LoadField(FieldInfo FieldInfo)
 		{
-			_LoadField_Address(OpCodes.Ldfld, FieldInfo);
+			_LoadField_Address(FieldInfo.IsStatic ? OpCodes.Ldsfld : OpCodes.Ldfld, FieldInfo);
 		}
 
 		public void LoadFieldAddress(FieldInfo FieldInfo)
 		{
-			_LoadField_Address(OpCodes.Ldflda, FieldInfo);
+			_LoadField_Address(FieldInfo.IsStatic ? OpCodes.Ldsflda : OpCodes.Ldflda, FieldInfo);
 		}
 
 		public void LoadMethodAddress()

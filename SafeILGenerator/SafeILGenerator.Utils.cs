@@ -10,7 +10,7 @@ namespace Codegen
 {
 	public partial class SafeILGenerator
 	{
-		internal ILGenerator __ILGenerator;
+		public ILGenerator __ILGenerator { get; private set; }
 		SafeTypeStack TypeStack;
 		List<SafeLabel> Labels = new List<SafeLabel>();
 		bool OverflowCheck = false;
