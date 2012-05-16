@@ -172,9 +172,14 @@ namespace Codegen
 			throw (new NotImplementedException());
 		}
 
+		public LocalBuilder DeclareLocal(Type Type, string Name = "")
+		{
+			return __ILGenerator.DeclareLocal(Type);
+		}
+
 		public LocalBuilder DeclareLocal<TType>(string Name = "")
 		{
-			return __ILGenerator.DeclareLocal(typeof(TType));
+			return DeclareLocal(typeof(TType), Name);
 		}
 
 		public void CheckAndFinalize()

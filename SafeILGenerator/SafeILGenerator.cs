@@ -90,7 +90,7 @@ namespace Codegen
 					if (Type == typeof(bool)) { Emit(OpCodes.Stind_I); break; }
 					if (Type == typeof(sbyte) || Type == typeof(byte)) { Emit(OpCodes.Stind_I1); break; }
 					if (Type == typeof(short) || Type == typeof(ushort)) { Emit(OpCodes.Stind_I2); break; }
-					if (Type == typeof(int) || Type == typeof(uint)) {Emit(OpCodes.Stind_I4); break; }
+					if (Type == typeof(int) || Type == typeof(uint)) { Emit(OpCodes.Stind_I4); break; }
 					if (Type == typeof(long) || Type == typeof(ulong)) { Emit(OpCodes.Stind_I8); break; }
 					if (Type == typeof(float)) { Emit(OpCodes.Stind_R4); break; }
 					if (Type == typeof(double)) { Emit(OpCodes.Stind_R8); break; }
@@ -1203,7 +1203,7 @@ namespace Codegen
 			{
 				int LocalIndex = Local.LocalIndex;
 
-				Emit(((int)(byte)LocalIndex == (int)LocalIndex) ? OpCodes.Ldloca_S : OpCodes.Ldloca);
+				Emit(((int)(byte)LocalIndex == (int)LocalIndex) ? OpCodes.Ldloca_S : OpCodes.Ldloca, Local);
 			}
 
 			if (DoDebug)
