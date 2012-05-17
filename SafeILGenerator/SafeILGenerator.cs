@@ -605,8 +605,6 @@ namespace Codegen
 
 		public void ConvertTo(Type Type)
 		{
-			// @TODO: From unsigned values
-
 			if (TrackStack)
 			{
 				var PreviousType = TypeStack.Pop();
@@ -631,6 +629,7 @@ namespace Codegen
 
 					if (Type.IsPointer)
 					{
+						Emit(OverflowCheck ? OpCodes.Conv_Ovf_U : OpCodes.Conv_U);
 						// Do nothing?
 						break;
 					}
@@ -1030,6 +1029,11 @@ namespace Codegen
 			LoadArgument(Argument.Type, Argument.Index);
 		}
 
+		public void LoadArgumentAddress(SafeArgument Argument)
+		{
+			LoadArgumentAddress(Argument.Type, Argument.Index);
+		}
+
 		public void LoadArgument<TType>(int ArgumentIndex)
 		{
 			LoadArgument(typeof(TType), ArgumentIndex);
@@ -1060,6 +1064,23 @@ namespace Codegen
 			}
 		}
 
+		public void LoadArgumentAddress(Type Type, int ArgumentIndex)
+		{
+			if (TrackStack)
+			{
+				TypeStack.Push(Type.MakePointerType());
+			}
+
+			if (DoEmit)
+			{
+				Emit(OpCodes.Ldarga, ArgumentIndex);
+			}
+
+			if (DoDebug)
+			{
+				Debug.WriteLine(String.Format("LoadArgumentAddress<{0}>({1}) :: Stack -> {2}", Type.Name, ArgumentIndex, TypeStack.Count));
+			}
+		}
 
 		public void LoadArgumentFromIndexAtStack()
 		{
