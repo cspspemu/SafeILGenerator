@@ -73,7 +73,7 @@ namespace Codegen
 
 		protected void Emit(OpCode opcode, SafeLabel Param) { EmitHook(opcode, Param); __ILGenerator.Emit(opcode, Param.ReflectionLabel); }
 		protected void Emit(OpCode opcode, SafeLabel[] Param) { EmitHook(opcode, Param); __ILGenerator.Emit(opcode, Param.Select(Label => Label.ReflectionLabel).ToArray()); }
-		protected void Emit(OpCode opcode, FieldInfo Param) { EmitHook(opcode, Param); __ILGenerator.Emit(opcode, Param); }
+		protected void Emit(OpCode opcode, FieldInfo Param)  { EmitHook(opcode, Param); __ILGenerator.Emit(opcode, Param); }
 		protected void Emit(OpCode opcode, MethodInfo Param) { EmitHook(opcode, Param); __ILGenerator.Emit(opcode, Param); }
 
 		static public TDelegate Generate<TDelegate>(string MethodName, Action<SafeILGenerator> Generator, bool CheckTypes = true, bool DoDebug = false, bool DoLog = false)
