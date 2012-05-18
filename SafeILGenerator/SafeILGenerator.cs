@@ -634,7 +634,13 @@ namespace Codegen
 						break;
 					}
 
-					throw (new NotImplementedException(String.Format("Can't conver to type '{0}'", Type)));
+					//if (Type.IsClass)
+					{
+						Emit(OpCodes.Castclass, Type);
+						break;
+					}
+
+					throw (new NotImplementedException(String.Format("Can't convert to type '{0}'", Type)));
 				}
 			}
 
@@ -1472,6 +1478,7 @@ namespace Codegen
 					if (Type == typeof(byte)) { Emit(OpCodes.Ldind_U1); break; }
 					if (Type == typeof(ushort)) { Emit(OpCodes.Ldind_U2); break; }
 					if (Type == typeof(uint)) { Emit(OpCodes.Ldind_U4); break; }
+					if (Type.IsPointer) { Emit(OpCodes.Ldind_Ref); break; }
 					//Emit(OpCodes.Ldelem);
 					throw (new NotImplementedException());
 				}
