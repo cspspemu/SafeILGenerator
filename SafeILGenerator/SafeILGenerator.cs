@@ -825,6 +825,7 @@ namespace Codegen
 			{
 				int CurrentArgumentIndex = 0;
 				foreach (var ParameterParameterType in SafeMethodTypeInfo.Parameters.Reverse())
+				//foreach (var ParameterParameterType in SafeMethodTypeInfo.Parameters)
 				{
 					var FunctionParameterType = ParameterParameterType;
 					var StackParameterType = TypeStack.Pop();
@@ -834,7 +835,7 @@ namespace Codegen
 
 					if (CheckTypes)
 					{
-						if (FunctionParameterType != StackParameterType)
+						if (FunctionParameterType != StackParameterType && (FunctionParameterType != typeof(object) && StackParameterType != typeof(object)))
 						{
 							if (GetCommonType(FunctionParameterType) != GetCommonType(StackParameterType))
 							{
@@ -1142,6 +1143,60 @@ namespace Codegen
 						}
 						break;
 				}
+			}
+
+			if (DoDebug)
+			{
+				Debug.WriteLine(String.Format("Push({0}) :: Stack -> {1}", Value, TypeStack.Count));
+			}
+		}
+
+		public void Push(Type Value)
+		{
+			if (TrackStack)
+			{
+				TypeStack.Push(typeof(Type));
+			}
+
+			if (DoEmit)
+			{
+				Emit(OpCodes.Ldtoken, Value);
+			}
+
+			if (DoDebug)
+			{
+				Debug.WriteLine(String.Format("Push({0}) :: Stack -> {1}", Value, TypeStack.Count));
+			}
+		}
+
+		public void Push(MethodInfo Value)
+		{
+			if (TrackStack)
+			{
+				TypeStack.Push(typeof(MethodInfo));
+			}
+
+			if (DoEmit)
+			{
+				Emit(OpCodes.Ldtoken, Value);
+			}
+
+			if (DoDebug)
+			{
+				Debug.WriteLine(String.Format("Push({0}) :: Stack -> {1}", Value, TypeStack.Count));
+			}
+		}
+
+		public void Push(FieldInfo Value)
+		{
+			if (TrackStack)
+			{
+				TypeStack.Push(typeof(FieldInfo));
+			}
+
+			if (DoEmit)
+			{
+				Emit(OpCodes.Ldtoken, Value);
 			}
 
 			if (DoDebug)
@@ -1600,6 +1655,26 @@ namespace Codegen
 			}
 			// End
 			EndLabel.Mark();
+		}
+
+		public IEnumerable<LocalBuilder> StackSave()
+		{
+			// TODO: Check if the stack fits or it should be a queue!
+			var SavedStack = new Stack<LocalBuilder>();
+			while (TypeStack.Count > 0)
+			{
+				var Type = TypeStack.Pop(); TypeStack.Push(Type);
+
+				var Temp1 = DeclareLocal(Type);
+				StoreLocal(Temp1);
+				SavedStack.Push(Temp1);
+			}
+			return SavedStack;
+		}
+
+		public void StackRestore(IEnumerable<LocalBuilder> SavedStack)
+		{
+			foreach (var Local in SavedStack) LoadLocal(Local);
 		}
 	}
 
