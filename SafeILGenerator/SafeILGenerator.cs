@@ -185,8 +185,8 @@ namespace Codegen
 
 					// Pointers
 					//if (Type.IsPointer) { Emit(OpCodes.Stobj, Type); break; }
-					//if (Type.IsPointer) { Emit(OpCodes.Stind_I); break; }
-					if (Type.IsPointer) { Emit(OpCodes.Stind_Ref); break; }
+					if (Type.IsPointer) { Emit(OpCodes.Stind_I); break; }
+					//if (Type.IsPointer) { Emit(OpCodes.Stind_Ref); break; }
 
 					throw(new NotImplementedException("Can't store indirectly type '" + Type.Name + "'"));
 				}
@@ -1161,7 +1161,7 @@ namespace Codegen
 		{
 			if (TrackStack)
 			{
-				TypeStack.Push(typeof(Type));
+				TypeStack.Push(typeof(RuntimeTypeHandle));
 			}
 
 			if (DoEmit)
@@ -1539,7 +1539,8 @@ namespace Codegen
 					if (Type == typeof(byte)) { Emit(OpCodes.Ldind_U1); break; }
 					if (Type == typeof(ushort)) { Emit(OpCodes.Ldind_U2); break; }
 					if (Type == typeof(uint)) { Emit(OpCodes.Ldind_U4); break; }
-					if (Type.IsPointer) { Emit(OpCodes.Ldind_Ref); break; }
+					//if (Type.IsPointer) { Emit(OpCodes.Ldind_Ref); break; }
+					if (Type.IsPointer) { Emit(OpCodes.Ldind_I); break; }
 					//Emit(OpCodes.Ldelem);
 					throw (new NotImplementedException());
 				}
