@@ -454,13 +454,19 @@ namespace Codegen
 			}
 		}
 
-		public void Return()
+		public void Return(Type ReturnType)
 		{
 			if (TrackStack)
 			{
-				// @TODO CHECK RETURN TYPE
-				//var ReturnType = TypeStack.Pop();
-				//throw(new NotImplementedException());
+				if (ReturnType != typeof(void))
+				{
+					var StackReturnType = TypeStack.Pop();
+					if (StackReturnType != ReturnType)
+					{
+						//throw (new Exception(String.Format("Invalid return type {0} != {1}", StackReturnType, ReturnType)));
+						ConvertTo(ReturnType);
+					}
+				}
 			}
 
 			if (DoEmit)
@@ -1631,6 +1637,27 @@ namespace Codegen
 			}
 		}
 
+		public void SaveRestoreTypeStack(Action Action)
+		{
+			var OldTypeStack = TypeStack.Clone2();
+			try
+			{
+				Action();
+			}
+			finally
+			{
+				TypeStack = OldTypeStack;
+			}
+		}
+
+		public int GetOffsetIncrement(Action Action)
+		{
+			var ILOffsetStart = __ILGenerator.ILOffset;
+			Action();
+			var ILOffsetEnd = __ILGenerator.ILOffset;
+			return ILOffsetEnd - ILOffsetStart;
+		}
+
 		public void MacroIfElse(Action IfAction, Action ElseAction)
 		{
 			var IfLabel = DefineLabel("If");
@@ -1642,16 +1669,18 @@ namespace Codegen
 			// If
 			IfLabel.Mark();
 			{
-				IfAction();
+				//SaveRestoreTypeStack(() => {
+					IfAction();
+				//});
 
 				BranchAlways(EndLabel);
 			}
 			// Else
 			ElseLabel.Mark();
 			{
-				ElseAction();
-
-				BranchAlways(EndLabel);
+				//SaveRestoreTypeStack(() =>  {
+					ElseAction();
+				//});
 			}
 			// End
 			EndLabel.Mark();

@@ -277,6 +277,14 @@ namespace Codegen
 		private LinkedList<Type> Stack = new LinkedList<Type>();
 		private SafeILGenerator SafeILGenerator;
 
+		public SafeTypeStack Clone2()
+		{
+			return new SafeTypeStack(SafeILGenerator)
+			{
+				Stack = new LinkedList<Type>(this.Stack.ToArray()),
+			};
+		}
+
 		internal SafeTypeStack(SafeILGenerator SafeILGenerator)
 		{
 			this.SafeILGenerator = SafeILGenerator;
