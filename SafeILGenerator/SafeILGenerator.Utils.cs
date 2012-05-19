@@ -174,7 +174,12 @@ namespace Codegen
 
 		public LocalBuilder DeclareLocal(Type Type, string Name = "")
 		{
-			return __ILGenerator.DeclareLocal(Type);
+			var LocalBuilder = __ILGenerator.DeclareLocal(Type);
+			if (Name != null && Name != "")
+			{
+				LocalBuilder.SetLocalSymInfo(Name);
+			}
+			return LocalBuilder;
 		}
 
 		public LocalBuilder DeclareLocal<TType>(string Name = "")
