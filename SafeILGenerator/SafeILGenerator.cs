@@ -454,6 +454,50 @@ namespace Codegen
 			}
 		}
 
+		public void NewObject(ConstructorInfo ConstructorInfo)
+		{
+			if (TrackStack)
+			{
+				//var ConstructorInfo = TypeStack.Pop();
+				foreach (var Parameter in ConstructorInfo.GetParameters())
+				{
+					TypeStack.Pop();
+				}
+			}
+
+			if (DoEmit)
+			{
+				__ILGenerator.Emit(OpCodes.Newobj, ConstructorInfo);
+			}
+
+			if (DoDebug)
+			{
+				Debug.WriteLine(String.Format("NewObject() :: Stack -> {0}", TypeStack.Count));
+			}
+		}
+
+		public void Throw()
+		{
+			if (TrackStack)
+			{
+				var ExceptionType = TypeStack.Pop();
+				if (typeof(Exception).IsAssignableFrom(ExceptionType))
+				{
+					throw(new InvalidOperationException(String.Format("Must throw an exception type but trying to throw {0}", ExceptionType)));
+				}
+			}
+
+			if (DoEmit)
+			{
+				Emit(OpCodes.Throw);
+			}
+
+			if (DoDebug)
+			{
+				Debug.WriteLine(String.Format("Throw() :: Stack -> {0}", TypeStack.Count));
+			}
+		}
+
 		public void Return(Type ReturnType)
 		{
 			if (TrackStack)
@@ -621,7 +665,14 @@ namespace Codegen
 			{
 				while (true)
 				{
-					if (Type == typeof(bool)) { Emit(OverflowCheck ? OpCodes.Conv_Ovf_I : OpCodes.Conv_I); break; }
+					if (Type == typeof(bool))
+					{
+						Push(0);
+						CompareBinary(SafeBinaryComparison.NotEquals);
+
+						//Emit(OverflowCheck ? OpCodes.Conv_Ovf_I : OpCodes.Conv_I);
+						break;
+					}
 					if (Type == typeof(sbyte)) { Emit(OverflowCheck ? OpCodes.Conv_Ovf_I1 : OpCodes.Conv_I1); break; }
 					if (Type == typeof(byte)) { Emit(OverflowCheck ? OpCodes.Conv_Ovf_U1 : OpCodes.Conv_U1); break; }
 					if (Type == typeof(short)) { Emit(OverflowCheck ? OpCodes.Conv_Ovf_I2 : OpCodes.Conv_I2); break; }
