@@ -1272,6 +1272,11 @@ namespace Codegen
 			_PushIntAs<int>(Value);
 		}
 
+		public void Push(char Value)
+		{
+			_PushIntAs<char>(Value);
+		}
+
 		public void Push(long Value)
 		{
 			if (TrackStack)
