@@ -188,7 +188,10 @@ namespace Codegen
 					if (Type.IsPointer) { Emit(OpCodes.Stind_I); break; }
 					//if (Type.IsPointer) { Emit(OpCodes.Stind_Ref); break; }
 
-					throw(new NotImplementedException("Can't store indirectly type '" + Type.Name + "'"));
+					//if (Type.IsClass) { Emit(OpCodes.Stobj, Type); break; }
+					if (true) { Emit(OpCodes.Stobj, Type); break; }
+
+					throw (new NotImplementedException("Can't store indirectly type '" + Type.Name + "'"));
 				}
 			}
 
@@ -240,12 +243,12 @@ namespace Codegen
 			StoreArgument(Argument.Type, Argument.Index);
 		}
 
-		public void StoreArgument<TType>(int ArgumentIndex)
+		public void StoreArgument<TType>(ushort ArgumentIndex)
 		{
 			StoreArgument(typeof(TType), ArgumentIndex);
 		}
 
-		public void StoreArgument(Type Type, int ArgumentIndex)
+		public void StoreArgument(Type Type, ushort ArgumentIndex)
 		{
 			if (TrackStack)
 			{
@@ -255,7 +258,14 @@ namespace Codegen
 
 			if (DoEmit)
 			{
-				Emit(((int)(byte)ArgumentIndex == (int)ArgumentIndex) ? OpCodes.Starg_S : OpCodes.Starg, ArgumentIndex);
+				if ((ushort)(byte)ArgumentIndex == (ushort)ArgumentIndex)
+				{
+					Emit(OpCodes.Starg_S, (byte)ArgumentIndex);
+				}
+				else
+				{
+					Emit(OpCodes.Starg, (ushort)ArgumentIndex);
+				}
 			}
 
 			if (DoDebug)
@@ -655,13 +665,16 @@ namespace Codegen
 
 		public void ConvertTo(Type Type)
 		{
+			Type PreviousType = null;
+
 			if (TrackStack)
 			{
-				var PreviousType = TypeStack.Pop();
+				PreviousType = TypeStack.Pop();
 				TypeStack.Push(Type);
+
 			}
 
-			if (DoEmit)
+			if (DoEmit && (PreviousType != Type))
 			{
 				while (true)
 				{
@@ -1074,7 +1087,7 @@ namespace Codegen
 			}
 		}
 
-		public SafeArgument DeclareArgument(Type Type, int ArgumentIndex)
+		public SafeArgument DeclareArgument(Type Type, ushort ArgumentIndex)
 		{
 			return new SafeArgument(Type, ArgumentIndex);
 		}
@@ -1118,7 +1131,16 @@ namespace Codegen
 					case 1: Emit(OpCodes.Ldarg_1); break;
 					case 2: Emit(OpCodes.Ldarg_2); break;
 					case 3: Emit(OpCodes.Ldarg_3); break;
-					default: Emit(((int)(byte)ArgumentIndex == (int)ArgumentIndex) ? OpCodes.Ldarg_S : OpCodes.Ldarg, ArgumentIndex); break;
+					default:
+						if ((ushort)(byte)ArgumentIndex == (ushort)ArgumentIndex)
+						{
+							Emit(OpCodes.Ldarg_S, (byte)ArgumentIndex);
+						}
+						else
+						{
+							Emit(OpCodes.Ldarg, (ushort)ArgumentIndex);
+						}
+					break;
 				}
 			}
 
@@ -1128,7 +1150,7 @@ namespace Codegen
 			}
 		}
 
-		public void LoadArgumentAddress(Type Type, int ArgumentIndex)
+		public void LoadArgumentAddress(Type Type, ushort ArgumentIndex)
 		{
 			if (TrackStack)
 			{
@@ -1137,7 +1159,14 @@ namespace Codegen
 
 			if (DoEmit)
 			{
-				Emit(OpCodes.Ldarga, ArgumentIndex);
+				if ((ushort)(byte)ArgumentIndex == (ushort)ArgumentIndex)
+				{
+					Emit(OpCodes.Ldarga_S, (byte)ArgumentIndex);
+				}
+				else
+				{
+					Emit(OpCodes.Ldarga, (ushort)ArgumentIndex);
+				}
 			}
 
 			if (DoDebug)
@@ -1598,7 +1627,11 @@ namespace Codegen
 					//if (Type.IsPointer) { Emit(OpCodes.Ldind_Ref); break; }
 					if (Type.IsPointer) { Emit(OpCodes.Ldind_I); break; }
 					//Emit(OpCodes.Ldelem);
-					throw (new NotImplementedException());
+					
+					//if (Type.IsClass) { Emit(OpCodes.Conv_U); Emit(OpCodes.Ldobj, Type); break; }
+					if (true) { Emit(OpCodes.Conv_U); Emit(OpCodes.Ldobj, Type); break; }
+
+					throw (new NotImplementedException("Can't load indirectly type '" + Type.Name + "'"));
 				}
 			}
 
@@ -1715,14 +1748,29 @@ namespace Codegen
 			return ILOffsetEnd - ILOffsetStart;
 		}
 
+		public void MacroIf(Action IfAction)
+		{
+			var IfLabel = DefineLabel("If");
+			var EndLabel = DefineLabel("End");
+
+			BranchUnaryComparison(SafeUnaryComparison.False, EndLabel);
+			// If
+			IfLabel.Mark();
+			{
+				//SaveRestoreTypeStack(() => {
+				IfAction();
+				//});
+			}
+			EndLabel.Mark();
+		}
+
 		public void MacroIfElse(Action IfAction, Action ElseAction)
 		{
 			var IfLabel = DefineLabel("If");
 			var ElseLabel = DefineLabel("Else");
 			var EndLabel = DefineLabel("End");
 
-			BranchUnaryComparison(SafeUnaryComparison.True, IfLabel);
-			BranchAlways(ElseLabel);
+			BranchUnaryComparison(SafeUnaryComparison.False, ElseLabel);
 			// If
 			IfLabel.Mark();
 			{
@@ -1767,9 +1815,9 @@ namespace Codegen
 	public class SafeArgument
 	{
 		internal Type Type;
-		internal int Index;
+		internal ushort Index;
 
-		internal SafeArgument(Type Type, int Index)
+		internal SafeArgument(Type Type, ushort Index)
 		{
 			this.Type = Type;
 			this.Index = Index;
