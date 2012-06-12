@@ -34,11 +34,9 @@ namespace Codegen
 			if (TrackStack)
 			{
 				var TypeRight = TypeStack.Pop();
-				var TypeLeft = TypeStack.Pop();
 
 				if (CheckTypes)
 				{
-					if (TypeLeft != TypeRight) throw (new InvalidOperationException("Binary operation mismatch"));
 				}
 
 				TypeStack.Push(TypeRight);
@@ -671,13 +669,37 @@ namespace Codegen
 			{
 				PreviousType = TypeStack.Pop();
 				TypeStack.Push(Type);
-
 			}
 
 			if (DoEmit && (PreviousType != Type))
 			{
 				while (true)
 				{
+					if (PreviousType != null && PreviousType.IsPointer)
+					{
+						Emit(OpCodes.Conv_U);
+					}
+
+					/*
+					if (PreviousType != null && PreviousType.IsPointer)
+					{
+						//typeof(IntPtr).GetMethods(
+						//typeof(IntPtr).GetMethod(null, null, null, 
+
+						var PointerToIntPtr = typeof(IntPtr).GetMethods().Where(Method => Method.Name == "op_Explicit" && Method.ReturnType == typeof(IntPtr) && Method.GetParameters()[0].ParameterType == typeof(void*)).First();
+						var IntPtrToInt32 = typeof(IntPtr).GetMethods().Where(Method => Method.Name == "op_Explicit" && Method.ReturnType == typeof(int) && Method.GetParameters()[0].ParameterType == typeof(IntPtr)).First();
+						Call(PointerToIntPtr);
+						Call(IntPtrToInt32);
+						// IL_0000: ldc.i4.0
+						// IL_0001: conv.u
+						// IL_0002: ldflda int32 ilcc.Runtime.Tests.CLibTest/MyStruct::c
+						// IL_0007: conv.u
+						// IL_0008: call native int [mscorlib]System.IntPtr::op_Explicit(void*)
+						// IL_000d: call int32 [mscorlib]System.IntPtr::op_Explicit(native int)
+						// IL_0012: ret
+					}
+					*/
+
 					if (Type == typeof(bool))
 					{
 						Push(0);
@@ -1087,9 +1109,9 @@ namespace Codegen
 			}
 		}
 
-		public SafeArgument DeclareArgument(Type Type, ushort ArgumentIndex)
+		public SafeArgument DeclareArgument(Type Type, ushort ArgumentIndex, string Name = "")
 		{
-			return new SafeArgument(Type, ArgumentIndex);
+			return new SafeArgument(Type, ArgumentIndex, Name);
 		}
 
 		public void LoadStoreArgument(SafeArgument Argument, Action Action)
@@ -1459,7 +1481,7 @@ namespace Codegen
 			{
 				//var FieldInfoType = TypeStack.Pop();
 				var TypePointer = TypeStack.Pop();
-				var ExpectedType = FieldInfo.DeclaringType;
+				var ExpectedType = FieldInfo.FieldType;
 				if (Address) ExpectedType = FieldInfo.DeclaringType.MakePointerType();
 #if false
 				if (TypePointer != ExpectedType)
@@ -1467,7 +1489,7 @@ namespace Codegen
 					throw (new InvalidOperationException(String.Format("{0} != {1}", TypePointer, ExpectedType)));
 				}
 #endif
-				TypeStack.Push(FieldInfo.FieldType);
+				TypeStack.Push(ExpectedType);
 			}
 	
 			if (DoEmit)
@@ -1486,9 +1508,17 @@ namespace Codegen
 			_LoadField_Address(FieldInfo.IsStatic ? OpCodes.Ldsfld : OpCodes.Ldfld, FieldInfo, Address: false);
 		}
 
-		public void LoadFieldAddress(FieldInfo FieldInfo)
+		public void LoadFieldAddress(FieldInfo FieldInfo, bool UseLoadFieldAddress = true)
 		{
-			_LoadField_Address(FieldInfo.IsStatic ? OpCodes.Ldsflda : OpCodes.Ldflda, FieldInfo, Address: true);
+			if (UseLoadFieldAddress)
+			{
+				_LoadField_Address(FieldInfo.IsStatic ? OpCodes.Ldsflda : OpCodes.Ldflda, FieldInfo, Address: true);
+			}
+			else
+			{
+				Push((int)Marshal.OffsetOf(FieldInfo.DeclaringType, FieldInfo.Name));
+				BinaryOperation(SafeBinaryOperator.AdditionSigned);
+			}
 		}
 
 		public void LoadMethodAddress()
@@ -1816,11 +1846,13 @@ namespace Codegen
 	{
 		internal Type Type;
 		internal ushort Index;
+		internal string Name;
 
-		internal SafeArgument(Type Type, ushort Index)
+		internal SafeArgument(Type Type, ushort Index, string Name)
 		{
 			this.Type = Type;
 			this.Index = Index;
+			this.Name = Name;
 		}
 	}
 }
