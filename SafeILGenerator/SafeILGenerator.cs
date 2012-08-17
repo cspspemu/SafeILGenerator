@@ -506,6 +506,11 @@ namespace Codegen
 			}
 		}
 
+		public void Return<TType>()
+		{
+			Return(typeof(TType));
+		}
+
 		public void Return(Type ReturnType)
 		{
 			if (TrackStack)

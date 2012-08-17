@@ -15,7 +15,7 @@ namespace Codegen.Tests
 				Generator.LoadArgument<int>(0);
 				Generator.LoadArgument<int>(1);
 				Generator.BinaryOperation(SafeBinaryOperator.AdditionSigned);
-				Generator.Return();
+				Generator.Return<int>();
 			});
 			Assert.AreEqual(3, Adder(1, 2));
 		}
@@ -33,7 +33,7 @@ namespace Codegen.Tests
 				Generator.BinaryOperation(SafeBinaryOperator.AdditionSigned);
 				Generator.Push((int)16);
 				Generator.BinaryOperation(SafeBinaryOperator.AdditionSigned);
-				Generator.Return();
+				Generator.Return<int>();
 			}, DoLog: true);
 
 			Assert.AreEqual(
@@ -45,7 +45,7 @@ namespace Codegen.Tests
 					"Op.add",
 					"Op.ret",
 				}),
-				String.Join("\r\n", SafeILGenerator.EmittedInstructions)
+				String.Join("\r\n", SafeILGenerator.GetEmittedInstructions())
 			);
 		}
 
@@ -78,7 +78,7 @@ namespace Codegen.Tests
 					}
 				);
 				Generator.LoadLocal(Local);
-				Generator.Return();
+				Generator.Return<int>();
 			});
 
 			var ExpectedItems = new int[] { -99, 0, -99, 2, 3, -99 };
