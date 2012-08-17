@@ -38,12 +38,12 @@ namespace Codegen.Tests
 
 			Assert.AreEqual(
 				String.Join("\r\n", new string[] {
-					"Op.ldarg.0",
-					"Op.ldarg.1",
-					"Op.add",
-					"Op.ldc.i4.s 16",
-					"Op.add",
-					"Op.ret",
+					"ldarg.0",
+					"ldarg.1",
+					"add",
+					"ldc.i4.s, 16",
+					"add",
+					"ret",
 				}),
 				String.Join("\r\n", SafeILGenerator.GetEmittedInstructions())
 			);
@@ -54,7 +54,7 @@ namespace Codegen.Tests
 		{
 			var Switcher = SafeILGenerator.Generate<Func<int, int>>("TestSwitch", (Generator) =>
 			{
-				var Local = Generator.DeclareLocal<int>("Value");
+				var Local = Generator.DeclareLocal<int>("Value", false);
 				Generator.Push((int)-33);
 				Generator.StoreLocal(Local);
 
