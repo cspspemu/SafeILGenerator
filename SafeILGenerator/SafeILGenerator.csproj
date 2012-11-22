@@ -58,6 +58,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Ast\AstArgument.cs" />
+    <Compile Include="Ast\AstFunction.cs" />
+    <Compile Include="Ast\AstFunctionUtils.cs" />
+    <Compile Include="Ast\AstLabel.cs" />
+    <Compile Include="Ast\AstLocal.cs" />
+    <Compile Include="Ast\Generators\Generator.cs" />
+    <Compile Include="Ast\Generators\GeneratorCSharp.cs" />
+    <Compile Include="Ast\Generators\GeneratorIL.cs" />
+    <Compile Include="Ast\Generators\NodeTypeAttribute.cs" />
+    <Compile Include="Ast\Nodes\AstNode.cs" />
+    <Compile Include="Ast\Nodes\AstNodeStm.cs" />
+    <Compile Include="Ast\Nodes\AstNodeStmAssignLocal.cs" />
+    <Compile Include="Ast\Nodes\AstNodeStmContainer.cs" />
+    <Compile Include="Ast\Nodes\AstNodeExpr.cs" />
+    <Compile Include="Ast\Nodes\AstNodeExprBinop.cs" />
+    <Compile Include="Ast\Nodes\AstNodeExprImm.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SafeAssemblyBuilder.cs" />
     <Compile Include="SafeILGenerator.cs" />
