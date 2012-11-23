@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Codegen.Ast.Generators
+namespace SafeILGenerator.Ast.Generators
 {
 	public sealed class NodeTypeAttribute : Attribute
 	{

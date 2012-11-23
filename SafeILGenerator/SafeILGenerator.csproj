@@ -87,8 +87,8 @@
     <Compile Include="Ast\Nodes\AstNodeStmReturn.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SafeAssemblyBuilder.cs" />
-    <Compile Include="SafeILGenerator.cs" />
-    <Compile Include="SafeILGenerator.Utils.cs" />
+    <Compile Include="CSafeILGenerator.cs" />
+    <Compile Include="CSafeILGenerator.Utils.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

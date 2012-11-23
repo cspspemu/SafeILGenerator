@@ -6,9 +6,9 @@ using System.Reflection.Emit;
 using System.Diagnostics;
 using System.Reflection;
 
-namespace Codegen
+namespace SafeILGenerator
 {
-	public partial class SafeILGenerator
+	public partial class CSafeILGenerator
 	{
 		public ILGenerator __ILGenerator { get; private set; }
 		SafeTypeStack TypeStack;
@@ -76,7 +76,7 @@ namespace Codegen
 		protected void Emit(OpCode opcode, FieldInfo Param)  { EmitHook(opcode, Param); __ILGenerator.Emit(opcode, Param); }
 		protected void Emit(OpCode opcode, MethodInfo Param) { EmitHook(opcode, Param); __ILGenerator.Emit(opcode, Param); }
 
-		static public TDelegate Generate<TDelegate>(string MethodName, Action<SafeILGenerator> Generator, bool CheckTypes = true, bool DoDebug = false, bool DoLog = false)
+		static public TDelegate Generate<TDelegate>(string MethodName, Action<CSafeILGenerator> Generator, bool CheckTypes = true, bool DoDebug = false, bool DoLog = false)
 		{
 			var MethodInfo = typeof(TDelegate).GetMethod("Invoke");
 			var DynamicMethod = new DynamicMethod(
@@ -86,14 +86,14 @@ namespace Codegen
 				Assembly.GetExecutingAssembly().ManifestModule
 			);
 			var ILGenerator = DynamicMethod.GetILGenerator();
-			var SafeILGenerator = new SafeILGenerator(ILGenerator, CheckTypes, DoDebug, DoLog);
+			var SafeILGenerator = new CSafeILGenerator(ILGenerator, CheckTypes, DoDebug, DoLog);
 			{
 				Generator(SafeILGenerator);
 			}
 			return (TDelegate)(object)DynamicMethod.CreateDelegate(typeof(TDelegate));
 		}
 
-		public SafeILGenerator(ILGenerator ILGenerator, bool CheckTypes, bool DoDebug, bool DoLog)
+		public CSafeILGenerator(ILGenerator ILGenerator, bool CheckTypes, bool DoDebug, bool DoLog)
 		{
 			this.__ILGenerator = ILGenerator;
 			this.TypeStack = new SafeTypeStack(this);
@@ -283,7 +283,7 @@ namespace Codegen
 	{
 		//public List<Type> List;
 		private LinkedList<Type> Stack = new LinkedList<Type>();
-		private SafeILGenerator SafeILGenerator;
+		private CSafeILGenerator SafeILGenerator;
 
 		public SafeTypeStack Clone2()
 		{
@@ -293,7 +293,7 @@ namespace Codegen
 			};
 		}
 
-		internal SafeTypeStack(SafeILGenerator SafeILGenerator)
+		internal SafeTypeStack(CSafeILGenerator SafeILGenerator)
 		{
 			this.SafeILGenerator = SafeILGenerator;
 		}
@@ -365,12 +365,12 @@ namespace Codegen
 
 	public class SafeLabel
 	{
-		private SafeILGenerator SafeILGenerator;
+		private CSafeILGenerator SafeILGenerator;
 		internal Label ReflectionLabel { get; private set; }
 		public bool Marked { get; private set; }
 		public string Name;
 
-		internal SafeLabel(SafeILGenerator SafeILGenerator, string Name)
+		internal SafeLabel(CSafeILGenerator SafeILGenerator, string Name)
 		{
 			this.SafeILGenerator = SafeILGenerator;
 			this.ReflectionLabel = SafeILGenerator.__ILGenerator.DefineLabel();

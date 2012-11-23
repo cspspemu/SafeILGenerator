@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Codegen.Ast.Generators;
+using SafeILGenerator.Ast.Generators;
 using System.Reflection.Emit;
 using System.Reflection;
-using Codegen.Ast.Nodes;
-using Codegen.Ast;
+using SafeILGenerator.Ast.Nodes;
+using SafeILGenerator.Ast;
 
-namespace Codegen.Tests.Ast.Generators
+namespace SafeILGenerator.Tests.Ast.Generators
 {
 	[TestClass]
 	public class GeneratorILTest

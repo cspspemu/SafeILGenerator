@@ -1,9 +1,9 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Codegen.Ast.Generators;
-using Codegen.Ast.Nodes;
+using SafeILGenerator.Ast.Generators;
+using SafeILGenerator.Ast.Nodes;
 
-namespace Codegen.Tests.Ast.Generators
+namespace SafeILGenerator.Tests.Ast.Generators
 {
 	[TestClass]
 	public class GeneratorCSharpTest

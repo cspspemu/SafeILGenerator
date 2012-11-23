@@ -1,11 +1,11 @@
-﻿using Codegen.Ast.Nodes;
+﻿using SafeILGenerator.Ast.Nodes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Codegen.Ast
+namespace SafeILGenerator.Ast
 {
 	static public class AstFunctionUtils
 	{

@@ -5,7 +5,7 @@ using System.Text;
 using System.Reflection.Emit;
 using System.Reflection;
 
-namespace Codegen
+namespace SafeILGenerator
 {
 	static public class SafeAssemblyExtensions
 	{

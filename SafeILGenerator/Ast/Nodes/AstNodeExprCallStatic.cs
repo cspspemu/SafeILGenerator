@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Codegen.Ast.Nodes
+namespace SafeILGenerator.Ast.Nodes
 {
 	public class AstNodeExprCallStatic : AstNodeExprCall
 	{

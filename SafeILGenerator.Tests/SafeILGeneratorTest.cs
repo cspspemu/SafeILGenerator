@@ -2,7 +2,7 @@
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Codegen.Tests
+namespace SafeILGenerator.Tests
 {
 	[TestClass]
 	public class SafeILGeneratorTest
@@ -10,7 +10,7 @@ namespace Codegen.Tests
 		[TestMethod]
 		public void TestGenerate()
 		{
-			var Adder = SafeILGenerator.Generate<Func<int, int, int>>("TestGenerate", (Generator) =>
+			var Adder = CSafeILGenerator.Generate<Func<int, int, int>>("TestGenerate", (Generator) =>
 			{
 				Generator.LoadArgument<int>(0);
 				Generator.LoadArgument<int>(1);
@@ -23,9 +23,9 @@ namespace Codegen.Tests
 		[TestMethod]
 		public void TestLog()
 		{
-			SafeILGenerator SafeILGenerator = null;
+			CSafeILGenerator SafeILGenerator = null;
 
-			var AdderPlus16 = SafeILGenerator.Generate<Func<int, int, int>>("TestGenerate", (Generator) =>
+			var AdderPlus16 = CSafeILGenerator.Generate<Func<int, int, int>>("TestGenerate", (Generator) =>
 			{
 				SafeILGenerator = Generator;
 				Generator.LoadArgument<int>(0);
@@ -52,7 +52,7 @@ namespace Codegen.Tests
 		[TestMethod]
 		public void TestSwitch()
 		{
-			var Switcher = SafeILGenerator.Generate<Func<int, int>>("TestSwitch", (Generator) =>
+			var Switcher = CSafeILGenerator.Generate<Func<int, int>>("TestSwitch", (Generator) =>
 			{
 				var Local = Generator.DeclareLocal<int>("Value", false);
 				Generator.Push((int)-33);

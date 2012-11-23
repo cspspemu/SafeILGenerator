@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Codegen.Ast
+namespace SafeILGenerator.Ast
 {
 	public class AstUtils
 	{

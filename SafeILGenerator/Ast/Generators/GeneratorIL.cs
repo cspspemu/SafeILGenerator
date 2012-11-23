@@ -1,6 +1,6 @@
-﻿using Codegen.Ast;
-using Codegen.Ast.Nodes;
-using Codegen.Ast.Generators;
+﻿using SafeILGenerator.Ast;
+using SafeILGenerator.Ast.Nodes;
+using SafeILGenerator.Ast.Generators;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
 
-namespace Codegen.Ast.Generators
+namespace SafeILGenerator.Ast.Generators
 {
 	public class GeneratorIL : Generator
 	{

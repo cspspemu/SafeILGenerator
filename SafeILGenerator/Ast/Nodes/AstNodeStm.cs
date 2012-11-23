@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Codegen.Ast.Nodes
+namespace SafeILGenerator.Ast.Nodes
 {
 	public abstract class AstNodeStm : AstNode
 	{

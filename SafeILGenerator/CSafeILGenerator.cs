@@ -7,7 +7,7 @@ using System.Reflection;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
-namespace Codegen
+namespace SafeILGenerator
 {
 	public class SafeMethodTypeInfo
 	{
@@ -27,7 +27,7 @@ namespace Codegen
 		}
 	}
 
-	public partial class SafeILGenerator
+	public partial class CSafeILGenerator
 	{
 		public void UnaryOperation(SafeUnaryOperator Operator)
 		{
