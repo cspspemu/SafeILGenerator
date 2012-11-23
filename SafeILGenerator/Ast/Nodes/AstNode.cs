@@ -14,6 +14,18 @@ namespace SafeILGenerator.Ast.Nodes
 		{
 			Node = (T)Transformer(Node);
 		}
+
+		static public void Ref<T>(this TransformNodesDelegate Transformer, ref T[] Nodes) where T : AstNode
+		{
+			var NewNodes = new List<T>();
+			foreach (var Node in Nodes)
+			{
+				var NewNode = (T)Transformer(Node);
+				if (NewNode != null) NewNodes.Add(NewNode);
+			}
+			Nodes = NewNodes.ToArray();
+			
+		}
 	}
 
 	public abstract class AstNode

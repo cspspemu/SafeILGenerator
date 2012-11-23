@@ -8,18 +8,20 @@ namespace SafeILGenerator.Ast.Nodes
 {
 	public class AstNodeStmAssign : AstNodeStm
 	{
-		public AstNodeExprLValue Left;
+		public AstNodeExprLValue LValue;
 		public AstNodeExpr Value;
 
-		public AstNodeStmAssign(AstNodeExprLValue Left, AstNodeExpr Value)
+		public AstNodeStmAssign(AstNodeExprLValue LValue, AstNodeExpr Value)
 		{
-			this.Left = Left;
+			if (LValue.Type != Value.Type) throw (new Exception(String.Format("Local.Type({0}) != Value.Type({1})", LValue.Type, Value.Type)));
+
+			this.LValue = LValue;
 			this.Value = Value;
 		}
 
 		public override void TransformNodes(TransformNodesDelegate Transformer)
 		{
-			Transformer.Ref(ref Left);
+			Transformer.Ref(ref LValue);
 			Transformer.Ref(ref Value);
 		}
 	}

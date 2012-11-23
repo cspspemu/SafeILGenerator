@@ -8,22 +8,37 @@ using System.Threading.Tasks;
 
 namespace SafeILGenerator.Ast.Generators
 {
-	public class GeneratorCSharp : Generator
+	public class GeneratorCSharp : Generator<GeneratorCSharp>
 	{
 		protected StringBuilder Output = new StringBuilder();
 
-		protected void Generate(AstNodeExprImm Item)
+		public override void Reset()
 		{
-			string StringValue = Item.Value.ToString();
+			Output = new StringBuilder();
+		}
+
+		protected void _Generate(AstNodeExprImm Item)
+		{
+			var ItemType = Item.Type;
+			var ItemValue = Item.Value;
+			string StringValue = ItemValue.ToString();
 
 			if (Item.Value is bool)
 			{
 				StringValue = StringValue.ToLower();
 			}
+			else if (!AstUtils.IsTypeSigned(ItemType))
+			{
+				//StringValue = String.Format("0x{0:X8}", ItemValue);
+				if (Convert.ToInt64(ItemValue) > 9)
+				{
+					StringValue = String.Format("0x{0:X}", ItemValue);
+				}
+			}
 			Output.Append(StringValue);
 		}
 
-		protected void Generate(AstNodeExprBinop Item)
+		protected void _Generate(AstNodeExprBinop Item)
 		{
 			Output.Append("(");
 			this.Generate(Item.LeftNode);
@@ -32,40 +47,89 @@ namespace SafeILGenerator.Ast.Generators
 			Output.Append(")");
 		}
 
-		protected void Generate(AstNodeStmIfElse Item)
+		protected void _Generate(AstNodeStmEmpty Empty)
+		{
+		}
+
+		protected void _Generate(AstNodeExprUnop Item)
+		{
+			Output.Append(Item.Operator + "(");
+			this.Generate(Item.RightNode);
+			Output.Append(")");
+		}
+
+		protected void _Generate(AstNodeStmIfElse IfElse)
 		{
 			Output.Append("if (");
-			this.Generate(Item.Condition);
+			this.Generate(IfElse.Condition);
 			Output.Append(") ");
-			this.Generate(Item.True);
-			if (Item.False != null)
+			this.Generate(IfElse.True);
+			if (IfElse.False != null)
 			{
 				Output.Append(" else ");
-				this.Generate(Item.False);
+				this.Generate(IfElse.False);
 			}
 		}
 
-		protected void Generate(AstNodeStmReturn Item)
+		protected void _Generate(AstNodeStmReturn Return)
 		{
 			Output.Append("return");
-			if (Item.Expression != null)
+			if (Return.Expression != null)
 			{
 				Output.Append(" ");
-				this.Generate(Item.Expression);
+				this.Generate(Return.Expression);
 			}
 			Output.Append(";");
 		}
 
-		protected void Generate(AstNodeExprCallStatic Item)
+		protected void _Generate(AstNodeStmAssign Assign)
 		{
-			Output.Append(Item.MethodInfo.DeclaringType.Name + "." + Item.MethodInfo.Name);
+			Generate(Assign.LValue);
+			Output.Append(" = ");
+			Generate(Assign.Value);
+			Output.Append(";");
+		}
+
+		protected void _Generate(AstNodeExprFieldAccess FieldAccess)
+		{
+			Generate(FieldAccess.Instance);
+			Output.Append(".");
+			Output.Append(FieldAccess.Field.Name);
+		}
+
+		protected void _Generate(AstNodeExprArgument Argument)
+		{
+			Output.Append(Argument.AstArgument.Name);
+		}
+
+		protected void _Generate(AstNodeExprCast Cast)
+		{
+			Output.Append("(" + Cast.CastedType.Name + ")");
+			Generate(Cast.Expr);
+		}
+
+		protected void _Generate(AstNodeExprCallStatic Call)
+		{
+			Output.Append(Call.MethodInfo.DeclaringType.Name + "." + Call.MethodInfo.Name);
 			Output.Append("(");
-			for (int n = 0; n < Item.Parameters.Length; n++)
+			for (int n = 0; n < Call.Parameters.Length; n++)
 			{
 				if (n != 0) Output.Append(", ");
-				Generate(Item.Parameters[n]);
+				Generate(Call.Parameters[n]);
 			}
 			Output.Append(")");
+		}
+
+		protected void _Generate(AstNodeStmContainer Container)
+		{
+			Output.Append("{\n");
+			foreach (var Node in Container.Nodes)
+			{
+				Output.Append("\t");
+				Generate(Node);
+				Output.Append("\n");
+			}
+			Output.Append("}\n");
 		}
 
 		public override string ToString()

@@ -9,17 +9,17 @@ namespace SafeILGenerator.Ast.Nodes
 {
 	public class AstNodeExprFieldAccess : AstNodeExprLValue
 	{
-		public AstNodeExpr Object;
+		public AstNodeExpr Instance;
 		public FieldInfo Field;
 
-		public AstNodeExprFieldAccess(AstNodeExpr Object, string FieldName)
-			: this(Object, Object.Type.GetField(FieldName))
+		public AstNodeExprFieldAccess(AstNodeExpr Instance, string FieldName)
+			: this(Instance, Instance.Type.GetField(FieldName))
 		{
 		}
 
-		public AstNodeExprFieldAccess(AstNodeExpr Object, FieldInfo Field)
+		public AstNodeExprFieldAccess(AstNodeExpr Instance, FieldInfo Field)
 		{
-			this.Object = Object;
+			this.Instance = Instance;
 			this.Field = Field;
 		}
 
@@ -30,7 +30,7 @@ namespace SafeILGenerator.Ast.Nodes
 
 		public override void TransformNodes(TransformNodesDelegate Transformer)
 		{
-			Transformer.Ref(ref Object);
+			Transformer.Ref(ref Instance);
 		}
 	}
 }

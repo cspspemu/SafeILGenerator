@@ -17,7 +17,14 @@ namespace SafeILGenerator.Ast.Nodes
 			var MethodParameters = MethodInfo.GetParameters().Select(Parameter => Parameter.ParameterType).ToArray();
 			var ParametersTypes = Parameters.Select(Parameter => Parameter.Type).ToArray();
 
-			if (!MethodParameters.SequenceEqual(ParametersTypes)) throw(new Exception("Parameters mismatch"));
+			if (!MethodParameters.SequenceEqual(ParametersTypes))
+			{
+				throw (new Exception(String.Format(
+					"Parameters mismatch ({0}) != ({1})",
+					String.Join(",", (IEnumerable<Type>)MethodParameters),
+					String.Join(",", (IEnumerable<Type>)ParametersTypes)
+				)));
+			}
 
 			this.MethodInfo = MethodInfo;
 			this.Parameters = Parameters;
@@ -30,10 +37,7 @@ namespace SafeILGenerator.Ast.Nodes
 
 		public override void TransformNodes(TransformNodesDelegate Transformer)
 		{
-			for (int n = 0; n < Parameters.Length; n++)
-			{
-				Transformer.Ref(ref Parameters[n]);
-			}
+			Transformer.Ref(ref Parameters);
 		}
 	}
 }

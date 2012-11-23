@@ -12,16 +12,18 @@ namespace SafeILGenerator.Ast
 	{
 		public readonly int Index;
 		public readonly Type Type;
+		public readonly string Name;
 
-		public AstArgument(int Index, Type Type)
+		public AstArgument(int Index, Type Type, string Name = null)
 		{
 			this.Index = Index;
 			this.Type = Type;
+			this.Name = (Name == null) ? ("@ARG(" + Index + ")") : Name;
 		}
 
-		static public AstArgument Create(MethodInfo MethodInfo, ILGenerator ILGenerator, int Index)
+		static public AstArgument Create(MethodInfo MethodInfo, ILGenerator ILGenerator, int Index, string Name = null)
 		{
-			return new AstArgument(Index, MethodInfo.GetParameters()[Index].ParameterType);
+			return new AstArgument(Index, MethodInfo.GetParameters()[Index].ParameterType, Name);
 		}
 	}
 }

@@ -22,13 +22,7 @@ namespace SafeILGenerator.Ast.Nodes
 
 		public override void TransformNodes(TransformNodesDelegate Transformer)
 		{
-			var NewNodes = new List<AstNodeStm>();
-			foreach (var Node in this.Nodes)
-			{
-				var NewNode = Transformer(Node);
-				if (NewNode != null) NewNodes.Add((AstNodeStm)NewNode);
-			}
-			this.Nodes = NewNodes.ToArray();
+			Transformer.Ref(ref Nodes);
 		}
 	}
 }

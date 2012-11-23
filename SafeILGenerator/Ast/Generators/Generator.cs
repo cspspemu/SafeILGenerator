@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace SafeILGenerator.Ast.Generators
 {
-	public abstract class Generator
+	public abstract class Generator<TGenerator>
 	{
 		private Dictionary<Type, MethodInfo> GenerateMappings = new Dictionary<Type, MethodInfo>();
 
@@ -27,11 +27,21 @@ namespace SafeILGenerator.Ast.Generators
 			}
 		}
 
+		public virtual void Reset()
+		{
+		}
+
 		/// <summary>
 		/// Determine dinamically which method to call.
 		/// </summary>
 		/// <param name="AstNode"></param>
-		public void Generate(AstNode AstNode)
+		public TGenerator Generate(AstNode AstNode)
+		{
+			GenerateInternal(AstNode);
+			return (TGenerator)(object)this;
+		}
+
+		protected virtual void GenerateInternal(AstNode AstNode)
 		{
 			//if (AstNode == null) return;
 
@@ -42,7 +52,7 @@ namespace SafeILGenerator.Ast.Generators
 				{
 					Console.WriteLine(GenerateMapping);
 				}
-				throw(new NotImplementedException(String.Format("Don't know how to generate {0}", AstNodeType)));
+				throw (new NotImplementedException(String.Format("Don't know how to generate {0}", AstNodeType)));
 			}
 			GenerateMappings[AstNodeType].Invoke(this, new object[] { AstNode });
 		}
