@@ -12,9 +12,10 @@ namespace SafeILGenerator.Ast.Generators
 	{
 		protected StringBuilder Output = new StringBuilder();
 
-		public override void Reset()
+		public override GeneratorCSharp Reset()
 		{
 			Output = new StringBuilder();
+			return this;
 		}
 
 		protected void _Generate(AstNodeExprImm Item)
@@ -44,6 +45,23 @@ namespace SafeILGenerator.Ast.Generators
 			this.Generate(Item.LeftNode);
 			Output.Append(" " + Item.Operator + " ");
 			this.Generate(Item.RightNode);
+			Output.Append(")");
+		}
+
+		protected void _Generate(AstNodeStmExpr Stat)
+		{
+			Generate(Stat.AstNodeExpr);
+			Output.Append(";");
+		}
+
+		protected void _Generate(AstNodeExprTerop Item)
+		{
+			Output.Append("(");
+			this.Generate(Item.Cond);
+			Output.Append(" ? ");
+			this.Generate(Item.True);
+			Output.Append(" : ");
+			this.Generate(Item.False);
 			Output.Append(")");
 		}
 

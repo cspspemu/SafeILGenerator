@@ -29,18 +29,21 @@ namespace SafeILGenerator.Ast.Optimizers
 
 		public AstNode Optimize(AstNode AstNode)
 		{
-			//Console.WriteLine("Optimize.AstNode: {0}", AstNode);
-			AstNode.TransformNodes(Optimize);
-
-			var AstNodeType = AstNode.GetType();
-
-			if (GenerateMappings.ContainsKey(AstNodeType))
+			//if (AstNode != null)
 			{
-				AstNode = (AstNode)GenerateMappings[AstNodeType].Invoke(this, new[] { AstNode });
-			}
-			else
-			{
-				//throw(new NotImplementedException(String.Format("Don't know how to optimize {0}", AstNodeType)));
+				//Console.WriteLine("Optimize.AstNode: {0}", AstNode);
+				AstNode.TransformNodes(Optimize);
+
+				var AstNodeType = AstNode.GetType();
+
+				if (GenerateMappings.ContainsKey(AstNodeType))
+				{
+					AstNode = (AstNode)GenerateMappings[AstNodeType].Invoke(this, new[] { AstNode });
+				}
+				else
+				{
+					//throw(new NotImplementedException(String.Format("Don't know how to optimize {0}", AstNodeType)));
+				}
 			}
 			
 			return AstNode;
@@ -60,7 +63,12 @@ namespace SafeILGenerator.Ast.Optimizers
 			else if (Cast.Expr is AstNodeExprCast)
 			{
 				//Console.WriteLine("Double Cast");
-				return Optimize(new AstNodeExprCast(Cast.CastedType, (Cast.Expr as AstNodeExprCast).Expr));
+				var FirstCast = (Cast.Expr as AstNodeExprCast).CastedType;
+				var SecondCast = Cast.CastedType;
+				if (AstUtils.GetTypeSize(FirstCast) >= AstUtils.GetTypeSize(SecondCast))
+				{
+					return Optimize(new AstNodeExprCast(Cast.CastedType, (Cast.Expr as AstNodeExprCast).Expr));
+				}
 			}
 			// Cast to immediate
 			else if (Cast.Expr is AstNodeExprImm)

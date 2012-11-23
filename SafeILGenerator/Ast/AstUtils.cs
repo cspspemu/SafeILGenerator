@@ -11,6 +11,18 @@ namespace SafeILGenerator.Ast
 {
 	public class AstUtils
 	{
+		static public int GetTypeSize(Type Type)
+		{
+			Type = GetSignedType(Type);
+			if (Type == typeof(sbyte)) return sizeof(sbyte);
+			if (Type == typeof(short)) return sizeof(short);
+			if (Type == typeof(int)) return sizeof(int);
+			if (Type == typeof(long)) return sizeof(long);
+			if (Type == typeof(float)) return sizeof(float);
+			if (Type == typeof(double)) return sizeof(double);
+			throw(new Exception("Invalid type"));
+		}
+
 		static public Type GetSignedType(Type Type)
 		{
 			if (Type == typeof(byte)) return typeof(sbyte);

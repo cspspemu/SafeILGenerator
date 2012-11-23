@@ -45,5 +45,21 @@ namespace SafeILGenerator.Tests.Ast.Optimizers
 			Node = new AstOptimizer().Optimize(Node);
 			Assert.AreEqual("7", new GeneratorCSharp().Generate(Node).ToString());
 		}
+
+		[TestMethod]
+		public void TestCastSignExtend()
+		{
+			var Node = (AstNode)this.Cast<uint>(this.Cast<sbyte>(this.Argument<int>(0, "Arg")));
+			Node = new AstOptimizer().Optimize(Node);
+			Assert.AreEqual("(UInt32)(SByte)Arg", new GeneratorCSharp().Generate(Node).ToString());
+		}
+
+		[TestMethod]
+		public void TestCastSignExtend2()
+		{
+			var Node = (AstNode)this.Cast<sbyte>(this.Cast<uint>(this.Argument<int>(0, "Arg")));
+			Node = new AstOptimizer().Optimize(Node);
+			Assert.AreEqual("(SByte)Arg", new GeneratorCSharp().Generate(Node).ToString());
+		}
 	}
 }

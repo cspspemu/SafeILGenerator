@@ -14,6 +14,7 @@ namespace SafeILGenerator.Ast.Nodes
 
 		public AstNodeStmIfElse(AstNodeExpr Condition, AstNodeStm True, AstNodeStm False = null)
 		{
+			//if (False == null) False = new AstNodeStmEmpty();
 			this.Condition = Condition;
 			this.True = True;
 			this.False  = False;
@@ -22,8 +23,8 @@ namespace SafeILGenerator.Ast.Nodes
 		public override void TransformNodes(TransformNodesDelegate Transformer)
 		{
 			Transformer.Ref(ref Condition);
-			Transformer.Ref(ref True);
-			Transformer.Ref(ref False);
+			if (True != null) Transformer.Ref(ref True);
+			if (False != null) Transformer.Ref(ref False);
 		}
 	}
 }

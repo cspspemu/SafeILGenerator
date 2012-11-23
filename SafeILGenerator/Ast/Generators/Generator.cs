@@ -27,8 +27,9 @@ namespace SafeILGenerator.Ast.Generators
 			}
 		}
 
-		public virtual void Reset()
+		public virtual TGenerator Reset()
 		{
+			return (TGenerator)(object)this;
 		}
 
 		/// <summary>

@@ -81,6 +81,7 @@
     <Compile Include="Ast\Nodes\AstNodeExprFieldAccess.cs" />
     <Compile Include="Ast\Nodes\AstNodeExprLocal.cs" />
     <Compile Include="Ast\Nodes\AstNodeExprLValue.cs" />
+    <Compile Include="Ast\Nodes\AstNodeExprTerop.cs" />
     <Compile Include="Ast\Nodes\AstNodeExprUnop.cs" />
     <Compile Include="Ast\Nodes\AstNodeStm.cs" />
     <Compile Include="Ast\Nodes\AstNodeStmAssign.cs" />

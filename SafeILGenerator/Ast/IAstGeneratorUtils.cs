@@ -65,6 +65,16 @@ namespace SafeILGenerator.Ast
 			return new AstNodeExprBinop(Left, Operator, Right);
 		}
 
+		static public AstNodeExprTerop Ternary(this IAstGenerator IAstGenerator, AstNodeExpr Condition, AstNodeExpr True, AstNodeExpr False)
+		{
+			return new AstNodeExprTerop(Condition, True, False);
+		}
+
+		static public AstNodeStmIfElse IfElse(this IAstGenerator IAstGenerator, AstNodeExpr Condition, AstNodeStm True, AstNodeStm False = null)
+		{
+			return new AstNodeStmIfElse(Condition, True, False);
+		}
+
 		static public AstNodeStmContainer Statements(this IAstGenerator IAstGenerator, params AstNodeStm[] Statements)
 		{
 			return new AstNodeStmContainer(Statements);

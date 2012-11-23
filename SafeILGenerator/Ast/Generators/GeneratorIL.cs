@@ -35,8 +35,9 @@ namespace SafeILGenerator.Ast.Generators
 		private void Emit(OpCode OpCode, MethodInfo Value) { EmitHook(OpCode, Value); ILGenerator.Emit(OpCode, Value); }
 		private void Emit(OpCode OpCode, FieldInfo Value) { EmitHook(OpCode, Value); ILGenerator.Emit(OpCode, Value); }
 		private void Emit(OpCode OpCode, Type Value) { EmitHook(OpCode, Value); ILGenerator.Emit(OpCode, Value); }
+		private void Emit(OpCode OpCode, Label Value) { EmitHook(OpCode, Value); ILGenerator.Emit(OpCode, Value); }
 
-		protected void Generate(AstNodeExprImm Item)
+		protected void _Generate(AstNodeExprImm Item)
 		{
 			var ItemType = Item.Type;
 			var ItemValue = Item.Value;
@@ -65,7 +66,7 @@ namespace SafeILGenerator.Ast.Generators
 			}
 		}
 
-		protected void Generate(AstNodeStmContainer Container)
+		protected void _Generate(AstNodeStmContainer Container)
 		{
 			foreach (var Node in Container.Nodes)
 			{
@@ -73,7 +74,7 @@ namespace SafeILGenerator.Ast.Generators
 			}
 		}
 
-		protected void Generate(AstNodeExprArgument Argument)
+		protected void _Generate(AstNodeExprArgument Argument)
 		{
 			int ArgumentIndex = Argument.AstArgument.Index;
 			switch (ArgumentIndex)
@@ -87,7 +88,7 @@ namespace SafeILGenerator.Ast.Generators
 			
 		}
 
-		protected void Generate(AstNodeExprLocal Local)
+		protected void _Generate(AstNodeExprLocal Local)
 		{
 			var LocalBuilder = Local.AstLocal.LocalBuilder;
 
@@ -101,13 +102,13 @@ namespace SafeILGenerator.Ast.Generators
 			}
 		}
 
-		protected void Generate(AstNodeExprFieldAccess FieldAccess)
+		protected void _Generate(AstNodeExprFieldAccess FieldAccess)
 		{
 			Generate(FieldAccess.Instance);
 			Emit(OpCodes.Ldfld, FieldAccess.Field);
 		}
 
-		protected void Generate(AstNodeStmAssign Assign)
+		protected void _Generate(AstNodeStmAssign Assign)
 		{
 			//Assign.Local.LocalBuilder.LocalIndex
 			var AstNodeExprLocal = (Assign.LValue as AstNodeExprLocal);
@@ -137,14 +138,14 @@ namespace SafeILGenerator.Ast.Generators
 			//Assign.Local
 		}
 
-		protected void Generate(AstNodeStmReturn Return)
+		protected void _Generate(AstNodeStmReturn Return)
 		{
 			if (Return.Expression.Type != MethodInfo.ReturnType) throw(new Exception("Return type mismatch"));
 			Generate(Return.Expression);
 			Emit(OpCodes.Ret);
 		}
 
-		protected void Generate(AstNodeExprCallStatic Call)
+		protected void _Generate(AstNodeExprCallStatic Call)
 		{
 			foreach (var Parameter in Call.Parameters)
 			{
@@ -153,7 +154,7 @@ namespace SafeILGenerator.Ast.Generators
 			Emit(OpCodes.Call, Call.MethodInfo);
 		}
 
-		protected void Generate(AstNodeExprCast Cast)
+		protected void _Generate(AstNodeExprCast Cast)
 		{
 			var CastedType = Cast.CastedType;
 
@@ -180,12 +181,37 @@ namespace SafeILGenerator.Ast.Generators
 			}
 		}
 
-		protected void Generate(AstNodeExprBinop Item)
+		protected void _Generate(AstNodeStmIfElse IfElse)
+		{
+			var AfterIfLabel = ILGenerator.DefineLabel();
+
+			Generate(IfElse.Condition);
+			Emit(OpCodes.Brfalse, AfterIfLabel);
+			Generate(IfElse.True);
+
+			if (IfElse.False != null)
+			{
+				var AfterElseLabel = ILGenerator.DefineLabel();
+				Emit(OpCodes.Br, AfterElseLabel);
+
+				ILGenerator.MarkLabel(AfterIfLabel);
+
+				Generate(IfElse.False);
+
+				ILGenerator.MarkLabel(AfterElseLabel);
+			}
+			else
+			{
+				ILGenerator.MarkLabel(AfterIfLabel);
+			}
+		}
+
+		protected void _Generate(AstNodeExprBinop Item)
 		{
 			var LeftType = Item.LeftNode.Type;
 			var RightType = Item.RightNode.Type;
 
-			if (LeftType != RightType) throw(new Exception("Type mismatch"));
+			if (LeftType != RightType) throw(new Exception(String.Format("BinaryOp Type mismatch ({0}) != ({1})", LeftType, RightType)));
 
 			//Item.GetType().GenericTypeArguments[0]
 			this.Generate(Item.LeftNode);
@@ -198,6 +224,12 @@ namespace SafeILGenerator.Ast.Generators
 				case "*": Emit(AstUtils.IsTypeSigned(LeftType) ? OpCodes.Mul : OpCodes.Mul); break;
 				case "/": Emit(AstUtils.IsTypeSigned(LeftType) ? OpCodes.Div : OpCodes.Div_Un); break;
 				case "%": Emit(AstUtils.IsTypeSigned(LeftType) ? OpCodes.Rem : OpCodes.Rem_Un); break;
+				case "==": Emit(OpCodes.Ceq); break;
+				case "!=": Emit(OpCodes.Ceq); Emit(OpCodes.Ldc_I4_0); Emit(OpCodes.Ceq); break;
+				case "<": Emit(AstUtils.IsTypeSigned(LeftType) ? OpCodes.Clt : OpCodes.Clt_Un); break;
+				case ">": Emit(AstUtils.IsTypeSigned(LeftType) ? OpCodes.Cgt : OpCodes.Cgt_Un); break;
+				case "<=": Emit(AstUtils.IsTypeSigned(LeftType) ? OpCodes.Cgt : OpCodes.Cgt_Un); Emit(OpCodes.Ldc_I4_0); Emit(OpCodes.Ceq); break;
+				case ">=": Emit(AstUtils.IsTypeSigned(LeftType) ? OpCodes.Clt : OpCodes.Clt_Un); Emit(OpCodes.Ldc_I4_0); Emit(OpCodes.Ceq); break;
 				case "&": Emit(OpCodes.And); break;
 				case "|": Emit(OpCodes.Or); break;
 				case "^": Emit(OpCodes.Xor); break;
@@ -207,11 +239,22 @@ namespace SafeILGenerator.Ast.Generators
 			}
 		}
 
-		protected void Generate(AstNodeStmEmpty Empty)
+		protected void _Generate(AstNodeStmExpr Stat)
+		{
+			var ExpressionType = Stat.AstNodeExpr.Type;
+			Generate(Stat.AstNodeExpr);
+
+			if (ExpressionType != typeof(void))
+			{
+				Emit(OpCodes.Pop);
+			}
+		}
+
+		protected void _Generate(AstNodeStmEmpty Empty)
 		{
 		}
 
-		protected void Generate(AstNodeExprUnop Item)
+		protected void _Generate(AstNodeExprUnop Item)
 		{
 			var RightType = Item.RightNode.Type;
 
