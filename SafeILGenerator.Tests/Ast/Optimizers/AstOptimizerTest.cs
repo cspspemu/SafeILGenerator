@@ -61,5 +61,13 @@ namespace SafeILGenerator.Tests.Ast.Optimizers
 			Node = new AstOptimizer().Optimize(Node);
 			Assert.AreEqual("(SByte)Arg", new GeneratorCSharp().Generate(Node).ToString());
 		}
+
+		[TestMethod]
+		public void TestZeroMinusNumber()
+		{
+			var Node = (AstNode)this.Binary(this.Immediate(0), "-", this.Argument<int>(0, "Arg"));
+			Node = new AstOptimizer().Optimize(Node);
+			Assert.AreEqual("(-Arg)", new GeneratorCSharp().Generate(Node).ToString());
+		}
 	}
 }

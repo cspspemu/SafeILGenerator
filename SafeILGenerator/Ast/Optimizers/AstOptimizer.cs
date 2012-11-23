@@ -139,7 +139,7 @@ namespace SafeILGenerator.Ast.Optimizers
 					switch (Operator)
 					{
 						case "+": if (LeftValue == 0) return Binary.RightNode; break;
-						case "-": if (LeftValue == 0) return Binary.RightNode; break;
+						case "-": if (LeftValue == 0) return new AstNodeExprUnop("-", Binary.RightNode); break;
 						case "*":
 							//if (LeftValue == 0) return new AstNodeExprImm(AstUtils.CastType(0, Type));
 							if (LeftValue == 1) return Binary.RightNode;

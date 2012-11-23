@@ -71,7 +71,7 @@ namespace SafeILGenerator.Ast.Generators
 
 		protected void _Generate(AstNodeExprUnop Item)
 		{
-			Output.Append(Item.Operator + "(");
+			Output.Append("(" + Item.Operator);
 			this.Generate(Item.RightNode);
 			Output.Append(")");
 		}
