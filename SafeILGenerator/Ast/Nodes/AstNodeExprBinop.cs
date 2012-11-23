@@ -21,8 +21,8 @@ namespace Codegen.Ast.Nodes
 
 		public override void TransformNodes(TransformNodesDelegate Transformer)
 		{
-			LeftNode = (AstNodeExpr)Transformer(LeftNode);
-			RightNode = (AstNodeExpr)Transformer(RightNode);
+			Transformer.Ref(ref LeftNode);
+			Transformer.Ref(ref RightNode);
 		}
 
 		protected override Type UncachedType

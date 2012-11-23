@@ -15,5 +15,34 @@ namespace Codegen.Tests.Ast.Generators
 			GeneratorCSharp.Generate(new AstNodeExprBinop(new AstNodeExprImm(3), "+", new AstNodeExprImm(5)));
 			Assert.AreEqual("(3 + 5)", GeneratorCSharp.ToString());
 		}
+
+		[TestMethod]
+		public void TestAstIf()
+		{
+			var GeneratorCSharp = new GeneratorCSharp();
+			GeneratorCSharp.Generate(new AstNodeStmIfElse(new AstNodeExprImm(true), new AstNodeStmReturn(), new AstNodeStmReturn()));
+			Assert.AreEqual("if (true) return; else return;", GeneratorCSharp.ToString());
+		}
+
+		[TestMethod]
+		public void TestSimpleCall()
+		{
+			var Generator = new GeneratorCSharp();
+			Generator.Generate(
+				new AstNodeStmReturn(
+					new AstNodeExprCallStatic(
+						(Func<int, int>)GetTestValue,
+						new AstNodeExprImm(10)
+					)
+				)
+			);
+
+			Assert.AreEqual("return GeneratorCSharpTest.GetTestValue(10);", Generator.ToString());
+		}
+
+		static public int GetTestValue(int Value)
+		{
+			return 333 * Value;
+		}
 	}
 }

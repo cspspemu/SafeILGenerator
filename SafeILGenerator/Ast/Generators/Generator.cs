@@ -33,6 +33,8 @@ namespace Codegen.Ast.Generators
 		/// <param name="AstNode"></param>
 		public void Generate(AstNode AstNode)
 		{
+			//if (AstNode == null) return;
+
 			var AstNodeType = AstNode.GetType();
 			if (!GenerateMappings.ContainsKey(AstNodeType))
 			{
@@ -40,7 +42,7 @@ namespace Codegen.Ast.Generators
 				{
 					Console.WriteLine(GenerateMapping);
 				}
-				throw(new Exception(String.Format("Don't know how to generate {0}", AstNodeType)));
+				throw(new NotImplementedException(String.Format("Don't know how to generate {0}", AstNodeType)));
 			}
 			GenerateMappings[AstNodeType].Invoke(this, new object[] { AstNode });
 		}

@@ -8,11 +8,16 @@ namespace Codegen.Ast.Nodes
 {
 	public class AstNodeStmContainer : AstNode
 	{
-		public List<AstNodeStm> Nodes;
+		public AstNodeStm[] Nodes;
+
+		public AstNodeStmContainer(params AstNodeStm[] Nodes)
+		{
+			this.Nodes = Nodes;
+		}
 
 		public AstNodeStmContainer(IEnumerable<AstNodeStm> Nodes)
 		{
-			this.Nodes = Nodes.ToList();
+			this.Nodes = Nodes.ToArray();
 		}
 
 		public override void TransformNodes(TransformNodesDelegate Transformer)
@@ -23,7 +28,7 @@ namespace Codegen.Ast.Nodes
 				var NewNode = Transformer(Node);
 				if (NewNode != null) NewNodes.Add((AstNodeStm)NewNode);
 			}
-			this.Nodes = NewNodes;
+			this.Nodes = NewNodes.ToArray();
 		}
 	}
 }

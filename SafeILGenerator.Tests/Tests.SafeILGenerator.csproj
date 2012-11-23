@@ -47,6 +47,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Ast\Generators\GeneratorCSharpTest.cs" />
+    <Compile Include="Ast\Generators\GeneratorILTest.cs" />
     <Compile Include="SafeILGeneratorTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
