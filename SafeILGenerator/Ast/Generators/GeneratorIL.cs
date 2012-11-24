@@ -1,4 +1,7 @@
-﻿using SafeILGenerator.Ast;
+﻿//#define DEBUG_GENERATOR_IL
+//#define DO_NOT_EMIT
+
+using SafeILGenerator.Ast;
 using SafeILGenerator.Ast.Nodes;
 using SafeILGenerator.Ast.Generators;
 using System;
@@ -24,11 +27,15 @@ namespace SafeILGenerator.Ast.Generators
 
 		private void EmitHook(OpCode OpCode, object Param)
 		{
-#if DEBUG_GENERATOR_IL
+#if DEBUG_GENERATOR_IL || DO_NOT_EMIT
 			Console.WriteLine("{0} {1}", OpCode, Param);
 #endif
 		}
 
+#if DO_NOT_EMIT
+		private void Emit(OpCode OpCode) { EmitHook(OpCode, null); }
+		private void Emit(OpCode OpCode, object Value) { EmitHook(OpCode, Value); }
+#else
 		private void Emit(OpCode OpCode) { EmitHook(OpCode, null); ILGenerator.Emit(OpCode); }
 		private void Emit(OpCode OpCode, int Value) { EmitHook(OpCode, Value); ILGenerator.Emit(OpCode, Value); }
 		private void Emit(OpCode OpCode, LocalBuilder Value) { EmitHook(OpCode, Value); ILGenerator.Emit(OpCode, Value); }
@@ -36,15 +43,21 @@ namespace SafeILGenerator.Ast.Generators
 		private void Emit(OpCode OpCode, FieldInfo Value) { EmitHook(OpCode, Value); ILGenerator.Emit(OpCode, Value); }
 		private void Emit(OpCode OpCode, Type Value) { EmitHook(OpCode, Value); ILGenerator.Emit(OpCode, Value); }
 		private void Emit(OpCode OpCode, Label Value) { EmitHook(OpCode, Value); ILGenerator.Emit(OpCode, Value); }
+#endif
 
 		protected void _Generate(AstNodeExprImm Item)
 		{
-			var ItemType = Item.Type;
+			var ItemType = AstUtils.GetSignedType(Item.Type);
 			var ItemValue = Item.Value;
 
-			if (ItemType == typeof(int) || ItemType == typeof(uint))
+			if (
+				ItemType == typeof(int)
+				|| ItemType == typeof(sbyte)
+				|| ItemType == typeof(short)
+				|| ItemType == typeof(bool)
+			)
 			{
-				var Value = (ItemType == typeof(int)) ? (int)ItemValue : (int)(uint)ItemValue;
+				var Value = (int)Convert.ToInt64(ItemValue);
 				switch (Value)
 				{
 					case -1: Emit(OpCodes.Ldc_I4_M1); break;
@@ -108,12 +121,51 @@ namespace SafeILGenerator.Ast.Generators
 			Emit(OpCodes.Ldfld, FieldAccess.Field);
 		}
 
+		protected void _Generate(AstNodeExprIndirect Indirect)
+		{
+			Generate(Indirect.PointerExpression);
+			var PointerType = Indirect.PointerExpression.Type.GetElementType();
+
+			if (false) { }
+
+			else if (PointerType == typeof(byte)) Emit(OpCodes.Ldind_U1);
+			else if (PointerType == typeof(ushort)) Emit(OpCodes.Ldind_U2);
+			else if (PointerType == typeof(uint)) Emit(OpCodes.Ldind_U4);
+			else if (PointerType == typeof(ulong)) Emit(OpCodes.Ldind_I8);
+
+			else if (PointerType == typeof(sbyte)) Emit(OpCodes.Ldind_I1);
+			else if (PointerType == typeof(short)) Emit(OpCodes.Ldind_I2);
+			else if (PointerType == typeof(int)) Emit(OpCodes.Ldind_I4);
+			else if (PointerType == typeof(long)) Emit(OpCodes.Ldind_I8);
+
+			else if (PointerType == typeof(float)) Emit(OpCodes.Ldind_R4);
+			else if (PointerType == typeof(double)) Emit(OpCodes.Ldind_R8);
+
+			else throw (new NotImplementedException("Can't load indirect value"));
+		}
+
+		protected void _Generate(AstNodeExprGetAddress GetAddress)
+		{
+			var AstNodeExprFieldAccess = (GetAddress.Expression as AstNodeExprFieldAccess);
+
+			if (AstNodeExprFieldAccess != null)
+			{
+				Generate(AstNodeExprFieldAccess.Instance);
+				Emit(OpCodes.Ldflda, AstNodeExprFieldAccess.Field);
+			}
+			else
+			{
+				throw(new NotImplementedException());
+			}
+		}
+
 		protected void _Generate(AstNodeStmAssign Assign)
 		{
 			//Assign.Local.LocalBuilder.LocalIndex
 			var AstNodeExprLocal = (Assign.LValue as AstNodeExprLocal);
 			var AstNodeExprArgument = (Assign.LValue as AstNodeExprArgument);
 			var AstNodeExprFieldAccess = (Assign.LValue as AstNodeExprFieldAccess);
+			var AstNodeExprIndirect = (Assign.LValue as AstNodeExprIndirect);
 
 			if (AstNodeExprLocal != null)
 			{
@@ -130,6 +182,21 @@ namespace SafeILGenerator.Ast.Generators
 				Generate(AstNodeExprFieldAccess.Instance);
 				Generate(Assign.Value);
 				Emit(OpCodes.Stfld, AstNodeExprFieldAccess.Field);
+			}
+			else if (AstNodeExprIndirect != null)
+			{
+				var PointerType = AstUtils.GetSignedType(AstNodeExprIndirect.PointerExpression.Type.GetElementType());
+
+				Generate(AstNodeExprIndirect.PointerExpression);
+				Generate(Assign.Value);
+
+				if (PointerType == typeof(sbyte)) Emit(OpCodes.Stind_I1);
+				else if (PointerType == typeof(short)) Emit(OpCodes.Stind_I2);
+				else if (PointerType == typeof(int)) Emit(OpCodes.Stind_I4);
+				else if (PointerType == typeof(long)) Emit(OpCodes.Stind_I8);
+				else if (PointerType == typeof(float)) Emit(OpCodes.Stind_R4);
+				else if (PointerType == typeof(double)) Emit(OpCodes.Stind_R8);
+				else throw (new NotImplementedException("Can't store indirect value"));
 			}
 			else
 			{
@@ -160,24 +227,27 @@ namespace SafeILGenerator.Ast.Generators
 
 			Generate(Cast.Expr);
 
-			if (false) { }
-			
-			else if (CastedType == typeof(sbyte)) Emit(OpCodes.Conv_I1);
-			else if (CastedType == typeof(short)) Emit(OpCodes.Conv_I2);
-			else if (CastedType == typeof(int)) Emit(OpCodes.Conv_I4);
-			else if (CastedType == typeof(long)) Emit(OpCodes.Conv_I8);
-
-			else if (CastedType == typeof(byte)) Emit(OpCodes.Conv_U1);
-			else if (CastedType == typeof(ushort)) Emit(OpCodes.Conv_U2);
-			else if (CastedType == typeof(uint)) Emit(OpCodes.Conv_U4);
-			else if (CastedType == typeof(ulong)) Emit(OpCodes.Conv_U8);
-
-			else if (CastedType == typeof(float)) Emit(OpCodes.Conv_R4);
-			else if (CastedType == typeof(double)) Emit(OpCodes.Conv_R8);
-
-			else
+			if (Cast.Explicit)
 			{
-				Emit(OpCodes.Castclass, CastedType);
+				if (false) { }
+
+				else if (CastedType == typeof(sbyte)) Emit(OpCodes.Conv_I1);
+				else if (CastedType == typeof(short)) Emit(OpCodes.Conv_I2);
+				else if (CastedType == typeof(int)) Emit(OpCodes.Conv_I4);
+				else if (CastedType == typeof(long)) Emit(OpCodes.Conv_I8);
+
+				else if (CastedType == typeof(byte)) Emit(OpCodes.Conv_U1);
+				else if (CastedType == typeof(ushort)) Emit(OpCodes.Conv_U2);
+				else if (CastedType == typeof(uint)) Emit(OpCodes.Conv_U4);
+				else if (CastedType == typeof(ulong)) Emit(OpCodes.Conv_U8);
+
+				else if (CastedType == typeof(float)) Emit(OpCodes.Conv_R4);
+				else if (CastedType == typeof(double)) Emit(OpCodes.Conv_R8);
+
+				else
+				{
+					Emit(OpCodes.Castclass, CastedType);
+				}
 			}
 		}
 

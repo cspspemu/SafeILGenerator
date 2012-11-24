@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SafeILGenerator.Ast.Nodes
 {
-	public class AstNodeStmContainer : AstNode
+	public class AstNodeStmContainer : AstNodeStm
 	{
 		public AstNodeStm[] Nodes;
 

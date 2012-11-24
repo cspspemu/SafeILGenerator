@@ -53,7 +53,7 @@ namespace SafeILGenerator.Ast.Generators
 				{
 					Console.WriteLine(GenerateMapping);
 				}
-				throw (new NotImplementedException(String.Format("Don't know how to generate {0}", AstNodeType)));
+				throw (new NotImplementedException(String.Format("Don't know how to generate {0} for {1}", AstNodeType, this.GetType())));
 			}
 			GenerateMappings[AstNodeType].Invoke(this, new object[] { AstNode });
 		}

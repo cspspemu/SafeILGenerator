@@ -10,11 +10,13 @@ namespace SafeILGenerator.Ast.Nodes
 	{
 		public Type CastedType;
 		public AstNodeExpr Expr;
+		public bool Explicit = true;
 
-		public AstNodeExprCast(Type CastedType, AstNodeExpr Expr)
+		public AstNodeExprCast(Type CastedType, AstNodeExpr Expr, bool Explicit = true)
 		{
 			this.CastedType = CastedType;
 			this.Expr = Expr;
+			this.Explicit = Explicit;
 		}
 
 		protected override Type UncachedType

@@ -79,6 +79,8 @@
     <Compile Include="Ast\Nodes\AstNodeExprCallTail.cs" />
     <Compile Include="Ast\Nodes\AstNodeExprCast.cs" />
     <Compile Include="Ast\Nodes\AstNodeExprFieldAccess.cs" />
+    <Compile Include="Ast\Nodes\AstNodeExprGetAddress.cs" />
+    <Compile Include="Ast\Nodes\AstNodeExprIndirect.cs" />
     <Compile Include="Ast\Nodes\AstNodeExprLocal.cs" />
     <Compile Include="Ast\Nodes\AstNodeExprLValue.cs" />
     <Compile Include="Ast\Nodes\AstNodeExprTerop.cs" />

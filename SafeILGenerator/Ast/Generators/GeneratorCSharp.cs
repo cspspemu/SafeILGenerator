@@ -108,6 +108,19 @@ namespace SafeILGenerator.Ast.Generators
 			Output.Append(";");
 		}
 
+		protected void _Generate(AstNodeExprIndirect Assign)
+		{
+			Output.Append("*(");
+			Generate(Assign.PointerExpression);
+			Output.Append(")");
+		}
+
+		protected void _Generate(AstNodeExprGetAddress GetAddress)
+		{
+			Output.Append("&");
+			Generate(GetAddress.Expression);
+		}
+
 		protected void _Generate(AstNodeExprFieldAccess FieldAccess)
 		{
 			Generate(FieldAccess.Instance);

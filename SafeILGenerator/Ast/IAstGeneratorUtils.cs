@@ -95,9 +95,24 @@ namespace SafeILGenerator.Ast
 			return new AstNodeStmAssign(Left, Expr);
 		}
 
-		static public AstNodeExprCast Cast<T>(this IAstGenerator IAstGenerator, AstNodeExpr Expr)
+		static public AstNodeExprCast Cast(this IAstGenerator IAstGenerator, Type Type, AstNodeExpr Expr, bool Explicit = true)
 		{
-			return new AstNodeExprCast(typeof(T), Expr);
+			return new AstNodeExprCast(Type, Expr, Explicit);
+		}
+
+		static public AstNodeExprCast Cast<T>(this IAstGenerator IAstGenerator, AstNodeExpr Expr, bool Explicit = true)
+		{
+			return IAstGenerator.Cast(typeof(T), Expr, Explicit);
+		}
+
+		static public AstNodeExprGetAddress GetAddress(this IAstGenerator IAstGenerator, AstNodeExprLValue Expr)
+		{
+			return new AstNodeExprGetAddress(Expr);
+		}
+
+		static public AstNodeExprIndirect Indirect(this IAstGenerator IAstGenerator, AstNodeExpr PointerExpr)
+		{
+			return new AstNodeExprIndirect(PointerExpr);
 		}
 	}
 }

@@ -17,6 +17,7 @@ namespace SafeILGenerator.Ast.Nodes
 			this.LeftNode = LeftNode;
 			this.Operator = Operator;
 			this.RightNode = RightNode;
+			if (LeftNode.Type != RightNode.Type) throw (new Exception(String.Format("Left.Type({0}) != Right.Type({1}) Operator: {2}", LeftNode.Type, RightNode.Type, Operator)));
 		}
 
 		public override void TransformNodes(TransformNodesDelegate Transformer)
@@ -25,12 +26,19 @@ namespace SafeILGenerator.Ast.Nodes
 			Transformer.Ref(ref RightNode);
 		}
 
+		public Type CommonType
+		{
+			get
+			{
+				return LeftNode.Type;
+			}
+		}
+
 		protected override Type UncachedType
 		{
 			get
 			{
-				if (LeftNode.Type != RightNode.Type) throw(new Exception("Left.Type != Right.Type"));
-				return LeftNode.Type;
+				return CommonType;
 			}
 		}
 	}
