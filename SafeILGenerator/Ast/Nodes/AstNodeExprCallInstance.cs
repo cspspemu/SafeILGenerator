@@ -9,7 +9,7 @@ namespace SafeILGenerator.Ast.Nodes
 {
 	public class AstNodeExprCallInstance : AstNodeExprCall
 	{
-		public AstNodeExpr Object;
+		public AstNodeExpr Instance;
 
 		public AstNodeExprCallInstance(AstNodeExpr Object, Delegate Delegate, params AstNodeExpr[] Parameters)
 			: this(Object, Delegate.Method, Parameters)
@@ -20,12 +20,12 @@ namespace SafeILGenerator.Ast.Nodes
 		public AstNodeExprCallInstance(AstNodeExpr Object, MethodInfo MethodInfo, params AstNodeExpr[] Parameters)
 			: base(MethodInfo, Parameters)
 		{
-			this.Object = Object;
+			this.Instance = Object;
 		}
 
 		public override void TransformNodes(TransformNodesDelegate Transformer)
 		{
-			Transformer.Ref(ref Object);
+			Transformer.Ref(ref Instance);
 			base.TransformNodes(Transformer);
 		}
 	}

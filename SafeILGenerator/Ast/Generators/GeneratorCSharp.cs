@@ -151,6 +151,19 @@ namespace SafeILGenerator.Ast.Generators
 			Output.Append(")");
 		}
 
+		protected void _Generate(AstNodeExprCallInstance Call)
+		{
+			Generate(Call.Instance);
+			Output.Append("." + Call.MethodInfo.Name);
+			Output.Append("(");
+			for (int n = 0; n < Call.Parameters.Length; n++)
+			{
+				if (n != 0) Output.Append(", ");
+				Generate(Call.Parameters[n]);
+			}
+			Output.Append(")");
+		}
+
 		protected void _Generate(AstNodeStmContainer Container)
 		{
 			Output.Append("{\n");

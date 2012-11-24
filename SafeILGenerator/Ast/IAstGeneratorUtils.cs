@@ -55,6 +55,11 @@ namespace SafeILGenerator.Ast
 			return new AstNodeExprCallStatic(Delegate, Parameters);
 		}
 
+		static public AstNodeExprCallInstance CallInstance(this IAstGenerator IAstGenerator, AstNodeExpr Instance, Delegate Delegate, params AstNodeExpr[] Parameters)
+		{
+			return new AstNodeExprCallInstance(Instance, Delegate, Parameters);
+		}
+
 		static public AstNodeExprUnop Unary(this IAstGenerator IAstGenerator, string Operator, AstNodeExpr Right)
 		{
 			return new AstNodeExprUnop(Operator, Right);

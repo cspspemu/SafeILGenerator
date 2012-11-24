@@ -221,6 +221,16 @@ namespace SafeILGenerator.Ast.Generators
 			Emit(OpCodes.Call, Call.MethodInfo);
 		}
 
+		protected void _Generate(AstNodeExprCallInstance Call)
+		{
+			Generate(Call.Instance);
+			foreach (var Parameter in Call.Parameters)
+			{
+				Generate(Parameter);
+			}
+			Emit(OpCodes.Call, Call.MethodInfo);
+		}
+
 		protected void _Generate(AstNodeExprCast Cast)
 		{
 			var CastedType = Cast.CastedType;
