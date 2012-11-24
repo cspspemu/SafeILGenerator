@@ -9,6 +9,11 @@ namespace SafeILGenerator.Ast.Nodes
 {
 	public abstract class AstNodeExprCall : AstNodeExpr
 	{
+		public bool IsTail { get {
+			if (Parent == null) return false;
+			//return Parent.GetType() == typeof(AstNodeExprCallTail);
+			return Parent is AstNodeExprCallTail;
+		} }
 		public MethodInfo MethodInfo;
 		public AstNodeExpr[] Parameters;
 

@@ -207,27 +207,32 @@ namespace SafeILGenerator.Ast.Generators
 
 		protected void _Generate(AstNodeStmReturn Return)
 		{
-			if (Return.Expression.Type != MethodInfo.ReturnType) throw(new Exception("Return type mismatch"));
-			Generate(Return.Expression);
+			var ExpressionType = (Return.Expression != null) ? Return.Expression.Type : typeof(void);
+
+			if (ExpressionType != MethodInfo.ReturnType) throw (new Exception("Return type mismatch"));
+
+			if (Return.Expression != null) Generate(Return.Expression);
+			Emit(OpCodes.Ret);
+		}
+
+		protected void _Generate(AstNodeExprCallTail Call)
+		{
+			Generate(Call.Call);
 			Emit(OpCodes.Ret);
 		}
 
 		protected void _Generate(AstNodeExprCallStatic Call)
 		{
-			foreach (var Parameter in Call.Parameters)
-			{
-				Generate(Parameter);
-			}
+			foreach (var Parameter in Call.Parameters) Generate(Parameter);
+			if (Call.IsTail) Emit(OpCodes.Tailcall);
 			Emit(OpCodes.Call, Call.MethodInfo);
 		}
 
 		protected void _Generate(AstNodeExprCallInstance Call)
 		{
 			Generate(Call.Instance);
-			foreach (var Parameter in Call.Parameters)
-			{
-				Generate(Parameter);
-			}
+			foreach (var Parameter in Call.Parameters) Generate(Parameter);
+			if (Call.IsTail) Emit(OpCodes.Tailcall);
 			Emit(OpCodes.Call, Call.MethodInfo);
 		}
 
@@ -344,7 +349,8 @@ namespace SafeILGenerator.Ast.Generators
 			{
 				case "~": Emit(OpCodes.Not); break;
 				case "-": Emit(OpCodes.Neg); break;
-				default: throw (new NotImplementedException(String.Format("Not implemented operator '{0}'", Item.Operator)));
+				case "!": Emit(OpCodes.Ldc_I4_0); Emit(OpCodes.Ceq); break;
+				default: throw(new NotImplementedException(String.Format("Not implemented operator '{0}'", Item.Operator)));
 			}
 		}
 	}

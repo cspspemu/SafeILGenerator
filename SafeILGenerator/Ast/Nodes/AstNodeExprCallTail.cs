@@ -8,11 +8,12 @@ namespace SafeILGenerator.Ast.Nodes
 {
 	public class AstNodeExprCallTail : AstNodeExpr
 	{
-		AstNodeExprCall Call;
+		public AstNodeExprCall Call;
 
 		public AstNodeExprCallTail(AstNodeExprCall Call)
 		{
 			this.Call = Call;
+			Call.Parent = this;
 		}
 
 		protected override Type UncachedType

@@ -139,6 +139,13 @@ namespace SafeILGenerator.Ast.Generators
 			Generate(Cast.Expr);
 		}
 
+		protected void _Generate(AstNodeExprCallTail Tail)
+		{
+			Output.Append("__tail_call(");
+			Generate(Tail.Call);
+			Output.Append(")");
+		}
+
 		protected void _Generate(AstNodeExprCallStatic Call)
 		{
 			Output.Append(Call.MethodInfo.DeclaringType.Name + "." + Call.MethodInfo.Name);

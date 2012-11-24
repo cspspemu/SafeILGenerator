@@ -30,6 +30,7 @@ namespace SafeILGenerator.Ast.Nodes
 
 	public abstract class AstNode
 	{
+		public AstNode Parent;
 		public abstract void TransformNodes(TransformNodesDelegate Transformer);
 	}
 }

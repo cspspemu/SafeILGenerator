@@ -17,7 +17,10 @@ namespace SafeILGenerator.Ast.Nodes
 
 		public override void TransformNodes(TransformNodesDelegate Transformer)
 		{
-			Transformer.Ref(ref Expression);
+			if (Expression != null)
+			{
+				Transformer.Ref(ref Expression);
+			}
 		}
 	}
 }

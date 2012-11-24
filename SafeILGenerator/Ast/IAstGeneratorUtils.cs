@@ -50,6 +50,11 @@ namespace SafeILGenerator.Ast
 			return new AstNodeExprImm(Value);
 		}
 
+		static public AstNodeExprCallTail CallTail(this IAstGenerator IAstGenerator, AstNodeExprCall Call)
+		{
+			return new AstNodeExprCallTail(Call);
+		}
+
 		static public AstNodeExprCallStatic CallStatic(this IAstGenerator IAstGenerator, Delegate Delegate, params AstNodeExpr[] Parameters)
 		{
 			return new AstNodeExprCallStatic(Delegate, Parameters);
@@ -83,6 +88,11 @@ namespace SafeILGenerator.Ast
 		static public AstNodeStmContainer Statements(this IAstGenerator IAstGenerator, params AstNodeStm[] Statements)
 		{
 			return new AstNodeStmContainer(Statements);
+		}
+
+		static public AstNodeStmEmpty Statement(this IAstGenerator IAstGenerator)
+		{
+			return new AstNodeStmEmpty();
 		}
 
 		static public AstNodeStmExpr Statement(this IAstGenerator IAstGenerator, AstNodeExpr Expr)
