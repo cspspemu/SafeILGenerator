@@ -28,6 +28,10 @@ namespace SafeILGenerator.Ast.Generators
 			{
 				StringValue = StringValue.ToLower();
 			}
+			else if (Item.Value is IntPtr)
+			{
+				StringValue = String.Format("0x{0:X}", ((IntPtr)Item.Value).ToInt64());
+			}
 			else if (!AstUtils.IsTypeSigned(ItemType))
 			{
 				//StringValue = String.Format("0x{0:X8}", ItemValue);

@@ -38,6 +38,7 @@ namespace SafeILGenerator.Ast.Generators
 #else
 		private void Emit(OpCode OpCode) { EmitHook(OpCode, null); ILGenerator.Emit(OpCode); }
 		private void Emit(OpCode OpCode, int Value) { EmitHook(OpCode, Value); ILGenerator.Emit(OpCode, Value); }
+		private void Emit(OpCode OpCode, long Value) { EmitHook(OpCode, Value); ILGenerator.Emit(OpCode, Value); }
 		private void Emit(OpCode OpCode, LocalBuilder Value) { EmitHook(OpCode, Value); ILGenerator.Emit(OpCode, Value); }
 		private void Emit(OpCode OpCode, MethodInfo Value) { EmitHook(OpCode, Value); ILGenerator.Emit(OpCode, Value); }
 		private void Emit(OpCode OpCode, FieldInfo Value) { EmitHook(OpCode, Value); ILGenerator.Emit(OpCode, Value); }
@@ -72,6 +73,24 @@ namespace SafeILGenerator.Ast.Generators
 					case 8: Emit(OpCodes.Ldc_I4_8); break;
 					default: Emit(OpCodes.Ldc_I4, Value); break;
 				}
+			}
+			else if (ItemType == typeof(IntPtr))
+			{
+#if false
+				Emit(OpCodes.Ldc_I8, ((IntPtr)Item.Value).ToInt64());
+				Emit(OpCodes.Conv_I);
+#else
+				if (Environment.Is64BitProcess)
+				{
+					Emit(OpCodes.Ldc_I8, ((IntPtr)Item.Value).ToInt64());
+					Emit(OpCodes.Conv_I);
+				}
+				else
+				{
+					Emit(OpCodes.Ldc_I4, ((IntPtr)Item.Value).ToInt32());
+					Emit(OpCodes.Conv_I);
+				}
+#endif
 			}
 			else
 			{
@@ -259,9 +278,12 @@ namespace SafeILGenerator.Ast.Generators
 				else if (CastedType == typeof(float)) Emit(OpCodes.Conv_R4);
 				else if (CastedType == typeof(double)) Emit(OpCodes.Conv_R8);
 
+				else if (CastedType.IsPointer) Emit(OpCodes.Conv_I);
+
 				else
 				{
-					Emit(OpCodes.Castclass, CastedType);
+					//Emit(OpCodes.Castclass, CastedType);
+					throw(new NotImplementedException("Not implemented cast class"));
 				}
 			}
 		}
@@ -296,7 +318,7 @@ namespace SafeILGenerator.Ast.Generators
 			var LeftType = Item.LeftNode.Type;
 			var RightType = Item.RightNode.Type;
 
-			if (LeftType != RightType) throw(new Exception(String.Format("BinaryOp Type mismatch ({0}) != ({1})", LeftType, RightType)));
+			//if (LeftType != RightType) throw(new Exception(String.Format("BinaryOp Type mismatch ({0}) != ({1})", LeftType, RightType)));
 
 			//Item.GetType().GenericTypeArguments[0]
 			this.Generate(Item.LeftNode);

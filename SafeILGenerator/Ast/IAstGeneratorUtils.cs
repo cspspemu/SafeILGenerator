@@ -10,9 +10,14 @@ namespace SafeILGenerator.Ast
 {
 	static public class IAstGeneratorUtils
 	{
+		static public AstNodeExprArgument Argument(this IAstGenerator IAstGenerator, Type Type, int Index, string Name = null)
+		{
+			return new AstNodeExprArgument(new AstArgument(Index, Type, Name));
+		}
+
 		static public AstNodeExprArgument Argument<T>(this IAstGenerator IAstGenerator, int Index, string Name = null)
 		{
-			return new AstNodeExprArgument(new AstArgument(Index, typeof(T), Name));
+			return IAstGenerator.Argument(typeof(T), Index, Name);
 		}
 
 		static public AstNodeExprArgument Argument(this IAstGenerator IAstGenerator, AstArgument AstArgument)

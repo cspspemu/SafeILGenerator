@@ -10,7 +10,7 @@ using SafeILGenerator.Ast;
 namespace SafeILGenerator.Tests.Ast.Generators
 {
 	[TestClass]
-	public class GeneratorILTest : IAstGenerator
+	public unsafe class GeneratorILTest : IAstGenerator
 	{
 		static public TDelegate GenerateDynamicMethod<TDelegate>(string MethodName, Action<DynamicMethod, ILGenerator> Generator, bool CheckTypes = true, bool DoDebug = false, bool DoLog = false)
 		{
@@ -108,6 +108,35 @@ namespace SafeILGenerator.Tests.Ast.Generators
 			});
 
 			Assert.AreEqual(456, Func(new TestClass()));
+		}
+
+		delegate void ActionPointer(void* Pointer);
+
+		[TestMethod]
+		public void TestPointerWrite()
+		{
+			var Func = GenerateDynamicMethod<ActionPointer>("Test", (DynamicMethod, ILGenerator) =>
+			{
+				var AstNode = this.Statements(
+					this.Assign(
+					this.Indirect(this.Cast(typeof(int*), this.Argument(typeof(int*), 0, "Ptr"))),
+						this.Immediate(456)
+					),
+					this.Return()
+				);
+
+				Console.WriteLine(new GeneratorCSharp().Generate((AstNode)AstNode).ToString());
+
+				new GeneratorIL(DynamicMethod, ILGenerator).Generate(AstNode);
+			});
+
+			var Data = new int[1];
+			fixed (int* DataPtr = Data)
+			{
+				Func(DataPtr);
+			}
+
+			Assert.AreEqual(456, Data[0]);
 		}
 
 		public class TestClass

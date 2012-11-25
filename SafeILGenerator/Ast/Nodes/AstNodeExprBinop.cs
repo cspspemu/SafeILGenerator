@@ -17,7 +17,24 @@ namespace SafeILGenerator.Ast.Nodes
 			this.LeftNode = LeftNode;
 			this.Operator = Operator;
 			this.RightNode = RightNode;
-			if (LeftNode.Type != RightNode.Type) throw (new Exception(String.Format("Left.Type({0}) != Right.Type({1}) Operator: {2}", LeftNode.Type, RightNode.Type, Operator)));
+			CheckCompatibleTypes();
+		}
+
+		private void CheckCompatibleTypes()
+		{
+			bool Compatible = true;
+
+			if (AstUtils.GetTypeSize(LeftNode.Type) < AstUtils.GetTypeSize(RightNode.Type))
+			{
+				Compatible = false;
+			}
+
+			if (OperatorRequireBoolOperands(Operator) && (LeftNode.Type != typeof(bool)) && (RightNode.Type != typeof(bool)))
+			{
+				Compatible = false;
+			}
+
+			if (!Compatible) throw (new Exception(String.Format("Left.Type({0}) Right.Type({1}) are not compatibles Operator: {2}", LeftNode.Type, RightNode.Type, Operator)));
 		}
 
 		public override void TransformNodes(TransformNodesDelegate Transformer)
@@ -26,10 +43,41 @@ namespace SafeILGenerator.Ast.Nodes
 			Transformer.Ref(ref RightNode);
 		}
 
-		public Type CommonType
+		static public bool OperatorRequireBoolOperands(string Operator)
+		{
+			switch (Operator)
+			{
+				case "&&":
+				case "||":
+					return true;
+				default:
+					return false;
+			}
+		}
+
+		static public bool OperatorReturnsBool(string Operator)
+		{
+			switch (Operator)
+			{
+				case "==":
+				case "!=":
+				case "<":
+				case "<=":
+				case ">":
+				case ">=":
+				case "&&":
+				case "||":
+					return true;
+				default:
+					return false;
+			}
+		}
+
+		public Type ResultType
 		{
 			get
 			{
+				if (OperatorReturnsBool(Operator)) return typeof(bool);
 				return LeftNode.Type;
 			}
 		}
@@ -38,7 +86,7 @@ namespace SafeILGenerator.Ast.Nodes
 		{
 			get
 			{
-				return CommonType;
+				return ResultType;
 			}
 		}
 	}
