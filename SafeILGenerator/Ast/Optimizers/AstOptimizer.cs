@@ -63,11 +63,14 @@ namespace SafeILGenerator.Ast.Optimizers
 			else if (Cast.Expr is AstNodeExprCast)
 			{
 				//Console.WriteLine("Double Cast");
-				var FirstCast = (Cast.Expr as AstNodeExprCast).CastedType;
-				var SecondCast = Cast.CastedType;
-				if (AstUtils.GetTypeSize(FirstCast) >= AstUtils.GetTypeSize(SecondCast))
+				var FirstCastType = (Cast.Expr as AstNodeExprCast).CastedType;
+				var SecondCastType = Cast.CastedType;
+				if (FirstCastType.IsPrimitive && SecondCastType.IsPrimitive)
 				{
-					return Optimize(new AstNodeExprCast(Cast.CastedType, (Cast.Expr as AstNodeExprCast).Expr));
+					if (AstUtils.GetTypeSize(FirstCastType) >= AstUtils.GetTypeSize(SecondCastType))
+					{
+						return Optimize(new AstNodeExprCast(Cast.CastedType, (Cast.Expr as AstNodeExprCast).Expr));
+					}
 				}
 			}
 			// Cast to immediate

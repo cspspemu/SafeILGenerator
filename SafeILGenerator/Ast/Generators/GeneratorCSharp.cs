@@ -43,6 +43,11 @@ namespace SafeILGenerator.Ast.Generators
 			Output.Append(StringValue);
 		}
 
+		protected void _Generate(AstNodeStmComment Comment)
+		{
+			Output.Append("// " + Comment.CommentText + "\n");
+		}
+
 		protected void _Generate(AstNodeExprBinop Item)
 		{
 			Output.Append("(");

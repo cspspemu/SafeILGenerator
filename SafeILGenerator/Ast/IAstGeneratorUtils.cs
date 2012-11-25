@@ -10,6 +10,11 @@ namespace SafeILGenerator.Ast
 {
 	static public class IAstGeneratorUtils
 	{
+		static public AstNodeStmComment Comment(this IAstGenerator IAstGenerator, string Comment)
+		{
+			return new AstNodeStmComment(Comment);
+		}
+
 		static public AstNodeExprArgument Argument(this IAstGenerator IAstGenerator, Type Type, int Index, string Name = null)
 		{
 			return new AstNodeExprArgument(new AstArgument(Index, Type, Name));
@@ -65,9 +70,19 @@ namespace SafeILGenerator.Ast
 			return new AstNodeExprCallStatic(Delegate, Parameters);
 		}
 
+		static public AstNodeExprCallStatic CallStatic(this IAstGenerator IAstGenerator, MethodInfo MethodInfo, params AstNodeExpr[] Parameters)
+		{
+			return new AstNodeExprCallStatic(MethodInfo, Parameters);
+		}
+
 		static public AstNodeExprCallInstance CallInstance(this IAstGenerator IAstGenerator, AstNodeExpr Instance, Delegate Delegate, params AstNodeExpr[] Parameters)
 		{
 			return new AstNodeExprCallInstance(Instance, Delegate, Parameters);
+		}
+
+		static public AstNodeExprCallInstance CallInstance(this IAstGenerator IAstGenerator, AstNodeExpr Instance, MethodInfo MethodInfo, params AstNodeExpr[] Parameters)
+		{
+			return new AstNodeExprCallInstance(Instance, MethodInfo, Parameters);
 		}
 
 		static public AstNodeExprUnop Unary(this IAstGenerator IAstGenerator, string Operator, AstNodeExpr Right)

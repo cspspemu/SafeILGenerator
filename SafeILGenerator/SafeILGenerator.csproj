@@ -23,6 +23,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -32,6 +33,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Trace|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
@@ -47,6 +49,7 @@
     <CodeAnalysisRuleSetDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\\Rule Sets</CodeAnalysisRuleSetDirectories>
     <CodeAnalysisRuleDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
     <Prefer32Bit>false</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -58,6 +61,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Ast\AstGenerator.cs" />
     <Compile Include="Ast\AstArgument.cs" />
     <Compile Include="Ast\AstFunction.cs" />
     <Compile Include="Ast\IAstGeneratorUtils.cs" />
@@ -87,6 +91,7 @@
     <Compile Include="Ast\Nodes\AstNodeExprUnop.cs" />
     <Compile Include="Ast\Nodes\AstNodeStm.cs" />
     <Compile Include="Ast\Nodes\AstNodeStmAssign.cs" />
+    <Compile Include="Ast\Nodes\AstNodeStmComment.cs" />
     <Compile Include="Ast\Nodes\AstNodeStmContainer.cs" />
     <Compile Include="Ast\Nodes\AstNodeExpr.cs" />
     <Compile Include="Ast\Nodes\AstNodeExprBinop.cs" />

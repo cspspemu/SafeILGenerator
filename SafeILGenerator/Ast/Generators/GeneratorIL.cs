@@ -104,6 +104,11 @@ namespace SafeILGenerator.Ast.Generators
 			}
 		}
 
+		protected void _Generate(AstNodeStmComment Comment)
+		{
+			// Do nothing
+		}
+
 		protected void _Generate(AstNodeStmContainer Container)
 		{
 			foreach (var Node in Container.Nodes)
@@ -286,10 +291,15 @@ namespace SafeILGenerator.Ast.Generators
 
 				else if (CastedType.IsPointer) Emit(OpCodes.Conv_I);
 
+				else if (CastedType.IsPrimitive)
+				{
+					throw (new NotImplementedException("Not implemented cast other primitives"));
+				}
+
 				else
 				{
-					//Emit(OpCodes.Castclass, CastedType);
-					throw(new NotImplementedException("Not implemented cast class"));
+					Emit(OpCodes.Castclass, CastedType);
+					//throw (new NotImplementedException("Not implemented cast class"));
 				}
 			}
 		}

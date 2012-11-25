@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace SafeILGenerator.Ast
 {
-	public class AstUtils
+	public unsafe class AstUtils
 	{
 		static public int GetTypeSize(Type Type)
 		{
@@ -22,8 +22,10 @@ namespace SafeILGenerator.Ast
 			if (Type == typeof(float)) return sizeof(float);
 			if (Type == typeof(double)) return sizeof(double);
 			if (Type == typeof(IntPtr)) return Marshal.SizeOf(typeof(IntPtr));
-			//return Marshal.SizeOf(Type);
-			throw (new Exception("GetTypeSize: Invalid type"));
+			if (Type.IsPointer) return sizeof(void*);
+			Console.Error.WriteLine("Warning. Trying to get size({0}) for: {1}", Marshal.SizeOf(Type), Type);
+			return Marshal.SizeOf(Type);
+			//throw (new Exception("GetTypeSize: Invalid type"));
 		}
 
 		static public Type GetSignedType(Type Type)
