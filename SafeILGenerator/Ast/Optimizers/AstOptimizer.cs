@@ -94,7 +94,7 @@ namespace SafeILGenerator.Ast.Optimizers
 			var RightType = Binary.RightNode.Type;
 			var Operator = Binary.Operator;
 
-			if (LeftType == RightType)
+			if ((LeftType == RightType) && !AstUtils.IsTypeFloat(LeftType))
 			{
 				var Type = LeftType;
 				// Can optimize just literal values.

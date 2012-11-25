@@ -13,12 +13,13 @@ namespace SafeILGenerator.Ast.Nodes
 		public FieldInfo Field;
 
 		public AstNodeExprFieldAccess(AstNodeExpr Instance, string FieldName)
-			: this(Instance, Instance.Type.GetField(FieldName))
+			: this(Instance, Instance.Type.GetField(FieldName), FieldName)
 		{
 		}
 
-		public AstNodeExprFieldAccess(AstNodeExpr Instance, FieldInfo Field)
+		public AstNodeExprFieldAccess(AstNodeExpr Instance, FieldInfo Field, string FieldName = null)
 		{
+			if (Field == null) throw (new Exception(String.Format("Field can't be null '{0}'", FieldName)));
 			this.Instance = Instance;
 			this.Field = Field;
 		}

@@ -44,6 +44,11 @@ namespace SafeILGenerator.Ast
 			return Type;
 		}
 
+		static public bool IsTypeFloat(Type Type)
+		{
+			return (Type == typeof(float)) || (Type == typeof(double));
+		}
+
 		static public bool IsTypeSigned(Type Type)
 		{
 			if (!Type.IsPrimitive) return false;

@@ -39,6 +39,8 @@ namespace SafeILGenerator.Ast.Generators
 		private void Emit(OpCode OpCode) { EmitHook(OpCode, null); ILGenerator.Emit(OpCode); }
 		private void Emit(OpCode OpCode, int Value) { EmitHook(OpCode, Value); ILGenerator.Emit(OpCode, Value); }
 		private void Emit(OpCode OpCode, long Value) { EmitHook(OpCode, Value); ILGenerator.Emit(OpCode, Value); }
+		private void Emit(OpCode OpCode, float Value) { EmitHook(OpCode, Value); ILGenerator.Emit(OpCode, Value); }
+		private void Emit(OpCode OpCode, double Value) { EmitHook(OpCode, Value); ILGenerator.Emit(OpCode, Value); }
 		private void Emit(OpCode OpCode, LocalBuilder Value) { EmitHook(OpCode, Value); ILGenerator.Emit(OpCode, Value); }
 		private void Emit(OpCode OpCode, MethodInfo Value) { EmitHook(OpCode, Value); ILGenerator.Emit(OpCode, Value); }
 		private void Emit(OpCode OpCode, FieldInfo Value) { EmitHook(OpCode, Value); ILGenerator.Emit(OpCode, Value); }
@@ -91,6 +93,10 @@ namespace SafeILGenerator.Ast.Generators
 					Emit(OpCodes.Conv_I);
 				}
 #endif
+			}
+			else if (ItemType == typeof(float))
+			{
+				Emit(OpCodes.Ldc_R4, (float)Item.Value);
 			}
 			else
 			{
