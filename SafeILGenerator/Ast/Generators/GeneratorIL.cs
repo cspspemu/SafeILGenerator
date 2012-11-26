@@ -32,6 +32,21 @@ namespace SafeILGenerator.Ast.Generators
 			return Generator.Lines.ToArray();
 		}
 
+		static public TDelegate GenerateDelegate<TDelegate>(string MethodName, AstNode AstNode)
+		{
+			var MethodInfo = typeof(TDelegate).GetMethod("Invoke");
+			var DynamicMethod = new DynamicMethod(
+				MethodName,
+				MethodInfo.ReturnType,
+				MethodInfo.GetParameters().Select(Parameter => Parameter.ParameterType).ToArray(),
+				Assembly.GetExecutingAssembly().ManifestModule
+			);
+			var ILGenerator = DynamicMethod.GetILGenerator();
+			var Generator = new GeneratorIL(MethodInfo, ILGenerator, GenerateLines: false);
+			Generator.Generate(AstNode);
+			return (TDelegate)(object)DynamicMethod.CreateDelegate(typeof(TDelegate));
+		}
+
 		private void EmitHook(OpCode OpCode, object Param)
 		{
 			if (GenerateLines)
