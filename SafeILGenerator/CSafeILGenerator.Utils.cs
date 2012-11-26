@@ -76,9 +76,9 @@ namespace SafeILGenerator
 		protected void Emit(OpCode opcode, FieldInfo Param)  { EmitHook(opcode, Param); __ILGenerator.Emit(opcode, Param); }
 		protected void Emit(OpCode opcode, MethodInfo Param) { EmitHook(opcode, Param); __ILGenerator.Emit(opcode, Param); }
 
-		static public TDelegate Generate<TDelegate>(string MethodName, Action<CSafeILGenerator> Generator, bool CheckTypes = true, bool DoDebug = false, bool DoLog = false)
+		static public Delegate Generate(Type DelegateType, string MethodName, Action<CSafeILGenerator> Generator, bool CheckTypes = true, bool DoDebug = false, bool DoLog = false)
 		{
-			var MethodInfo = typeof(TDelegate).GetMethod("Invoke");
+			var MethodInfo = DelegateType.GetMethod("Invoke");
 			var DynamicMethod = new DynamicMethod(
 				MethodName,
 				MethodInfo.ReturnType,
@@ -90,7 +90,12 @@ namespace SafeILGenerator
 			{
 				Generator(SafeILGenerator);
 			}
-			return (TDelegate)(object)DynamicMethod.CreateDelegate(typeof(TDelegate));
+			return DynamicMethod.CreateDelegate(DelegateType);
+		}
+
+		static public TDelegate Generate<TDelegate>(string MethodName, Action<CSafeILGenerator> Generator, bool CheckTypes = true, bool DoDebug = false, bool DoLog = false)
+		{
+			return (TDelegate)(object)Generate(typeof(TDelegate), MethodName, Generator, CheckTypes, DoDebug, DoLog);
 		}
 
 		public CSafeILGenerator(ILGenerator ILGenerator, bool CheckTypes, bool DoDebug, bool DoLog)
@@ -366,7 +371,7 @@ namespace SafeILGenerator
 	public class SafeLabel
 	{
 		private CSafeILGenerator SafeILGenerator;
-		internal Label ReflectionLabel { get; private set; }
+		public Label ReflectionLabel { get; private set; }
 		public bool Marked { get; private set; }
 		public string Name;
 

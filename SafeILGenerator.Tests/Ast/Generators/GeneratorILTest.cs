@@ -10,8 +10,10 @@ using SafeILGenerator.Ast;
 namespace SafeILGenerator.Tests.Ast.Generators
 {
 	[TestClass]
-	public unsafe class GeneratorILTest : IAstGenerator
+	public unsafe class GeneratorILTest
 	{
+		static private AstGenerator ast = AstGenerator.Instance;
+
 		static public TDelegate GenerateDynamicMethod<TDelegate>(string MethodName, Action<DynamicMethod, ILGenerator> Generator, bool CheckTypes = true, bool DoDebug = false, bool DoLog = false)
 		{
 			var MethodInfo = typeof(TDelegate).GetMethod("Invoke");
@@ -90,15 +92,15 @@ namespace SafeILGenerator.Tests.Ast.Generators
 			{
 				var TestLocal = AstLocal.Create(ILGenerator, typeof(int), "TestLocal");
 
-				var TestArgument = this.Argument<TestClass>(0, "Test");
+				var TestArgument = ast.Argument<TestClass>(0, "Test");
 
-				var AstNode = this.Statements(
-					this.Assign(
-						this.FieldAccess(TestArgument, "Test"),
-						this.Immediate(456)
+				var AstNode = ast.Statements(
+					ast.Assign(
+						ast.FieldAccess(TestArgument, "Test"),
+						ast.Immediate(456)
 					),
-					this.Return(
-						this.FieldAccess(TestArgument, "Test")
+					ast.Return(
+						ast.FieldAccess(TestArgument, "Test")
 					)
 				);
 	
@@ -117,12 +119,12 @@ namespace SafeILGenerator.Tests.Ast.Generators
 		{
 			var Func = GenerateDynamicMethod<ActionPointer>("Test", (DynamicMethod, ILGenerator) =>
 			{
-				var AstNode = this.Statements(
-					this.Assign(
-					this.Indirect(this.Cast(typeof(int*), this.Argument(typeof(int*), 0, "Ptr"))),
-						this.Immediate(456)
+				var AstNode = ast.Statements(
+					ast.Assign(
+					ast.Indirect(ast.Cast(typeof(int*), ast.Argument(typeof(int*), 0, "Ptr"))),
+						ast.Immediate(456)
 					),
-					this.Return()
+					ast.Return()
 				);
 
 				Console.WriteLine(new GeneratorCSharp().Generate((AstNode)AstNode).ToString());

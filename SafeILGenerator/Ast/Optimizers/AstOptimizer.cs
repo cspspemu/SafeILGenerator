@@ -49,6 +49,32 @@ namespace SafeILGenerator.Ast.Optimizers
 			return AstNode;
 		}
 
+		protected AstNode _Optimize(AstNodeStmContainer Container)
+		{
+			var NewContainer = new AstNodeStmContainer();
+			foreach (var Node in Container.Nodes)
+			{
+				if (Node is AstNodeStmContainer)
+				{
+					foreach (var Node2 in (Node as AstNodeStmContainer).Nodes)
+					{
+						if (!(Node2 is AstNodeStmEmpty))
+						{
+							NewContainer.AddStatement(Node2);
+						}
+					}
+				}
+				else
+				{
+					if (!(Node is AstNodeStmEmpty))
+					{
+						NewContainer.AddStatement(Node);
+					}
+				}
+			}
+			return NewContainer;
+		}
+
 		protected AstNode _Optimize(AstNodeExprCast Cast)
 		{
 			//Console.WriteLine("Optimize.AstNodeExprCast: {0} : {1}", Cast.CastedType, Cast.Expr);

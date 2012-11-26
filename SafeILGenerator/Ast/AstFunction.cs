@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SafeILGenerator.Ast
 {
-	public class AstFunction : IAstGenerator
+	public class AstFunction
 	{
 		public List<AstArgument> Arguments;
 		public List<AstLocal> Locals;

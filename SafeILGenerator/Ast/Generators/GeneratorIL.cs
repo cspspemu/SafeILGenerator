@@ -25,6 +25,11 @@ namespace SafeILGenerator.Ast.Generators
 			this.GenerateLines = GenerateLines;
 		}
 
+		static public string GenerateToString(MethodInfo MethodInfo, AstNode AstNode)
+		{
+			return String.Join("\n", GenerateToStringList(MethodInfo, AstNode));
+		}
+
 		static public string[] GenerateToStringList(MethodInfo MethodInfo, AstNode AstNode)
 		{
 			var Generator = new GeneratorIL(MethodInfo, null, GenerateLines: true);
@@ -59,16 +64,16 @@ namespace SafeILGenerator.Ast.Generators
 		{
 		}
 
-		private void MarkLabelHook(Label Label)
+		private void MarkLabelHook(AstLabel Label)
 		{
 			if (GenerateLines)
 			{
-				Lines.Add(String.Format("Label_{0}:;", Label));
+				Lines.Add(String.Format("Label_{0}:;", Label.Name));
 			}
 		}
 
-		private Label DefineLabel() { DefineLabelHook(); if (ILGenerator != null) return ILGenerator.DefineLabel(); return default(Label); }
-		private void MarkLabel(Label Label) { MarkLabelHook(Label); if (ILGenerator != null) ILGenerator.MarkLabel(Label); }
+		private AstLabel DefineLabel(string Name) { DefineLabelHook(); if (ILGenerator != null) return AstLabel.CreateFromLabel(ILGenerator.DefineLabel(), Name); return AstLabel.CreateDummyWithName(Name); }
+		private void MarkLabel(AstLabel Label) { MarkLabelHook(Label); if (ILGenerator != null) ILGenerator.MarkLabel(Label.Label); }
 
 		private void Emit(OpCode OpCode) { EmitHook(OpCode, null); if (ILGenerator != null) ILGenerator.Emit(OpCode); }
 		private void Emit(OpCode OpCode, int Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
@@ -79,7 +84,7 @@ namespace SafeILGenerator.Ast.Generators
 		private void Emit(OpCode OpCode, MethodInfo Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
 		private void Emit(OpCode OpCode, FieldInfo Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
 		private void Emit(OpCode OpCode, Type Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
-		private void Emit(OpCode OpCode, Label Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
+		private void Emit(OpCode OpCode, AstLabel Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value.Label); }
 
 		protected void _Generate(AstNodeExprImm Item)
 		{
@@ -351,7 +356,7 @@ namespace SafeILGenerator.Ast.Generators
 
 		protected void _Generate(AstNodeStmIfElse IfElse)
 		{
-			var AfterIfLabel = DefineLabel();
+			var AfterIfLabel = DefineLabel("AfterIf");
 
 			Generate(IfElse.Condition);
 			Emit(OpCodes.Brfalse, AfterIfLabel);
@@ -359,18 +364,18 @@ namespace SafeILGenerator.Ast.Generators
 
 			if (IfElse.False != null)
 			{
-				var AfterElseLabel = DefineLabel();
+				var AfterElseLabel = DefineLabel("AfterElse");
 				Emit(OpCodes.Br, AfterElseLabel);
 
-				ILGenerator.MarkLabel(AfterIfLabel);
+				MarkLabel(AfterIfLabel);
 
 				Generate(IfElse.False);
 
-				ILGenerator.MarkLabel(AfterElseLabel);
+				MarkLabel(AfterElseLabel);
 			}
 			else
 			{
-				ILGenerator.MarkLabel(AfterIfLabel);
+				MarkLabel(AfterIfLabel);
 			}
 		}
 
@@ -420,6 +425,28 @@ namespace SafeILGenerator.Ast.Generators
 
 		protected void _Generate(AstNodeStmEmpty Empty)
 		{
+		}
+
+		protected void _Generate(AstNodeStmLabel Label)
+		{
+			MarkLabel(Label.AstLabel);
+		}
+
+		protected void _Generate(AstNodeStmGotoIfTrue Goto)
+		{
+			Generate(Goto.Condition);
+			Emit(OpCodes.Brtrue, Goto.AstLabel);
+		}
+
+		protected void _Generate(AstNodeStmGotoIfFalse Goto)
+		{
+			Generate(Goto.Condition);
+			Emit(OpCodes.Brfalse, Goto.AstLabel);
+		}
+
+		protected void _Generate(AstNodeStmGotoAlways Goto)
+		{
+			Emit(OpCodes.Br, Goto.AstLabel);
 		}
 
 		protected void _Generate(AstNodeExprUnop Item)

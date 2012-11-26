@@ -18,9 +18,29 @@ namespace SafeILGenerator.Ast
 			this.Name = Name;
 		}
 
+		static public AstLabel CreateDummyWithName(string Name = "<Unknown>")
+		{
+			return new AstLabel(default(Label), Name);
+		}
+
 		static public AstLabel Create(ILGenerator ILGenerator, string Name = "<Unknown>")
 		{
-			return new AstLabel(ILGenerator.DefineLabel(), Name);
+			return CreateFromLabel(ILGenerator.DefineLabel(), Name);
+		}
+
+		static public AstLabel CreateFromLabel(SafeLabel SafeLabel)
+		{
+			return CreateFromLabel(SafeLabel.ReflectionLabel, SafeLabel.Name);
+		}
+
+		static public AstLabel CreateFromLabel(Label Label, string Name = "<Unknown>")
+		{
+			return new AstLabel(Label, Name);
+		}
+
+		public override string ToString()
+		{
+			return String.Format("AstLabel({0})", Name);
 		}
 	}
 }

@@ -57,6 +57,39 @@ namespace SafeILGenerator.Ast.Generators
 			Output.Append(")");
 		}
 
+		protected void _Generate(AstNodeStmGotoIfTrue Goto)
+		{
+			Output.Append("if (");
+			Generate(Goto.Condition);
+			Output.Append(") ");
+			Output.Append("goto ");
+			Output.Append("Label_" + Goto.AstLabel.Name);
+			Output.Append(";");
+		}
+
+		protected void _Generate(AstNodeStmGotoIfFalse Goto)
+		{
+			Output.Append("if (!(");
+			Generate(Goto.Condition);
+			Output.Append(")) ");
+			Output.Append("goto ");
+			Output.Append("Label_" + Goto.AstLabel.Name);
+			Output.Append(";");
+		}
+
+		protected void _Generate(AstNodeStmGotoAlways Goto)
+		{
+			Output.Append("goto ");
+			Output.Append("Label_" + Goto.AstLabel.Name);
+			Output.Append(";");
+		}
+
+		protected void _Generate(AstNodeStmLabel Label)
+		{
+			Output.Append("Label_" + Label.AstLabel.Name);
+			Output.Append(":;");
+		}
+
 		protected void _Generate(AstNodeStmExpr Stat)
 		{
 			Generate(Stat.AstNodeExpr);
