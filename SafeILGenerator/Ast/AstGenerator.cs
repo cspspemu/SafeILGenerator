@@ -9,5 +9,10 @@ namespace SafeILGenerator.Ast
 {
 	public class AstGenerator : IAstGenerator
 	{
+		private AstGenerator()
+		{
+		}
+
+		static public AstGenerator Instance = new AstGenerator();
 	}
 }

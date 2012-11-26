@@ -144,8 +144,10 @@ namespace SafeILGenerator.Ast.Generators
 
 		protected void _Generate(AstNodeExprCast Cast)
 		{
+			Output.Append("(");
 			Output.Append("(" + Cast.CastedType.Name + ")");
 			Generate(Cast.Expr);
+			Output.Append(")");
 		}
 
 		protected void _Generate(AstNodeExprCallTail Tail)

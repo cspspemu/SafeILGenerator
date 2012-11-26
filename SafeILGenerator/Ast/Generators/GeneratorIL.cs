@@ -1,7 +1,4 @@
-﻿//#define DEBUG_GENERATOR_IL
-//#define DO_NOT_EMIT
-
-using SafeILGenerator.Ast;
+﻿using SafeILGenerator.Ast;
 using SafeILGenerator.Ast.Nodes;
 using SafeILGenerator.Ast.Generators;
 using System;
@@ -14,39 +11,60 @@ using System.Reflection;
 
 namespace SafeILGenerator.Ast.Generators
 {
-	public class GeneratorIL : Generator<GeneratorIL>, IAstGenerator
+	public class GeneratorIL : Generator<GeneratorIL>
 	{
 		protected MethodInfo MethodInfo;
 		protected ILGenerator ILGenerator;
+		protected bool GenerateLines;
+		protected List<string> Lines = new List<string>();
 
-		public GeneratorIL(MethodInfo MethodInfo, ILGenerator ILGenerator)
+		public GeneratorIL(MethodInfo MethodInfo, ILGenerator ILGenerator, bool GenerateLines = false)
 		{
 			this.MethodInfo = MethodInfo;
 			this.ILGenerator = ILGenerator;
+			this.GenerateLines = GenerateLines;
+		}
+
+		static public string[] GenerateToStringList(MethodInfo MethodInfo, AstNode AstNode)
+		{
+			var Generator = new GeneratorIL(MethodInfo, null, GenerateLines: true);
+			Generator.Generate(AstNode);
+			return Generator.Lines.ToArray();
 		}
 
 		private void EmitHook(OpCode OpCode, object Param)
 		{
-#if DEBUG_GENERATOR_IL || DO_NOT_EMIT
-			Console.WriteLine("{0} {1}", OpCode, Param);
-#endif
+			if (GenerateLines)
+			{
+				Lines.Add(String.Format("  {0} {1}", OpCode, Param));
+			}
 		}
 
-#if DO_NOT_EMIT
-		private void Emit(OpCode OpCode) { EmitHook(OpCode, null); }
-		private void Emit(OpCode OpCode, object Value) { EmitHook(OpCode, Value); }
-#else
-		private void Emit(OpCode OpCode) { EmitHook(OpCode, null); ILGenerator.Emit(OpCode); }
-		private void Emit(OpCode OpCode, int Value) { EmitHook(OpCode, Value); ILGenerator.Emit(OpCode, Value); }
-		private void Emit(OpCode OpCode, long Value) { EmitHook(OpCode, Value); ILGenerator.Emit(OpCode, Value); }
-		private void Emit(OpCode OpCode, float Value) { EmitHook(OpCode, Value); ILGenerator.Emit(OpCode, Value); }
-		private void Emit(OpCode OpCode, double Value) { EmitHook(OpCode, Value); ILGenerator.Emit(OpCode, Value); }
-		private void Emit(OpCode OpCode, LocalBuilder Value) { EmitHook(OpCode, Value); ILGenerator.Emit(OpCode, Value); }
-		private void Emit(OpCode OpCode, MethodInfo Value) { EmitHook(OpCode, Value); ILGenerator.Emit(OpCode, Value); }
-		private void Emit(OpCode OpCode, FieldInfo Value) { EmitHook(OpCode, Value); ILGenerator.Emit(OpCode, Value); }
-		private void Emit(OpCode OpCode, Type Value) { EmitHook(OpCode, Value); ILGenerator.Emit(OpCode, Value); }
-		private void Emit(OpCode OpCode, Label Value) { EmitHook(OpCode, Value); ILGenerator.Emit(OpCode, Value); }
-#endif
+		private void DefineLabelHook()
+		{
+		}
+
+		private void MarkLabelHook(Label Label)
+		{
+			if (GenerateLines)
+			{
+				Lines.Add(String.Format("Label_{0}:;", Label));
+			}
+		}
+
+		private Label DefineLabel() { DefineLabelHook(); if (ILGenerator != null) return ILGenerator.DefineLabel(); return default(Label); }
+		private void MarkLabel(Label Label) { MarkLabelHook(Label); if (ILGenerator != null) ILGenerator.MarkLabel(Label); }
+
+		private void Emit(OpCode OpCode) { EmitHook(OpCode, null); if (ILGenerator != null) ILGenerator.Emit(OpCode); }
+		private void Emit(OpCode OpCode, int Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
+		private void Emit(OpCode OpCode, long Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
+		private void Emit(OpCode OpCode, float Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
+		private void Emit(OpCode OpCode, double Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
+		private void Emit(OpCode OpCode, LocalBuilder Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
+		private void Emit(OpCode OpCode, MethodInfo Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
+		private void Emit(OpCode OpCode, FieldInfo Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
+		private void Emit(OpCode OpCode, Type Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
+		private void Emit(OpCode OpCode, Label Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
 
 		protected void _Generate(AstNodeExprImm Item)
 		{
@@ -266,6 +284,44 @@ namespace SafeILGenerator.Ast.Generators
 			Emit(OpCodes.Call, Call.MethodInfo);
 		}
 
+		private void _GenerateCastToType(Type CastedType)
+		{
+			if (false) { }
+
+			else if (CastedType == typeof(sbyte)) Emit(OpCodes.Conv_I1);
+			else if (CastedType == typeof(short)) Emit(OpCodes.Conv_I2);
+			else if (CastedType == typeof(int)) Emit(OpCodes.Conv_I4);
+			else if (CastedType == typeof(long)) Emit(OpCodes.Conv_I8);
+
+			else if (CastedType == typeof(byte)) Emit(OpCodes.Conv_U1);
+			else if (CastedType == typeof(ushort)) Emit(OpCodes.Conv_U2);
+			else if (CastedType == typeof(uint)) Emit(OpCodes.Conv_U4);
+			else if (CastedType == typeof(ulong)) Emit(OpCodes.Conv_U8);
+
+			else if (CastedType == typeof(float)) Emit(OpCodes.Conv_R4);
+			else if (CastedType == typeof(double)) Emit(OpCodes.Conv_R8);
+
+			else if (CastedType.IsPointer) Emit(OpCodes.Conv_I);
+			else if (CastedType.IsByRef) Emit(OpCodes.Conv_I);
+
+			else if (CastedType.IsPrimitive)
+			{
+				throw (new NotImplementedException("Not implemented cast other primitives"));
+			}
+
+			else if (CastedType.IsEnum)
+			{
+				_GenerateCastToType(CastedType.GetEnumUnderlyingType());
+				//throw (new NotImplementedException("Not implemented cast other primitives"));
+			}
+
+			else
+			{
+				Emit(OpCodes.Castclass, CastedType);
+				//throw (new NotImplementedException("Not implemented cast class"));
+			}
+		}
+
 		protected void _Generate(AstNodeExprCast Cast)
 		{
 			var CastedType = Cast.CastedType;
@@ -274,39 +330,13 @@ namespace SafeILGenerator.Ast.Generators
 
 			if (Cast.Explicit)
 			{
-				if (false) { }
-
-				else if (CastedType == typeof(sbyte)) Emit(OpCodes.Conv_I1);
-				else if (CastedType == typeof(short)) Emit(OpCodes.Conv_I2);
-				else if (CastedType == typeof(int)) Emit(OpCodes.Conv_I4);
-				else if (CastedType == typeof(long)) Emit(OpCodes.Conv_I8);
-
-				else if (CastedType == typeof(byte)) Emit(OpCodes.Conv_U1);
-				else if (CastedType == typeof(ushort)) Emit(OpCodes.Conv_U2);
-				else if (CastedType == typeof(uint)) Emit(OpCodes.Conv_U4);
-				else if (CastedType == typeof(ulong)) Emit(OpCodes.Conv_U8);
-
-				else if (CastedType == typeof(float)) Emit(OpCodes.Conv_R4);
-				else if (CastedType == typeof(double)) Emit(OpCodes.Conv_R8);
-
-				else if (CastedType.IsPointer) Emit(OpCodes.Conv_I);
-
-				else if (CastedType.IsPrimitive)
-				{
-					throw (new NotImplementedException("Not implemented cast other primitives"));
-				}
-
-				else
-				{
-					Emit(OpCodes.Castclass, CastedType);
-					//throw (new NotImplementedException("Not implemented cast class"));
-				}
+				_GenerateCastToType(CastedType);
 			}
 		}
 
 		protected void _Generate(AstNodeStmIfElse IfElse)
 		{
-			var AfterIfLabel = ILGenerator.DefineLabel();
+			var AfterIfLabel = DefineLabel();
 
 			Generate(IfElse.Condition);
 			Emit(OpCodes.Brfalse, AfterIfLabel);
@@ -314,7 +344,7 @@ namespace SafeILGenerator.Ast.Generators
 
 			if (IfElse.False != null)
 			{
-				var AfterElseLabel = ILGenerator.DefineLabel();
+				var AfterElseLabel = DefineLabel();
 				Emit(OpCodes.Br, AfterElseLabel);
 
 				ILGenerator.MarkLabel(AfterIfLabel);
