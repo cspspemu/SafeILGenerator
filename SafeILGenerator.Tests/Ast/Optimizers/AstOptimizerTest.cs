@@ -23,7 +23,7 @@ namespace SafeILGenerator.Tests.Ast.Optimizers
 			var OptimizedNode = new AstOptimizer().Optimize(
 				(ast.Immediate(0) + ast.Immediate(2)) * ast.Immediate(3)
 			);
-			Assert.AreEqual("6", new GeneratorCSharp().Generate(OptimizedNode).ToString());
+			Assert.AreEqual("6", new GeneratorCSharp().GenerateRoot(OptimizedNode).ToString());
 			//Console.WriteLine("{0}", Opti);
 		}
 
@@ -33,7 +33,7 @@ namespace SafeILGenerator.Tests.Ast.Optimizers
 			var OptimizedNode = new AstOptimizer().Optimize(
 				(ast.Argument<int>(0, "Arg") + ast.Immediate(0)) * ast.Immediate(3)
 			);
-			Assert.AreEqual("(Arg * 3)", new GeneratorCSharp().Generate(OptimizedNode).ToString());
+			Assert.AreEqual("(Arg * 3)", new GeneratorCSharp().GenerateRoot(OptimizedNode).ToString());
 			//Console.WriteLine("{0}", Opti);
 		}
 
@@ -42,7 +42,7 @@ namespace SafeILGenerator.Tests.Ast.Optimizers
 		{
 			var Node = (AstNode)ast.Cast<int>(ast.Cast<uint>(ast.Immediate((int)7)));
 			Node = new AstOptimizer().Optimize(Node);
-			Assert.AreEqual("7", new GeneratorCSharp().Generate(Node).ToString());
+			Assert.AreEqual("7", new GeneratorCSharp().GenerateRoot(Node).ToString());
 		}
 
 		[TestMethod]
@@ -50,7 +50,7 @@ namespace SafeILGenerator.Tests.Ast.Optimizers
 		{
 			var Node = (AstNode)ast.Cast<uint>(ast.Immediate((int)7));
 			Node = new AstOptimizer().Optimize(Node);
-			Assert.AreEqual("7", new GeneratorCSharp().Generate(Node).ToString());
+			Assert.AreEqual("7", new GeneratorCSharp().GenerateRoot(Node).ToString());
 		}
 
 		[TestMethod]
@@ -58,7 +58,7 @@ namespace SafeILGenerator.Tests.Ast.Optimizers
 		{
 			var Node = (AstNode)ast.Cast<uint>(ast.Cast<sbyte>(ast.Argument<int>(0, "Arg")));
 			Node = new AstOptimizer().Optimize(Node);
-			Assert.AreEqual("(UInt32)(SByte)Arg", new GeneratorCSharp().Generate(Node).ToString());
+			Assert.AreEqual("((UInt32)((SByte)Arg))", new GeneratorCSharp().GenerateRoot(Node).ToString());
 		}
 
 		[TestMethod]
@@ -66,7 +66,7 @@ namespace SafeILGenerator.Tests.Ast.Optimizers
 		{
 			var Node = (AstNode)ast.Cast<sbyte>(ast.Cast<uint>(ast.Argument<int>(0, "Arg")));
 			Node = new AstOptimizer().Optimize(Node);
-			Assert.AreEqual("(SByte)Arg", new GeneratorCSharp().Generate(Node).ToString());
+			Assert.AreEqual("((SByte)Arg)", new GeneratorCSharp().GenerateRoot(Node).ToString());
 		}
 
 		[TestMethod]
@@ -74,7 +74,7 @@ namespace SafeILGenerator.Tests.Ast.Optimizers
 		{
 			var Node = (AstNode)ast.Binary(ast.Immediate(0), "-", ast.Argument<int>(0, "Arg"));
 			Node = new AstOptimizer().Optimize(Node);
-			Assert.AreEqual("(-Arg)", new GeneratorCSharp().Generate(Node).ToString());
+			Assert.AreEqual("(-Arg)", new GeneratorCSharp().GenerateRoot(Node).ToString());
 		}
 
 		static XmlSerializer AstNodeSerializer = new XmlSerializer(typeof(AstNode));

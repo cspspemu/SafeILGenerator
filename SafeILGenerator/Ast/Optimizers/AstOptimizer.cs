@@ -49,11 +49,13 @@ namespace SafeILGenerator.Ast.Optimizers
 			return AstNode;
 		}
 
-		protected AstNode _Optimize(AstNodeStmContainer Container)
+		protected virtual AstNode _Optimize(AstNodeStmContainer Container)
 		{
 			var NewContainer = new AstNodeStmContainer();
 			foreach (var Node in Container.Nodes)
 			{
+				if (Node == null) continue;
+
 				if (Node is AstNodeStmContainer)
 				{
 					foreach (var Node2 in (Node as AstNodeStmContainer).Nodes)
@@ -75,7 +77,7 @@ namespace SafeILGenerator.Ast.Optimizers
 			return NewContainer;
 		}
 
-		protected AstNode _Optimize(AstNodeExprCast Cast)
+		protected virtual AstNode _Optimize(AstNodeExprCast Cast)
 		{
 			//Console.WriteLine("Optimize.AstNodeExprCast: {0} : {1}", Cast.CastedType, Cast.Expr);
 
@@ -109,12 +111,12 @@ namespace SafeILGenerator.Ast.Optimizers
 			return Cast;
 		}
 
-		protected AstNode _Optimize(AstNodeExprImm Immediate)
+		protected virtual AstNode _Optimize(AstNodeExprImm Immediate)
 		{
 			return Immediate;
 		}
 
-		protected AstNode _Optimize(AstNodeExprBinop Binary)
+		protected virtual AstNode _Optimize(AstNodeExprBinop Binary)
 		{
 			//Console.WriteLine("Optimize.AstNodeExprBinop: {0} {1} {2}", Binary.LeftNode, Binary.Operator, Binary.RightNode);
 			var LeftImm = (Binary.LeftNode as AstNodeExprImm);

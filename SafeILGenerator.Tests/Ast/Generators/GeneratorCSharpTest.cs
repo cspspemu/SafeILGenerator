@@ -12,7 +12,7 @@ namespace SafeILGenerator.Tests.Ast.Generators
 		public void TestAstExpression()
 		{
 			var GeneratorCSharp = new GeneratorCSharp();
-			GeneratorCSharp.Generate(new AstNodeExprBinop(new AstNodeExprImm(3), "+", new AstNodeExprImm(5)));
+			GeneratorCSharp.GenerateRoot(new AstNodeExprBinop(new AstNodeExprImm(3), "+", new AstNodeExprImm(5)));
 			Assert.AreEqual("(3 + 5)", GeneratorCSharp.ToString());
 		}
 
@@ -20,7 +20,7 @@ namespace SafeILGenerator.Tests.Ast.Generators
 		public void TestAstIf()
 		{
 			var GeneratorCSharp = new GeneratorCSharp();
-			GeneratorCSharp.Generate(new AstNodeStmIfElse(new AstNodeExprImm(true), new AstNodeStmReturn(), new AstNodeStmReturn()));
+			GeneratorCSharp.GenerateRoot(new AstNodeStmIfElse(new AstNodeExprImm(true), new AstNodeStmReturn(), new AstNodeStmReturn()));
 			Assert.AreEqual("if (true) return; else return;", GeneratorCSharp.ToString());
 		}
 
@@ -28,7 +28,7 @@ namespace SafeILGenerator.Tests.Ast.Generators
 		public void TestSimpleCall()
 		{
 			var Generator = new GeneratorCSharp();
-			Generator.Generate(
+			Generator.GenerateRoot(
 				new AstNodeStmReturn(
 					new AstNodeExprCallStatic(
 						(Func<int, int>)GetTestValue,

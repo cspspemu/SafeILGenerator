@@ -18,26 +18,60 @@ namespace SafeILGenerator.Ast.Generators
 		protected bool GenerateLines;
 		protected List<string> Lines = new List<string>();
 
+		protected GeneratorIL()
+		{
+		}
+
+		public override GeneratorIL GenerateRoot(AstNode AstNode)
+		{
+			if (ILGenerator != null)
+			{
+				var UsedSet = new HashSet<AstLabel>();
+				foreach (var AstNodeStmLabel in AstNode.Descendant.Where(Node => Node is AstNodeStmLabel).Cast<AstNodeStmLabel>())
+				{
+					if (UsedSet.Contains(AstNodeStmLabel.AstLabel))
+					{
+						throw(new Exception("Label declared twice"));
+					}
+					UsedSet.Add(AstNodeStmLabel.AstLabel);
+				}
+
+				foreach (var AstNodeStmLabel in UsedSet)
+				{
+					//Console.WriteLine("CreateAllUsedLabels: {0}", AstNodeStmLabel);
+					AstNodeStmLabel.Label = ILGenerator.DefineLabel();
+				}
+			}
+			return base.GenerateRoot(AstNode);
+		}
+
 		public GeneratorIL(MethodInfo MethodInfo, ILGenerator ILGenerator, bool GenerateLines = false)
+		{
+			Init(MethodInfo, ILGenerator, GenerateLines);
+		}
+
+		public GeneratorIL Init(MethodInfo MethodInfo, ILGenerator ILGenerator, bool GenerateLines = false)
 		{
 			this.MethodInfo = MethodInfo;
 			this.ILGenerator = ILGenerator;
 			this.GenerateLines = GenerateLines;
+			return this;
 		}
 
-		static public string GenerateToString(MethodInfo MethodInfo, AstNode AstNode)
+		static public string GenerateToString<TGenerator>(MethodInfo MethodInfo, AstNode AstNode) where TGenerator : GeneratorIL, new()
 		{
-			return String.Join("\n", GenerateToStringList(MethodInfo, AstNode));
+			return String.Join("\n", GenerateToStringList<TGenerator>(MethodInfo, AstNode));
 		}
 
-		static public string[] GenerateToStringList(MethodInfo MethodInfo, AstNode AstNode)
+		static public string[] GenerateToStringList<TGenerator>(MethodInfo MethodInfo, AstNode AstNode) where TGenerator : GeneratorIL, new()
 		{
-			var Generator = new GeneratorIL(MethodInfo, null, GenerateLines: true);
+			var Generator = new TGenerator();
+			Generator.Init(MethodInfo, null, GenerateLines: true);
 			Generator.Generate(AstNode);
 			return Generator.Lines.ToArray();
 		}
 
-		static public TDelegate GenerateDelegate<TDelegate>(string MethodName, AstNode AstNode)
+		static public TDelegate GenerateDelegate<TGenerator, TDelegate>(string MethodName, AstNode AstNode) where TGenerator : GeneratorIL, new()
 		{
 			var MethodInfo = typeof(TDelegate).GetMethod("Invoke");
 			var DynamicMethod = new DynamicMethod(
@@ -47,12 +81,13 @@ namespace SafeILGenerator.Ast.Generators
 				Assembly.GetExecutingAssembly().ManifestModule
 			);
 			var ILGenerator = DynamicMethod.GetILGenerator();
-			var Generator = new GeneratorIL(MethodInfo, ILGenerator, GenerateLines: false);
+			var Generator = new TGenerator();
+			Generator.Init(MethodInfo, ILGenerator, GenerateLines: false);
 			Generator.Generate(AstNode);
 			return (TDelegate)(object)DynamicMethod.CreateDelegate(typeof(TDelegate));
 		}
 
-		private void EmitHook(OpCode OpCode, object Param)
+		protected void EmitHook(OpCode OpCode, object Param)
 		{
 			if (GenerateLines)
 			{
@@ -60,11 +95,11 @@ namespace SafeILGenerator.Ast.Generators
 			}
 		}
 
-		private void DefineLabelHook()
+		protected void DefineLabelHook()
 		{
 		}
 
-		private void MarkLabelHook(AstLabel Label)
+		protected void MarkLabelHook(AstLabel Label)
 		{
 			if (GenerateLines)
 			{
@@ -72,21 +107,21 @@ namespace SafeILGenerator.Ast.Generators
 			}
 		}
 
-		private AstLabel DefineLabel(string Name) { DefineLabelHook(); if (ILGenerator != null) return AstLabel.CreateFromLabel(ILGenerator.DefineLabel(), Name); return AstLabel.CreateDummyWithName(Name); }
-		private void MarkLabel(AstLabel Label) { MarkLabelHook(Label); if (ILGenerator != null) ILGenerator.MarkLabel(Label.Label); }
+		protected AstLabel DefineLabel(string Name) { DefineLabelHook(); if (ILGenerator != null) return AstLabel.CreateFromLabel(ILGenerator.DefineLabel(), Name); return AstLabel.CreateDelayedWithName(Name); }
+		protected void MarkLabel(AstLabel Label) { MarkLabelHook(Label); if (ILGenerator != null) ILGenerator.MarkLabel(Label.Label); }
 
-		private void Emit(OpCode OpCode) { EmitHook(OpCode, null); if (ILGenerator != null) ILGenerator.Emit(OpCode); }
-		private void Emit(OpCode OpCode, int Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
-		private void Emit(OpCode OpCode, long Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
-		private void Emit(OpCode OpCode, float Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
-		private void Emit(OpCode OpCode, double Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
-		private void Emit(OpCode OpCode, LocalBuilder Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
-		private void Emit(OpCode OpCode, MethodInfo Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
-		private void Emit(OpCode OpCode, FieldInfo Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
-		private void Emit(OpCode OpCode, Type Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
-		private void Emit(OpCode OpCode, AstLabel Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value.Label); }
+		protected void Emit(OpCode OpCode) { EmitHook(OpCode, null); if (ILGenerator != null) ILGenerator.Emit(OpCode); }
+		protected void Emit(OpCode OpCode, int Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
+		protected void Emit(OpCode OpCode, long Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
+		protected void Emit(OpCode OpCode, float Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
+		protected void Emit(OpCode OpCode, double Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
+		protected void Emit(OpCode OpCode, LocalBuilder Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
+		protected void Emit(OpCode OpCode, MethodInfo Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
+		protected void Emit(OpCode OpCode, FieldInfo Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
+		protected void Emit(OpCode OpCode, Type Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
+		protected void Emit(OpCode OpCode, AstLabel Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value.Label); }
 
-		protected void _Generate(AstNodeExprImm Item)
+		protected virtual void _Generate(AstNodeExprImm Item)
 		{
 			var ItemType = AstUtils.GetSignedType(Item.Type);
 			var ItemValue = Item.Value;
@@ -142,12 +177,12 @@ namespace SafeILGenerator.Ast.Generators
 			}
 		}
 
-		protected void _Generate(AstNodeStmComment Comment)
+		protected virtual void _Generate(AstNodeStmComment Comment)
 		{
 			// Do nothing
 		}
 
-		protected void _Generate(AstNodeStmContainer Container)
+		protected virtual void _Generate(AstNodeStmContainer Container)
 		{
 			foreach (var Node in Container.Nodes)
 			{
@@ -155,7 +190,7 @@ namespace SafeILGenerator.Ast.Generators
 			}
 		}
 
-		protected void _Generate(AstNodeExprArgument Argument)
+		protected virtual void _Generate(AstNodeExprArgument Argument)
 		{
 			int ArgumentIndex = Argument.AstArgument.Index;
 			switch (ArgumentIndex)
@@ -169,7 +204,7 @@ namespace SafeILGenerator.Ast.Generators
 			
 		}
 
-		protected void _Generate(AstNodeExprLocal Local)
+		protected virtual void _Generate(AstNodeExprLocal Local)
 		{
 			var LocalBuilder = Local.AstLocal.LocalBuilder;
 
@@ -183,13 +218,13 @@ namespace SafeILGenerator.Ast.Generators
 			}
 		}
 
-		protected void _Generate(AstNodeExprFieldAccess FieldAccess)
+		protected virtual void _Generate(AstNodeExprFieldAccess FieldAccess)
 		{
 			Generate(FieldAccess.Instance);
 			Emit(OpCodes.Ldfld, FieldAccess.Field);
 		}
 
-		protected void _Generate(AstNodeExprIndirect Indirect)
+		protected virtual void _Generate(AstNodeExprIndirect Indirect)
 		{
 			Generate(Indirect.PointerExpression);
 			var PointerType = Indirect.PointerExpression.Type.GetElementType();
@@ -212,7 +247,7 @@ namespace SafeILGenerator.Ast.Generators
 			else throw (new NotImplementedException("Can't load indirect value"));
 		}
 
-		protected void _Generate(AstNodeExprGetAddress GetAddress)
+		protected virtual void _Generate(AstNodeExprGetAddress GetAddress)
 		{
 			var AstNodeExprFieldAccess = (GetAddress.Expression as AstNodeExprFieldAccess);
 
@@ -227,7 +262,7 @@ namespace SafeILGenerator.Ast.Generators
 			}
 		}
 
-		protected void _Generate(AstNodeStmAssign Assign)
+		protected virtual void _Generate(AstNodeStmAssign Assign)
 		{
 			//Assign.Local.LocalBuilder.LocalIndex
 			var AstNodeExprLocal = (Assign.LValue as AstNodeExprLocal);
@@ -273,7 +308,7 @@ namespace SafeILGenerator.Ast.Generators
 			//Assign.Local
 		}
 
-		protected void _Generate(AstNodeStmReturn Return)
+		protected virtual void _Generate(AstNodeStmReturn Return)
 		{
 			var ExpressionType = (Return.Expression != null) ? Return.Expression.Type : typeof(void);
 
@@ -283,20 +318,20 @@ namespace SafeILGenerator.Ast.Generators
 			Emit(OpCodes.Ret);
 		}
 
-		protected void _Generate(AstNodeExprCallTail Call)
+		protected virtual void _Generate(AstNodeExprCallTail Call)
 		{
 			Generate(Call.Call);
 			Emit(OpCodes.Ret);
 		}
 
-		protected void _Generate(AstNodeExprCallStatic Call)
+		protected virtual void _Generate(AstNodeExprCallStatic Call)
 		{
 			foreach (var Parameter in Call.Parameters) Generate(Parameter);
 			if (Call.IsTail) Emit(OpCodes.Tailcall);
 			Emit(OpCodes.Call, Call.MethodInfo);
 		}
 
-		protected void _Generate(AstNodeExprCallInstance Call)
+		protected virtual void _Generate(AstNodeExprCallInstance Call)
 		{
 			Generate(Call.Instance);
 			foreach (var Parameter in Call.Parameters) Generate(Parameter);
@@ -304,7 +339,7 @@ namespace SafeILGenerator.Ast.Generators
 			Emit(OpCodes.Call, Call.MethodInfo);
 		}
 
-		private void _GenerateCastToType(Type CastedType)
+		protected virtual void _GenerateCastToType(Type CastedType)
 		{
 			if (false) { }
 
@@ -342,7 +377,7 @@ namespace SafeILGenerator.Ast.Generators
 			}
 		}
 
-		protected void _Generate(AstNodeExprCast Cast)
+		protected virtual void _Generate(AstNodeExprCast Cast)
 		{
 			var CastedType = Cast.CastedType;
 
@@ -354,7 +389,7 @@ namespace SafeILGenerator.Ast.Generators
 			}
 		}
 
-		protected void _Generate(AstNodeStmIfElse IfElse)
+		protected virtual void _Generate(AstNodeStmIfElse IfElse)
 		{
 			var AfterIfLabel = DefineLabel("AfterIf");
 
@@ -379,7 +414,7 @@ namespace SafeILGenerator.Ast.Generators
 			}
 		}
 
-		protected void _Generate(AstNodeExprBinop Item)
+		protected virtual void _Generate(AstNodeExprBinop Item)
 		{
 			var LeftType = Item.LeftNode.Type;
 			var RightType = Item.RightNode.Type;
@@ -412,7 +447,7 @@ namespace SafeILGenerator.Ast.Generators
 			}
 		}
 
-		protected void _Generate(AstNodeStmExpr Stat)
+		protected virtual void _Generate(AstNodeStmExpr Stat)
 		{
 			var ExpressionType = Stat.AstNodeExpr.Type;
 			Generate(Stat.AstNodeExpr);
@@ -423,33 +458,33 @@ namespace SafeILGenerator.Ast.Generators
 			}
 		}
 
-		protected void _Generate(AstNodeStmEmpty Empty)
+		protected virtual void _Generate(AstNodeStmEmpty Empty)
 		{
 		}
 
-		protected void _Generate(AstNodeStmLabel Label)
+		protected virtual void _Generate(AstNodeStmLabel Label)
 		{
 			MarkLabel(Label.AstLabel);
 		}
 
-		protected void _Generate(AstNodeStmGotoIfTrue Goto)
+		protected virtual void _Generate(AstNodeStmGotoIfTrue Goto)
 		{
 			Generate(Goto.Condition);
 			Emit(OpCodes.Brtrue, Goto.AstLabel);
 		}
 
-		protected void _Generate(AstNodeStmGotoIfFalse Goto)
+		protected virtual void _Generate(AstNodeStmGotoIfFalse Goto)
 		{
 			Generate(Goto.Condition);
 			Emit(OpCodes.Brfalse, Goto.AstLabel);
 		}
 
-		protected void _Generate(AstNodeStmGotoAlways Goto)
+		protected virtual void _Generate(AstNodeStmGotoAlways Goto)
 		{
 			Emit(OpCodes.Br, Goto.AstLabel);
 		}
 
-		protected void _Generate(AstNodeExprUnop Item)
+		protected virtual void _Generate(AstNodeExprUnop Item)
 		{
 			var RightType = Item.RightNode.Type;
 

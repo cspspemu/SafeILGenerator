@@ -36,7 +36,7 @@ namespace SafeILGenerator.Tests.Ast.Generators
 			var Func = GenerateDynamicMethod<Func<int>>("Test", (DynamicMethod, ILGenerator) =>
 			{
 				var Generator = new GeneratorIL(DynamicMethod, ILGenerator);
-				Generator.Generate(new AstNodeStmReturn(new AstNodeExprImm(777)));
+				Generator.GenerateRoot(new AstNodeStmReturn(new AstNodeExprImm(777)));
 			});
 
 			Assert.AreEqual(777, Func());
@@ -48,7 +48,7 @@ namespace SafeILGenerator.Tests.Ast.Generators
 			var Func = GenerateDynamicMethod<Func<int>>("Test", (DynamicMethod, ILGenerator) =>
 			{
 				var Generator = new GeneratorIL(DynamicMethod, ILGenerator);
-				Generator.Generate(
+				Generator.GenerateRoot(
 					new AstNodeStmReturn(
 						new AstNodeExprCallStatic(
 							(Func<int, int>)GetTestValue,
@@ -69,7 +69,7 @@ namespace SafeILGenerator.Tests.Ast.Generators
 				var TestLocal = AstLocal.Create(ILGenerator, typeof(int), "TestLocal");
 
 				var Generator = new GeneratorIL(DynamicMethod, ILGenerator);
-				Generator.Generate(
+				Generator.GenerateRoot(
 					new AstNodeStmContainer(
 						new AstNodeStmAssign(
 							new AstNodeExprLocal(TestLocal),
@@ -104,9 +104,9 @@ namespace SafeILGenerator.Tests.Ast.Generators
 					)
 				);
 	
-				Console.WriteLine(new GeneratorCSharp().Generate((AstNode)AstNode).ToString());
+				Console.WriteLine(new GeneratorCSharp().GenerateRoot((AstNode)AstNode).ToString());
 
-				new GeneratorIL(DynamicMethod, ILGenerator).Generate(AstNode);
+				new GeneratorIL(DynamicMethod, ILGenerator).GenerateRoot(AstNode);
 			});
 
 			Assert.AreEqual(456, Func(new TestClass()));
@@ -127,9 +127,9 @@ namespace SafeILGenerator.Tests.Ast.Generators
 					ast.Return()
 				);
 
-				Console.WriteLine(new GeneratorCSharp().Generate((AstNode)AstNode).ToString());
+				Console.WriteLine(new GeneratorCSharp().GenerateRoot((AstNode)AstNode).ToString());
 
-				new GeneratorIL(DynamicMethod, ILGenerator).Generate(AstNode);
+				new GeneratorIL(DynamicMethod, ILGenerator).GenerateRoot(AstNode);
 			});
 
 			var Data = new int[1];

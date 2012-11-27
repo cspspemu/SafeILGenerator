@@ -44,5 +44,30 @@ namespace SafeILGenerator.Ast.Nodes
 	{
 		public AstNode Parent;
 		public abstract void TransformNodes(TransformNodesDelegate Transformer);
+
+		public IEnumerable<AstNode> Descendant
+		{
+			get
+			{
+				foreach (var Child in Childs)
+				{
+					yield return Child;
+					foreach (var GrandChild in Child.Descendant)
+					{
+						yield return GrandChild;
+					}
+				}
+			}
+		}
+
+		public IEnumerable<AstNode> Childs
+		{
+			get
+			{
+				var List = new List<AstNode>();
+				TransformNodes((Node) => { List.Add(Node); return Node; });
+				return List;
+			}
+		}
 	}
 }

@@ -9,8 +9,8 @@ namespace SafeILGenerator.Ast
 {
 	public class AstLabel
 	{
-		public readonly Label Label;
-		public readonly string Name;
+		public Label Label;
+		public string Name;
 
 		protected AstLabel(Label Label, string Name)
 		{
@@ -18,19 +18,9 @@ namespace SafeILGenerator.Ast
 			this.Name = Name;
 		}
 
-		static public AstLabel CreateDummyWithName(string Name = "<Unknown>")
+		static public AstLabel CreateDelayedWithName(string Name = "<Unknown>")
 		{
 			return new AstLabel(default(Label), Name);
-		}
-
-		static public AstLabel Create(ILGenerator ILGenerator, string Name = "<Unknown>")
-		{
-			return CreateFromLabel(ILGenerator.DefineLabel(), Name);
-		}
-
-		static public AstLabel CreateFromLabel(SafeLabel SafeLabel)
-		{
-			return CreateFromLabel(SafeLabel.ReflectionLabel, SafeLabel.Name);
 		}
 
 		static public AstLabel CreateFromLabel(Label Label, string Name = "<Unknown>")

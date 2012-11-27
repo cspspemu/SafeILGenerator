@@ -12,11 +12,10 @@ namespace SafeILGenerator.Ast.Serializers
 		static public string Serialize(AstNode Node)
 		{
 			var Parameters = new List<string>();
-			Node.TransformNodes((Node2) =>
+			foreach (var Child in Node.Childs)
 			{
-				Parameters.Add(Serialize(Node2));
-				return Node2;
-			});
+				Parameters.Add(Serialize(Child));
+			}
 			return Node.GetType().Name + "(" + String.Join(", ", Parameters) + ")";
 		}
 	}

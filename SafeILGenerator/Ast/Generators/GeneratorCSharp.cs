@@ -1,5 +1,6 @@
 ﻿using SafeILGenerator.Ast.Generators;
 using SafeILGenerator.Ast.Nodes;
+using SafeILGenerator.Ast.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,15 +11,15 @@ namespace SafeILGenerator.Ast.Generators
 {
 	public class GeneratorCSharp : Generator<GeneratorCSharp>
 	{
-		protected StringBuilder Output = new StringBuilder();
+		protected IndentedStringBuilder Output;
 
 		public override GeneratorCSharp Reset()
 		{
-			Output = new StringBuilder();
+			Output = new IndentedStringBuilder();
 			return this;
 		}
 
-		protected void _Generate(AstNodeExprImm Item)
+		protected virtual void _Generate(AstNodeExprImm Item)
 		{
 			var ItemType = Item.Type;
 			var ItemValue = Item.Value;
@@ -40,191 +41,193 @@ namespace SafeILGenerator.Ast.Generators
 					StringValue = String.Format("0x{0:X}", ItemValue);
 				}
 			}
-			Output.Append(StringValue);
+			Output.Write(StringValue);
 		}
 
-		protected void _Generate(AstNodeStmComment Comment)
+		protected virtual void _Generate(AstNodeStmComment Comment)
 		{
-			Output.Append("// " + Comment.CommentText + "\n");
+			Output.Write("// " + Comment.CommentText + "\n");
 		}
 
-		protected void _Generate(AstNodeExprBinop Item)
+		protected virtual void _Generate(AstNodeExprBinop Item)
 		{
-			Output.Append("(");
+			Output.Write("(");
 			this.Generate(Item.LeftNode);
-			Output.Append(" " + Item.Operator + " ");
+			Output.Write(" " + Item.Operator + " ");
 			this.Generate(Item.RightNode);
-			Output.Append(")");
+			Output.Write(")");
 		}
 
-		protected void _Generate(AstNodeStmGotoIfTrue Goto)
+		protected virtual void _Generate(AstNodeStmGotoIfTrue Goto)
 		{
-			Output.Append("if (");
+			Output.Write("if (");
 			Generate(Goto.Condition);
-			Output.Append(") ");
-			Output.Append("goto ");
-			Output.Append("Label_" + Goto.AstLabel.Name);
-			Output.Append(";");
+			Output.Write(") ");
+			Output.Write("goto ");
+			Output.Write("Label_" + Goto.AstLabel.Name);
+			Output.Write(";");
 		}
 
-		protected void _Generate(AstNodeStmGotoIfFalse Goto)
+		protected virtual void _Generate(AstNodeStmGotoIfFalse Goto)
 		{
-			Output.Append("if (!(");
+			Output.Write("if (!(");
 			Generate(Goto.Condition);
-			Output.Append(")) ");
-			Output.Append("goto ");
-			Output.Append("Label_" + Goto.AstLabel.Name);
-			Output.Append(";");
+			Output.Write(")) ");
+			Output.Write("goto ");
+			Output.Write("Label_" + Goto.AstLabel.Name);
+			Output.Write(";");
 		}
 
-		protected void _Generate(AstNodeStmGotoAlways Goto)
+		protected virtual void _Generate(AstNodeStmGotoAlways Goto)
 		{
-			Output.Append("goto ");
-			Output.Append("Label_" + Goto.AstLabel.Name);
-			Output.Append(";");
+			Output.Write("goto ");
+			Output.Write("Label_" + Goto.AstLabel.Name);
+			Output.Write(";");
 		}
 
-		protected void _Generate(AstNodeStmLabel Label)
+		protected virtual void _Generate(AstNodeStmLabel Label)
 		{
-			Output.Append("Label_" + Label.AstLabel.Name);
-			Output.Append(":;");
+			Output.Write("Label_" + Label.AstLabel.Name);
+			Output.Write(":;");
 		}
 
-		protected void _Generate(AstNodeStmExpr Stat)
+		protected virtual void _Generate(AstNodeStmExpr Stat)
 		{
 			Generate(Stat.AstNodeExpr);
-			Output.Append(";");
+			Output.Write(";");
 		}
 
-		protected void _Generate(AstNodeExprTerop Item)
+		protected virtual void _Generate(AstNodeExprTerop Item)
 		{
-			Output.Append("(");
+			Output.Write("(");
 			this.Generate(Item.Cond);
-			Output.Append(" ? ");
+			Output.Write(" ? ");
 			this.Generate(Item.True);
-			Output.Append(" : ");
+			Output.Write(" : ");
 			this.Generate(Item.False);
-			Output.Append(")");
+			Output.Write(")");
 		}
 
-		protected void _Generate(AstNodeStmEmpty Empty)
+		protected virtual void _Generate(AstNodeStmEmpty Empty)
 		{
 		}
 
-		protected void _Generate(AstNodeExprUnop Item)
+		protected virtual void _Generate(AstNodeExprUnop Item)
 		{
-			Output.Append("(" + Item.Operator);
+			Output.Write("(" + Item.Operator);
 			this.Generate(Item.RightNode);
-			Output.Append(")");
+			Output.Write(")");
 		}
 
-		protected void _Generate(AstNodeStmIfElse IfElse)
+		protected virtual void _Generate(AstNodeStmIfElse IfElse)
 		{
-			Output.Append("if (");
+			Output.Write("if (");
 			this.Generate(IfElse.Condition);
-			Output.Append(") ");
+			Output.Write(") ");
 			this.Generate(IfElse.True);
 			if (IfElse.False != null)
 			{
-				Output.Append(" else ");
+				Output.Write(" else ");
 				this.Generate(IfElse.False);
 			}
 		}
 
-		protected void _Generate(AstNodeStmReturn Return)
+		protected virtual void _Generate(AstNodeStmReturn Return)
 		{
-			Output.Append("return");
+			Output.Write("return");
 			if (Return.Expression != null)
 			{
-				Output.Append(" ");
+				Output.Write(" ");
 				this.Generate(Return.Expression);
 			}
-			Output.Append(";");
+			Output.Write(";");
 		}
 
-		protected void _Generate(AstNodeStmAssign Assign)
+		protected virtual void _Generate(AstNodeStmAssign Assign)
 		{
 			Generate(Assign.LValue);
-			Output.Append(" = ");
+			Output.Write(" = ");
 			Generate(Assign.Value);
-			Output.Append(";");
+			Output.Write(";");
 		}
 
-		protected void _Generate(AstNodeExprIndirect Assign)
+		protected virtual void _Generate(AstNodeExprIndirect Assign)
 		{
-			Output.Append("*(");
+			Output.Write("*(");
 			Generate(Assign.PointerExpression);
-			Output.Append(")");
+			Output.Write(")");
 		}
 
-		protected void _Generate(AstNodeExprGetAddress GetAddress)
+		protected virtual void _Generate(AstNodeExprGetAddress GetAddress)
 		{
-			Output.Append("&");
+			Output.Write("&");
 			Generate(GetAddress.Expression);
 		}
 
-		protected void _Generate(AstNodeExprFieldAccess FieldAccess)
+		protected virtual void _Generate(AstNodeExprFieldAccess FieldAccess)
 		{
 			Generate(FieldAccess.Instance);
-			Output.Append(".");
-			Output.Append(FieldAccess.Field.Name);
+			Output.Write(".");
+			Output.Write(FieldAccess.Field.Name);
 		}
 
-		protected void _Generate(AstNodeExprArgument Argument)
+		protected virtual void _Generate(AstNodeExprArgument Argument)
 		{
-			Output.Append(Argument.AstArgument.Name);
+			Output.Write(Argument.AstArgument.Name);
 		}
 
-		protected void _Generate(AstNodeExprCast Cast)
+		protected virtual void _Generate(AstNodeExprCast Cast)
 		{
-			Output.Append("(");
-			Output.Append("(" + Cast.CastedType.Name + ")");
+			Output.Write("(");
+			Output.Write("(" + Cast.CastedType.Name + ")");
 			Generate(Cast.Expr);
-			Output.Append(")");
+			Output.Write(")");
 		}
 
-		protected void _Generate(AstNodeExprCallTail Tail)
+		protected virtual void _Generate(AstNodeExprCallTail Tail)
 		{
-			Output.Append("__tail_call(");
+			Output.Write("__tail_call(");
 			Generate(Tail.Call);
-			Output.Append(")");
+			Output.Write(")");
 		}
 
-		protected void _Generate(AstNodeExprCallStatic Call)
+		protected virtual void _Generate(AstNodeExprCallStatic Call)
 		{
-			Output.Append(Call.MethodInfo.DeclaringType.Name + "." + Call.MethodInfo.Name);
-			Output.Append("(");
+			Output.Write(Call.MethodInfo.DeclaringType.Name + "." + Call.MethodInfo.Name);
+			Output.Write("(");
 			for (int n = 0; n < Call.Parameters.Length; n++)
 			{
-				if (n != 0) Output.Append(", ");
+				if (n != 0) Output.Write(", ");
 				Generate(Call.Parameters[n]);
 			}
-			Output.Append(")");
+			Output.Write(")");
 		}
 
-		protected void _Generate(AstNodeExprCallInstance Call)
+		protected virtual void _Generate(AstNodeExprCallInstance Call)
 		{
 			Generate(Call.Instance);
-			Output.Append("." + Call.MethodInfo.Name);
-			Output.Append("(");
+			Output.Write("." + Call.MethodInfo.Name);
+			Output.Write("(");
 			for (int n = 0; n < Call.Parameters.Length; n++)
 			{
-				if (n != 0) Output.Append(", ");
+				if (n != 0) Output.Write(", ");
 				Generate(Call.Parameters[n]);
 			}
-			Output.Append(")");
+			Output.Write(")");
 		}
 
-		protected void _Generate(AstNodeStmContainer Container)
+		protected virtual void _Generate(AstNodeStmContainer Container)
 		{
-			Output.Append("{\n");
-			foreach (var Node in Container.Nodes)
+			Output.Write("{\n");
+			Output.Indent(() =>
 			{
-				Output.Append("\t");
-				Generate(Node);
-				Output.Append("\n");
-			}
-			Output.Append("}\n");
+				foreach (var Node in Container.Nodes)
+				{
+					Generate(Node);
+					Output.Write("\n");
+				}
+			});
+			Output.Write("}\n");
 		}
 
 		public override string ToString()

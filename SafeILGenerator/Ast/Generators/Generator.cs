@@ -25,6 +25,8 @@ namespace SafeILGenerator.Ast.Generators
 			{
 				GenerateMappings[Method.GetParameters().First().ParameterType] = Method;
 			}
+
+			this.Reset();
 		}
 
 		public virtual TGenerator Reset()
@@ -36,13 +38,13 @@ namespace SafeILGenerator.Ast.Generators
 		/// Determine dinamically which method to call.
 		/// </summary>
 		/// <param name="AstNode"></param>
-		public TGenerator Generate(AstNode AstNode)
+		public virtual TGenerator GenerateRoot(AstNode AstNode)
 		{
-			GenerateInternal(AstNode);
+			Generate(AstNode);
 			return (TGenerator)(object)this;
 		}
 
-		protected virtual void GenerateInternal(AstNode AstNode)
+		protected virtual void Generate(AstNode AstNode)
 		{
 			//if (AstNode == null) return;
 
