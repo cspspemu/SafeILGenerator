@@ -122,6 +122,11 @@ namespace SafeILGenerator.Ast
 			return new AstNodeStmIfElse(Condition, True, False);
 		}
 
+		public AstNodeStmContainer Statements(IEnumerable<AstNodeStm> Statements)
+		{
+			return new AstNodeStmContainer(Statements);
+		}
+
 		public AstNodeStmContainer Statements(params AstNodeStm[] Statements)
 		{
 			return new AstNodeStmContainer(Statements);
