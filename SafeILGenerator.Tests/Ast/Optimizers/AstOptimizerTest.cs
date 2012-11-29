@@ -20,27 +20,26 @@ namespace SafeILGenerator.Tests.Ast.Optimizers
 		[TestMethod]
 		public void TestCalculateImmediates()
 		{
-			var OptimizedNode = new AstOptimizer().Optimize(
-				(ast.Immediate(0) + ast.Immediate(2)) * ast.Immediate(3)
-			);
-			Assert.AreEqual("6", new GeneratorCSharp().GenerateRoot(OptimizedNode).ToString());
-			//Console.WriteLine("{0}", Opti);
+			var Node = (AstNode)((ast.Immediate(0) + ast.Immediate(2)) * ast.Immediate(3));
+			Assert.AreEqual("((0 + 2) * 3)", new GeneratorCSharp().GenerateRoot(Node).ToString());
+			Node = new AstOptimizer().Optimize(Node);
+			Assert.AreEqual("6", new GeneratorCSharp().GenerateRoot(Node).ToString());
 		}
 
 		[TestMethod]
 		public void TestAdd0()
 		{
-			var OptimizedNode = new AstOptimizer().Optimize(
-				(ast.Argument<int>(0, "Arg") + ast.Immediate(0)) * ast.Immediate(3)
-			);
-			Assert.AreEqual("(Arg * 3)", new GeneratorCSharp().GenerateRoot(OptimizedNode).ToString());
-			//Console.WriteLine("{0}", Opti);
+			var Node = (AstNode)((ast.Argument<int>(0, "Arg") + ast.Immediate(0)) * ast.Immediate(3));
+			Assert.AreEqual("((Arg + 0) * 3)", new GeneratorCSharp().GenerateRoot(Node).ToString());
+			Node = new AstOptimizer().Optimize(Node);
+			Assert.AreEqual("(Arg * 3)", new GeneratorCSharp().GenerateRoot(Node).ToString());
 		}
 
 		[TestMethod]
 		public void TestTripleCast()
 		{
 			var Node = (AstNode)ast.Cast<int>(ast.Cast<uint>(ast.Immediate((int)7)));
+			Assert.AreEqual("((Int32)((UInt32)7))", new GeneratorCSharp().GenerateRoot(Node).ToString());
 			Node = new AstOptimizer().Optimize(Node);
 			Assert.AreEqual("7", new GeneratorCSharp().GenerateRoot(Node).ToString());
 		}
@@ -49,6 +48,7 @@ namespace SafeILGenerator.Tests.Ast.Optimizers
 		public void TestCastToImmediate()
 		{
 			var Node = (AstNode)ast.Cast<uint>(ast.Immediate((int)7));
+			Assert.AreEqual("((UInt32)7)", new GeneratorCSharp().GenerateRoot(Node).ToString());
 			Node = new AstOptimizer().Optimize(Node);
 			Assert.AreEqual("7", new GeneratorCSharp().GenerateRoot(Node).ToString());
 		}
@@ -57,6 +57,7 @@ namespace SafeILGenerator.Tests.Ast.Optimizers
 		public void TestCastSignExtend()
 		{
 			var Node = (AstNode)ast.Cast<uint>(ast.Cast<sbyte>(ast.Argument<int>(0, "Arg")));
+			Assert.AreEqual("((UInt32)((SByte)Arg))", new GeneratorCSharp().GenerateRoot(Node).ToString());
 			Node = new AstOptimizer().Optimize(Node);
 			Assert.AreEqual("((UInt32)((SByte)Arg))", new GeneratorCSharp().GenerateRoot(Node).ToString());
 		}
@@ -65,6 +66,7 @@ namespace SafeILGenerator.Tests.Ast.Optimizers
 		public void TestCastSignExtend2()
 		{
 			var Node = (AstNode)ast.Cast<sbyte>(ast.Cast<uint>(ast.Argument<int>(0, "Arg")));
+			Assert.AreEqual("((SByte)((UInt32)Arg))", new GeneratorCSharp().GenerateRoot(Node).ToString());
 			Node = new AstOptimizer().Optimize(Node);
 			Assert.AreEqual("((SByte)Arg)", new GeneratorCSharp().GenerateRoot(Node).ToString());
 		}
@@ -73,6 +75,7 @@ namespace SafeILGenerator.Tests.Ast.Optimizers
 		public void TestZeroMinusNumber()
 		{
 			var Node = (AstNode)ast.Binary(ast.Immediate(0), "-", ast.Argument<int>(0, "Arg"));
+			Assert.AreEqual("(0 - Arg)", new GeneratorCSharp().GenerateRoot(Node).ToString());
 			Node = new AstOptimizer().Optimize(Node);
 			Assert.AreEqual("(-Arg)", new GeneratorCSharp().GenerateRoot(Node).ToString());
 		}

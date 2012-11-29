@@ -3,6 +3,7 @@ using SafeILGenerator.Ast.Nodes;
 using SafeILGenerator.Ast.Utils;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -32,6 +33,10 @@ namespace SafeILGenerator.Ast.Generators
 			else if (Item.Value is IntPtr)
 			{
 				StringValue = String.Format("0x{0:X}", ((IntPtr)Item.Value).ToInt64());
+			}
+			else if (Item.Value is string)
+			{
+				StringValue = String.Format("{0}", AstStringUtils.ToLiteral(Item.Value as string));
 			}
 			else if (!AstUtils.IsTypeSigned(ItemType))
 			{

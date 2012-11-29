@@ -38,6 +38,7 @@ namespace SafeILGenerator.Ast.Nodes
 		public static implicit operator AstNodeExpr(bool Value) { return new AstNodeExprImm(Value); }
 		public static implicit operator AstNodeExpr(float Value) { return new AstNodeExprImm(Value); }
 		public static implicit operator AstNodeExpr(double Value) { return new AstNodeExprImm(Value); }
+		public static implicit operator AstNodeExpr(string Value) { return new AstNodeExprImm(Value); }
 
 		//public static AstNodeExprBinop operator ==(AstNodeExpr Left, AstNodeExpr Right) { return new AstNodeExprBinop(Left, "==", Right); }
 		//public static AstNodeExprBinop operator !=(AstNodeExpr Left, AstNodeExpr Right) { return new AstNodeExprBinop(Left, "!=", Right); }

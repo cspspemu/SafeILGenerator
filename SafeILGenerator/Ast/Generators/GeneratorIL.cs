@@ -18,7 +18,7 @@ namespace SafeILGenerator.Ast.Generators
 		protected bool GenerateLines;
 		protected List<string> Lines = new List<string>();
 
-		protected GeneratorIL()
+		public GeneratorIL()
 		{
 		}
 
@@ -115,6 +115,7 @@ namespace SafeILGenerator.Ast.Generators
 		protected void Emit(OpCode OpCode, long Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
 		protected void Emit(OpCode OpCode, float Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
 		protected void Emit(OpCode OpCode, double Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
+		protected void Emit(OpCode OpCode, string Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
 		protected void Emit(OpCode OpCode, LocalBuilder Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
 		protected void Emit(OpCode OpCode, MethodInfo Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
 		protected void Emit(OpCode OpCode, FieldInfo Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
@@ -170,6 +171,10 @@ namespace SafeILGenerator.Ast.Generators
 			else if (ItemType == typeof(float))
 			{
 				Emit(OpCodes.Ldc_R4, (float)Item.Value);
+			}
+			else if (ItemType == typeof(string))
+			{
+				Emit(OpCodes.Ldstr, (string)Item.Value);
 			}
 			else
 			{
@@ -327,17 +332,41 @@ namespace SafeILGenerator.Ast.Generators
 
 		protected virtual void _Generate(AstNodeExprCallStatic Call)
 		{
-			foreach (var Parameter in Call.Parameters) Generate(Parameter);
-			if (Call.IsTail) Emit(OpCodes.Tailcall);
-			Emit(OpCodes.Call, Call.MethodInfo);
+			if (Call.MethodInfo.CallingConvention.HasFlag(CallingConventions.HasThis))
+			{
+				throw (new Exception("CallString calling convention shouldn't have this"));
+			}
+			switch (Call.MethodInfo.CallingConvention & CallingConventions.Any)
+			{
+				case CallingConventions.Standard:
+					foreach (var Parameter in Call.Parameters) Generate(Parameter);
+					if (Call.IsTail) Emit(OpCodes.Tailcall);
+					Emit(OpCodes.Call, Call.MethodInfo);
+					break;
+				default:
+					throw (new Exception(String.Format("Can't handle calling convention {0}", Call.MethodInfo.CallingConvention)));
+			}
+			
 		}
 
 		protected virtual void _Generate(AstNodeExprCallInstance Call)
 		{
-			Generate(Call.Instance);
-			foreach (var Parameter in Call.Parameters) Generate(Parameter);
-			if (Call.IsTail) Emit(OpCodes.Tailcall);
-			Emit(OpCodes.Call, Call.MethodInfo);
+			if (!Call.MethodInfo.CallingConvention.HasFlag(CallingConventions.HasThis))
+			{
+				throw(new Exception("CallInstance calling convention should have this"));
+			}
+			switch (Call.MethodInfo.CallingConvention & CallingConventions.Any)
+			{
+				case CallingConventions.Standard:
+					Generate(Call.Instance);
+					foreach (var Parameter in Call.Parameters) Generate(Parameter);
+					if (Call.IsTail) Emit(OpCodes.Tailcall);
+					//OpCodes.Calli
+					Emit(OpCodes.Call, Call.MethodInfo);
+					break;
+				default:
+					throw (new Exception(String.Format("Can't handle calling convention {0}", Call.MethodInfo.CallingConvention)));
+			}
 		}
 
 		protected virtual void _GenerateCastToType(Type CastedType)

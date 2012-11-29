@@ -7,6 +7,7 @@ using System.Reflection;
 
 namespace SafeILGenerator
 {
+	[Obsolete("Use AST instead", true)]
 	static public class SafeAssemblyExtensions
 	{
 		static public void AddCustomAttribute<TType>(this TypeBuilder TypeBuilder)
@@ -23,6 +24,7 @@ namespace SafeILGenerator
 		}
 	}
 
+	[Obsolete("Use AST instead", true)]
 	public class SafeAssemblyUtils
 	{
 		static public AssemblyBuilder CreateAssemblyBuilder(string AssemblyName, string OutputPath)

@@ -9,6 +9,7 @@ using System.Runtime.InteropServices;
 
 namespace SafeILGenerator
 {
+	[Obsolete("Use AST instead", error: false)]
 	public class SafeMethodTypeInfo
 	{
 		public Type ReturnType;
@@ -27,6 +28,7 @@ namespace SafeILGenerator
 		}
 	}
 
+	[Obsolete("Use AST instead", error: false)]
 	public partial class CSafeILGenerator
 	{
 		public void UnaryOperation(SafeUnaryOperator Operator)

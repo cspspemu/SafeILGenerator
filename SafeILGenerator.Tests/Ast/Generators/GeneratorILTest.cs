@@ -6,6 +6,7 @@ using System.Reflection.Emit;
 using System.Reflection;
 using SafeILGenerator.Ast.Nodes;
 using SafeILGenerator.Ast;
+using SafeILGenerator.Ast.Utils;
 
 namespace SafeILGenerator.Tests.Ast.Generators
 {
@@ -174,6 +175,28 @@ namespace SafeILGenerator.Tests.Ast.Generators
 				for (int n = 1; n < 8; n++) Assert.AreEqual(FillValue, Data[n]);
 			}
         }
+
+		[TestMethod]
+		public void TestWriteLineLoadString()
+		{
+			var Ast = ast.Statements(
+				ast.Statement(ast.CallStatic((Action<string>)Console.WriteLine, ast.Argument<string>(0))),
+				ast.Statement(ast.CallStatic((Action<string>)Console.WriteLine, "Goodbye World!")),
+				ast.Return()
+			);
+
+			var Method = GeneratorIL.GenerateDelegate<GeneratorIL, Action<string>>("TestWriteLine", Ast);
+
+			Console.WriteLine(new GeneratorCSharp().GenerateRoot(Ast).ToString());
+			Console.WriteLine("{0}", GeneratorIL.GenerateToString<GeneratorIL>(Method.Method, Ast));
+
+			var Output = AstStringUtils.CaptureOutput(() =>
+			{
+				Method("Hello World!");
+			});
+
+			Assert.AreEqual("Hello World!\r\nGoodbye World!\r\n", Output);
+		}
 
 		public class TestClass
 		{

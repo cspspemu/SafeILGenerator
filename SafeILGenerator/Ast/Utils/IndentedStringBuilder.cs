@@ -26,23 +26,35 @@ namespace SafeILGenerator.Ast.Utils
 			}
 		}
 
-		public void Write(string Text)
+		private void WriteNormalText(string InlineText)
 		{
-			var Lines = Text.Split('\n');
-			for (int n = 0; n < Lines.Length; n++)
+			if (InlineText.Length > 0)
 			{
-				var Line = Lines[n];
-				if (n > 0)
-				{
-					StringBuilder.Append("\n");
-					StartingLine = true;
-				}
 				if (StartingLine)
 				{
 					StartingLine = false;
 					StringBuilder.Append(new String(' ', IndentLevel * IndentLevelSpaceCount));
 				}
-				StringBuilder.Append(Line);
+				StringBuilder.Append(InlineText);
+			}
+		}
+
+		private void WriteNewLine()
+		{
+			StartingLine = true;
+			StringBuilder.Append("\n");
+		}
+
+		public void Write(string Text)
+		{
+			var Lines = Text.Split('\n');
+			for (int n = 0; n < Lines.Length; n++)
+			{
+				if (n > 0)
+				{
+					WriteNewLine();
+				}
+				WriteNormalText(Lines[n]);
 			}
 		}
 
