@@ -229,6 +229,13 @@ namespace SafeILGenerator.Ast.Generators
 			Emit(OpCodes.Ldfld, FieldAccess.Field);
 		}
 
+		protected virtual void _Generate(AstNodeExprArrayAccess ArrayAccess)
+		{
+			Generate(ArrayAccess.ArrayInstance);
+			Generate(ArrayAccess.Index);
+			Emit(OpCodes.Ldelem_I4);
+		}
+
 		protected virtual void _Generate(AstNodeExprIndirect Indirect)
 		{
 			Generate(Indirect.PointerExpression);
@@ -347,6 +354,11 @@ namespace SafeILGenerator.Ast.Generators
 					throw (new Exception(String.Format("Can't handle calling convention {0}", Call.MethodInfo.CallingConvention)));
 			}
 			
+		}
+
+		protected virtual void _Generate(AstNodeExprCallDelegate Call)
+		{
+			_Generate((AstNodeExprCallInstance)Call);
 		}
 
 		protected virtual void _Generate(AstNodeExprCallInstance Call)

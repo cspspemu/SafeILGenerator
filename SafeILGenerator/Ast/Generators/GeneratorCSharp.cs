@@ -176,6 +176,14 @@ namespace SafeILGenerator.Ast.Generators
 			Output.Write(FieldAccess.Field.Name);
 		}
 
+		protected virtual void _Generate(AstNodeExprArrayAccess ArrayAccess)
+		{
+			Generate(ArrayAccess.ArrayInstance);
+			Output.Write("[");
+			Generate(ArrayAccess.Index);
+			Output.Write("]");
+		}
+
 		protected virtual void _Generate(AstNodeExprArgument Argument)
 		{
 			Output.Write(Argument.AstArgument.Name);
@@ -196,29 +204,34 @@ namespace SafeILGenerator.Ast.Generators
 			Output.Write(")");
 		}
 
+		private void GenerateCallParameters(AstNodeExpr[] Parameters)
+		{
+			Output.Write("(");
+			for (int n = 0; n < Parameters.Length; n++)
+			{
+				if (n != 0) Output.Write(", ");
+				Generate(Parameters[n]);
+			}
+			Output.Write(")");
+		}
+
 		protected virtual void _Generate(AstNodeExprCallStatic Call)
 		{
 			Output.Write(Call.MethodInfo.DeclaringType.Name + "." + Call.MethodInfo.Name);
-			Output.Write("(");
-			for (int n = 0; n < Call.Parameters.Length; n++)
-			{
-				if (n != 0) Output.Write(", ");
-				Generate(Call.Parameters[n]);
-			}
-			Output.Write(")");
+			GenerateCallParameters(Call.Parameters);
 		}
 
 		protected virtual void _Generate(AstNodeExprCallInstance Call)
 		{
 			Generate(Call.Instance);
 			Output.Write("." + Call.MethodInfo.Name);
-			Output.Write("(");
-			for (int n = 0; n < Call.Parameters.Length; n++)
-			{
-				if (n != 0) Output.Write(", ");
-				Generate(Call.Parameters[n]);
-			}
-			Output.Write(")");
+			GenerateCallParameters(Call.Parameters);
+		}
+
+		protected virtual void _Generate(AstNodeExprCallDelegate Call)
+		{
+			Generate(Call.Instance);
+			GenerateCallParameters(Call.Parameters);
 		}
 
 		protected virtual void _Generate(AstNodeStmContainer Container)

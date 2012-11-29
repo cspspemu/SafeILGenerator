@@ -72,6 +72,11 @@ namespace SafeILGenerator.Ast
 			return new AstNodeExprFieldAccess(Instance, FieldName);
 		}
 
+		public AstNodeExprArrayAccess ArrayAccess(AstNodeExpr Instance, AstNodeExpr Index)
+		{
+			return new AstNodeExprArrayAccess(Instance, Index);
+		}
+
 		public AstNodeExprImm Immediate(object Value)
 		{
 			return new AstNodeExprImm(Value);
@@ -95,6 +100,11 @@ namespace SafeILGenerator.Ast
 		public AstNodeExprCallInstance CallInstance(AstNodeExpr Instance, Delegate Delegate, params AstNodeExpr[] Parameters)
 		{
 			return new AstNodeExprCallInstance(Instance, Delegate, Parameters);
+		}
+
+		public AstNodeExprCallDelegate CallDelegate(AstNodeExpr Instance, params AstNodeExpr[] Parameters)
+		{
+			return new AstNodeExprCallDelegate(Instance, Parameters);
 		}
 
 		public AstNodeExprCallInstance CallInstance(AstNodeExpr Instance, MethodInfo MethodInfo, params AstNodeExpr[] Parameters)
