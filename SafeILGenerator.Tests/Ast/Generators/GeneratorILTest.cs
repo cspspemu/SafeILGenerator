@@ -159,13 +159,20 @@ namespace SafeILGenerator.Tests.Ast.Generators
                 new GeneratorIL(DynamicMethod, ILGenerator).GenerateRoot(AstNode);
             });
 
-            var Data = new bool[1];
-            fixed (bool* DataPtr = Data)
-            {
-                Func(DataPtr);
-            }
+			foreach (var FillValue in new bool[] { false, true })
+			{
+				var Data = new bool[8];
+				for (int n = 0; n < Data.Length; n++) Data[n] = FillValue;
+				Data[0] = false;
 
-            Assert.AreEqual(true, Data[0]);
+				fixed (bool* DataPtr = Data)
+				{
+					Func(DataPtr);
+				}
+
+				Assert.AreEqual(true, Data[0]);
+				for (int n = 1; n < 8; n++) Assert.AreEqual(FillValue, Data[n]);
+			}
         }
 
 		public class TestClass
