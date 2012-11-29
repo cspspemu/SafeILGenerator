@@ -141,6 +141,33 @@ namespace SafeILGenerator.Tests.Ast.Generators
 			Assert.AreEqual(456, Data[0]);
 		}
 
+        [TestMethod]
+        public void TestPointerWrite_bool()
+        {
+            var Func = GenerateDynamicMethod<ActionPointer>("Test", (DynamicMethod, ILGenerator) =>
+            {
+                var AstNode = ast.Statements(
+                    ast.Assign(
+                    ast.Indirect(ast.Cast(typeof(bool*), ast.Argument(typeof(bool*), 0, "Ptr"))),
+                        ast.Immediate(true)
+                    ),
+                    ast.Return()
+                );
+
+                Console.WriteLine(new GeneratorCSharp().GenerateRoot((AstNode)AstNode).ToString());
+
+                new GeneratorIL(DynamicMethod, ILGenerator).GenerateRoot(AstNode);
+            });
+
+            var Data = new bool[1];
+            fixed (bool* DataPtr = Data)
+            {
+                Func(DataPtr);
+            }
+
+            Assert.AreEqual(true, Data[0]);
+        }
+
 		public class TestClass
 		{
 			public int Test;

@@ -299,6 +299,7 @@ namespace SafeILGenerator.Ast.Generators
 				else if (PointerType == typeof(long)) Emit(OpCodes.Stind_I8);
 				else if (PointerType == typeof(float)) Emit(OpCodes.Stind_R4);
 				else if (PointerType == typeof(double)) Emit(OpCodes.Stind_R8);
+                else if (PointerType == typeof(bool)) Emit(OpCodes.Stind_I);
 				else throw (new NotImplementedException("Can't store indirect value"));
 			}
 			else
@@ -342,7 +343,6 @@ namespace SafeILGenerator.Ast.Generators
 		protected virtual void _GenerateCastToType(Type CastedType)
 		{
 			if (false) { }
-
 			else if (CastedType == typeof(sbyte)) Emit(OpCodes.Conv_I1);
 			else if (CastedType == typeof(short)) Emit(OpCodes.Conv_I2);
 			else if (CastedType == typeof(int)) Emit(OpCodes.Conv_I4);
@@ -355,6 +355,8 @@ namespace SafeILGenerator.Ast.Generators
 
 			else if (CastedType == typeof(float)) Emit(OpCodes.Conv_R4);
 			else if (CastedType == typeof(double)) Emit(OpCodes.Conv_R8);
+
+            else if (CastedType == typeof(bool)) Emit(OpCodes.Conv_I);
 
 			else if (CastedType.IsPointer) Emit(OpCodes.Conv_I);
 			else if (CastedType.IsByRef) Emit(OpCodes.Conv_I);

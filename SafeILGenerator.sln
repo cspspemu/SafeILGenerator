@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 11
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SafeILGenerator", "SafeILGenerator\SafeILGenerator.csproj", "{9A93C7E4-09DA-46CF-B7DD-6BB09681D5AB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SafeILGenerator.Tests", "SafeILGenerator.Tests\SafeILGenerator.Tests.csproj", "{84686E6D-3496-4934-A021-79FA6B7E7420}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SafeILGenerator.Tests", "SafeILGenerator.Tests\Tests.SafeILGenerator.csproj", "{84686E6D-3496-4934-A021-79FA6B7E7420}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
