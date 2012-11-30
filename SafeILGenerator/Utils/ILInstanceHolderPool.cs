@@ -48,10 +48,11 @@ namespace SafeILGenerator.Utils
 		}
 	}
 
-	public class ILInstanceHolderPoolItem
+	public class ILInstanceHolderPoolItem : IDisposable
 	{
 		private readonly ILInstanceHolderPool Parent;
 		public readonly int Index;
+		internal bool Allocated;
 		public readonly FieldInfo FieldInfo;
 
 		public ILInstanceHolderPoolItem(ILInstanceHolderPool Parent, int Index, FieldInfo FieldInfo)
@@ -77,13 +78,22 @@ namespace SafeILGenerator.Utils
 
 		public void Free()
 		{
-			Parent.Free(this);
+			if (Allocated)
+			{
+				Allocated = false;
+				Parent.Free(this);
+			}
 		}
 
 		public AstNodeExprStaticFieldAccess GetAstFieldAccess()
 		{
 			if (FieldInfo == null) throw (new Exception("FieldInfo == null"));
 			return new AstNodeExprStaticFieldAccess(FieldInfo);
+		}
+
+		void IDisposable.Dispose()
+		{
+			Free();
 		}
 	}
 
@@ -118,6 +128,7 @@ namespace SafeILGenerator.Utils
 		{
 			var Item = FieldInfos[FreeItems.First.Value];
 			FreeItems.RemoveFirst();
+			Item.Allocated = true;
 			Item.Value = null;
 			return Item;
 		}
