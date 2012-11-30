@@ -54,6 +54,7 @@
     <Compile Include="Ast\Generators\GeneratorCSharpTest.cs" />
     <Compile Include="Ast\Generators\GeneratorILTest.cs" />
     <Compile Include="Ast\Optimizers\AstOptimizerTest.cs" />
+    <Compile Include="Ast\Serializers\UnitTest1.cs" />
     <Compile Include="Ast\Utils\IndentedStringBuilderTest.cs" />
     <Compile Include="SafeILGeneratorTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

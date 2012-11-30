@@ -89,5 +89,16 @@ namespace SafeILGenerator.Ast.Nodes
 				return ResultType;
 			}
 		}
+
+		public override Dictionary<string, string> Info
+		{
+			get
+			{
+				return new Dictionary<string, string>()
+				{
+					{ "Operator", Operator },
+				};
+			}
+		}
 	}
 }

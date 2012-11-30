@@ -80,8 +80,6 @@ namespace SafeILGenerator.Tests.Ast.Optimizers
 			Assert.AreEqual("(-Arg)", new GeneratorCSharp().GenerateRoot(Node).ToString());
 		}
 
-		static XmlSerializer AstNodeSerializer = new XmlSerializer(typeof(AstNode));
-
 		[TestMethod]
 		public void TestCompactStmContainer()
 		{
@@ -104,6 +102,19 @@ namespace SafeILGenerator.Tests.Ast.Optimizers
 			Assert.AreEqual(
 				"AstNodeStmContainer(AstNodeStmReturn(), AstNodeStmReturn(), AstNodeStmReturn(), AstNodeStmReturn(), AstNodeStmReturn(), AstNodeStmReturn())",
 				AstSerializer.Serialize(Node)
+			);
+		}
+
+		[TestMethod]
+		public void TestCompactStmContainer2()
+		{
+			var Node = (AstNode)ast.Statements(
+				ast.Return()
+			);
+			Node = new AstOptimizer().Optimize(Node);
+			Assert.AreEqual(
+				"<AstNodeStmReturn />",
+				AstSerializer.SerializeAsXml(Node, false)
 			);
 		}
 	}

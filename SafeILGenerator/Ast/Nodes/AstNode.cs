@@ -44,6 +44,7 @@ namespace SafeILGenerator.Ast.Nodes
 	{
 		public AstNode Parent;
 		public abstract void TransformNodes(TransformNodesDelegate Transformer);
+		public virtual Dictionary<string, string> Info { get { return null; } }
 
 		public IEnumerable<AstNode> Descendant
 		{

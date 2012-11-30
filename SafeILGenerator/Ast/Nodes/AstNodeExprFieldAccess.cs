@@ -33,6 +33,17 @@ namespace SafeILGenerator.Ast.Nodes
 		{
 			Transformer.Ref(ref Instance);
 		}
+
+		public override Dictionary<string, string> Info
+		{
+			get
+			{
+				return new Dictionary<string, string>()
+				{
+					{ "Field", Field.Name },
+				};
+			}
+		}
 	}
 
 	public class AstNodeExprStaticFieldAccess : AstNodeExprLValue
@@ -52,6 +63,17 @@ namespace SafeILGenerator.Ast.Nodes
 
 		public override void TransformNodes(TransformNodesDelegate Transformer)
 		{
+		}
+
+		public override Dictionary<string, string> Info
+		{
+			get
+			{
+				return new Dictionary<string, string>()
+				{
+					{ "Field", Field.DeclaringType.Name + "." + Field.Name },
+				};
+			}
 		}
 	}
 

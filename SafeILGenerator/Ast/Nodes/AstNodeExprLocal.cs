@@ -23,5 +23,16 @@ namespace SafeILGenerator.Ast.Nodes
 		public override void TransformNodes(TransformNodesDelegate Transformer)
 		{
 		}
+
+		public override Dictionary<string, string> Info
+		{
+			get
+			{
+				return new Dictionary<string, string>()
+				{
+					{ "Local", AstLocal.Name },
+				};
+			}
+		}
 	}
 }

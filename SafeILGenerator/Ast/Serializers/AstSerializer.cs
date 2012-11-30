@@ -1,4 +1,5 @@
 ﻿using SafeILGenerator.Ast.Nodes;
+using SafeILGenerator.Ast.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +18,50 @@ namespace SafeILGenerator.Ast.Serializers
 				Parameters.Add(Serialize(Child));
 			}
 			return Node.GetType().Name + "(" + String.Join(", ", Parameters) + ")";
+		}
+
+		static public string SerializeAsXml(AstNode Node, bool Spaces = true)
+		{
+			var Out = new IndentedStringBuilder();
+			SerializeAsXml(Node, Out, Spaces);
+			return Out.ToString();
+		}
+
+		static private void SerializeAsXml(AstNode Node, IndentedStringBuilder Out, bool Spaces)
+		{
+			var NodeName = Node.GetType().Name;
+			Out.Write("<" + NodeName);
+			var Parameters = Node.Info;
+			if (Parameters != null)
+			{
+				foreach (var Pair in Parameters)
+				{
+					Out.Write(String.Format(" {0}=\"{1}\"", Pair.Key, Pair.Value));
+				}
+			}
+			if (Node.Childs.Count() > 0)
+			{
+				Out.Write(">");
+				if (Spaces) Out.Write("\n");
+				if (Spaces)
+				{
+					Out.Indent(() =>
+					{
+						foreach (var Child in Node.Childs) SerializeAsXml(Child, Out, Spaces);
+					});
+				}
+				else
+				{
+					foreach (var Child in Node.Childs) SerializeAsXml(Child, Out, Spaces);
+				}
+				Out.Write("</" + NodeName + ">");
+				if (Spaces) Out.Write("\n");
+			}
+			else
+			{
+				Out.Write(" />");
+				if (Spaces) Out.Write("\n");
+			}
 		}
 	}
 }

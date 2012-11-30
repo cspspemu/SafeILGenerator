@@ -95,6 +95,14 @@ namespace SafeILGenerator.Ast.Generators
 			}
 		}
 
+		protected void EmitComment(string Text)
+		{
+			if (GenerateLines)
+			{
+				Lines.Add(String.Format("; {0}", Text));
+			}
+		}
+
 		protected void DefineLabelHook()
 		{
 		}

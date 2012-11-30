@@ -28,5 +28,16 @@ namespace SafeILGenerator.Ast.Nodes
 		{
 			Transformer.Ref(ref Expr);
 		}
+
+		public override Dictionary<string, string> Info
+		{
+			get
+			{
+				return new Dictionary<string, string>()
+				{
+					{ "Cast", CastedType.Name },
+				};
+			}
+		}
 	}
 }
