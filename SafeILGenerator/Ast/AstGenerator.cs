@@ -182,5 +182,9 @@ namespace SafeILGenerator.Ast
 			return new AstNodeExprIndirect(PointerExpr);
 		}
 
+		public AstNodeStm DebugWrite(string Text)
+		{
+			return Statement(CallStatic((Action<string>)Console.WriteLine, Text));
+		}
 	}
 }
