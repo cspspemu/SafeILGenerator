@@ -25,6 +25,11 @@ namespace SafeILGenerator.Ast.Generators
 			return new TGeneratorCSharp().GenerateRoot(AstNode).ToString();
 		}
 
+		protected virtual void _Generate(AstNodeExprLocal Local)
+		{
+			Output.Write(Local.AstLocal.Name);
+		}
+
 		protected virtual void _Generate(AstNodeExprImm Item)
 		{
 			var ItemType = Item.Type;
