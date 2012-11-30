@@ -57,7 +57,7 @@ namespace SafeILGenerator.Tests.Util
 			Assert.AreEqual(0, ILInstanceHolder.CapacityCount);
 			Assert.AreEqual(0, ILInstanceHolder.FreeCount);
 			
-			var GlobalKey = ILInstanceHolder.Alloc<int>();
+			var GlobalKey = ILInstanceHolder.TAlloc<int>();
 
 			Assert.AreEqual(4, ILInstanceHolder.CapacityCount);
 			Assert.AreEqual(3, ILInstanceHolder.FreeCount);

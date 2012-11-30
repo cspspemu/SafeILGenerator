@@ -1,10 +1,12 @@
 ﻿using SafeILGenerator.Ast;
 using SafeILGenerator.Ast.Generators;
+using SafeILGenerator.Ast.Nodes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -23,10 +25,12 @@ namespace SafeILGenerator.Utils
 
 		public TType Value
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
 			{
 				Item.Value = value;
 			}
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return (TType)Item.Value;
@@ -36,6 +40,11 @@ namespace SafeILGenerator.Utils
 		public void Free()
 		{
 			Item.Free();
+		}
+
+		public AstNodeExprStaticFieldAccess GetAstFieldAccess()
+		{
+			return Item.GetAstFieldAccess();
 		}
 	}
 
@@ -54,10 +63,12 @@ namespace SafeILGenerator.Utils
 
 		public object Value
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
 			{
 				FieldInfo.SetValue(null, value);
 			}
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return FieldInfo.GetValue(null);
@@ -67,6 +78,12 @@ namespace SafeILGenerator.Utils
 		public void Free()
 		{
 			Parent.Free(this);
+		}
+
+		public AstNodeExprStaticFieldAccess GetAstFieldAccess()
+		{
+			if (FieldInfo == null) throw (new Exception("FieldInfo == null"));
+			return new AstNodeExprStaticFieldAccess(FieldInfo);
 		}
 	}
 

@@ -24,11 +24,13 @@ namespace SafeILGenerator.Utils
 				{
 					PoolsType.Add(FreePool = new ILInstanceHolderPool(Type, 1 << (PoolsType.Count + 2)));
 				}
-				return FreePool.Alloc();
+				var Item = FreePool.Alloc();
+				Item.Value = Value;
+				return Item;
 			}
 		}
 
-		public static ILInstanceHolderPoolItem<TType> Alloc<TType>(TType Value = default(TType))
+		public static ILInstanceHolderPoolItem<TType> TAlloc<TType>(TType Value = default(TType))
 		{
 			return new ILInstanceHolderPoolItem<TType>(Alloc(typeof(TType), Value));
 		}
