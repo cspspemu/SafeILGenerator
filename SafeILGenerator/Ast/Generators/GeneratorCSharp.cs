@@ -102,8 +102,11 @@ namespace SafeILGenerator.Ast.Generators
 
 		protected virtual void _Generate(AstNodeStmLabel Label)
 		{
-			Output.Write("Label_" + Label.AstLabel.Name);
-			Output.Write(":;");
+			Output.UnIndent(() =>
+			{
+				Output.Write("Label_" + Label.AstLabel.Name);
+				Output.Write(":;");
+			});
 		}
 
 		protected virtual void _Generate(AstNodeStmExpr Stat)

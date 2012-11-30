@@ -192,7 +192,7 @@ namespace SafeILGenerator.Ast.Generators
 
 		protected virtual void _Generate(AstNodeStmComment Comment)
 		{
-			// Do nothing
+			EmitComment(Comment.CommentText);
 		}
 
 		protected virtual void _Generate(AstNodeStmContainer Container)

@@ -26,6 +26,19 @@ namespace SafeILGenerator.Ast.Utils
 			}
 		}
 
+		public void UnIndent(Action Action)
+		{
+			IndentLevel--;
+			try
+			{
+				Action();
+			}
+			finally
+			{
+				IndentLevel++;
+			}
+		}
+
 		private void WriteNormalText(string InlineText)
 		{
 			if (InlineText.Length > 0)
@@ -33,7 +46,7 @@ namespace SafeILGenerator.Ast.Utils
 				if (StartingLine)
 				{
 					StartingLine = false;
-					StringBuilder.Append(new String(' ', IndentLevel * IndentLevelSpaceCount));
+					StringBuilder.Append(new String(' ', Math.Max(IndentLevel, 0) * IndentLevelSpaceCount));
 				}
 				StringBuilder.Append(InlineText);
 			}
