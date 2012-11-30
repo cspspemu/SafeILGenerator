@@ -12,18 +12,21 @@ namespace SafeILGenerator.Tests.Util
 		private static AstGenerator ast = AstGenerator.Instance;
 
 		[TestMethod]
-		public void TestMethod1()
+		public void TestAllocAssignGetAndRelease()
 		{
-			var Pool = new ILInstanceHolderPool<int>(16);
+			var Pool = new ILInstanceHolderPool(typeof(int), 16);
 			var Item = Pool.Alloc();
-			Item.Set(10);
-			Assert.AreEqual(10, Item.Get());
+			Item.Value = 10;
+			Assert.AreEqual(10, Item.Value);
+			Assert.AreEqual(15, Pool.FreeCount);
+			Item.Free();
+			Assert.AreEqual(16, Pool.FreeCount);
 		}
 
 		[TestMethod]
 		public void TestMethod2()
 		{
-			var Pool = new ILInstanceHolderPool<int>(16);
+			var Pool = new ILInstanceHolderPool(typeof(int), 16);
 			var Item = Pool.Alloc();
 			var AstNode = ast.Statements(
 				ast.Assign(ast.StaticFieldAccess(Item.FieldInfo), ast.Argument<int>(0, "Value")),
@@ -32,20 +35,28 @@ namespace SafeILGenerator.Tests.Util
 			Console.WriteLine(GeneratorCSharp.GenerateString<GeneratorCSharp>(AstNode));
 			var ItemSet = GeneratorIL.GenerateDelegate<GeneratorIL, Action<int>>("ItemSet", AstNode);
 			ItemSet(10);
-			Assert.AreEqual(10, Item.Get());
+			Assert.AreEqual(10, Item.Value);
 		}
 
 		[TestMethod]
 		public void TestMethod3()
 		{
-			var Pool1 = new ILInstanceHolderPool<int>(16);
-			var Pool2 = new ILInstanceHolderPool<int>(16);
+			var Pool1 = new ILInstanceHolderPool(typeof(int), 16);
+			var Pool2 = new ILInstanceHolderPool(typeof(int), 16);
 			var Item1 = Pool1.Alloc();
 			var Item2 = Pool2.Alloc();
-			Item1.Set(11);
-			Item2.Set(22);
-			Assert.AreEqual(11, Item1.Get());
-			Assert.AreEqual(22, Item2.Get());
+			Item1.Value = 11;
+			Item2.Value = 22;
+			Assert.AreEqual(11, Item1.Value);
+			Assert.AreEqual(22, Item2.Value);
+		}
+
+		[TestMethod]
+		public void TestGlobalAlloc()
+		{
+			var GlobalKey = ILInstanceHolder.Alloc<int>();
+			GlobalKey.Value = 10;
+			GlobalKey.Free();
 		}
 	}
 }

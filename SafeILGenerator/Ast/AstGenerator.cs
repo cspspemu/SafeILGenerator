@@ -1,5 +1,6 @@
 ﻿using SafeILGenerator.Ast;
 using SafeILGenerator.Ast.Nodes;
+using SafeILGenerator.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -81,6 +82,11 @@ namespace SafeILGenerator.Ast
 		{
 			return new AstNodeExprImm(Value);
 		}
+
+		//public AstNodeExprStaticFieldAccess ImmediateObject<TType>(ILInstanceHolderPool<TType> Pool, TType Value)
+		//{
+		//	return new AstNodeExprImm(Value);
+		//}
 
 		public AstNodeExprCallTail CallTail(AstNodeExprCall Call)
 		{
