@@ -20,6 +20,11 @@ namespace SafeILGenerator.Ast.Generators
 			return this;
 		}
 
+		static public string GenerateString<TGeneratorCSharp>(AstNode AstNode) where TGeneratorCSharp : GeneratorCSharp, new()
+		{
+			return new TGeneratorCSharp().GenerateRoot(AstNode).ToString();
+		}
+
 		protected virtual void _Generate(AstNodeExprImm Item)
 		{
 			var ItemType = Item.Type;
@@ -172,6 +177,13 @@ namespace SafeILGenerator.Ast.Generators
 		protected virtual void _Generate(AstNodeExprFieldAccess FieldAccess)
 		{
 			Generate(FieldAccess.Instance);
+			Output.Write(".");
+			Output.Write(FieldAccess.Field.Name);
+		}
+
+		protected virtual void _Generate(AstNodeExprStaticFieldAccess FieldAccess)
+		{
+			Output.Write(FieldAccess.Field.DeclaringType.Name);
 			Output.Write(".");
 			Output.Write(FieldAccess.Field.Name);
 		}

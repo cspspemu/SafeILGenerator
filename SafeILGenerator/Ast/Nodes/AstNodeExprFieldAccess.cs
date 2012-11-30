@@ -34,4 +34,25 @@ namespace SafeILGenerator.Ast.Nodes
 			Transformer.Ref(ref Instance);
 		}
 	}
+
+	public class AstNodeExprStaticFieldAccess : AstNodeExprLValue
+	{
+		public FieldInfo Field;
+
+		public AstNodeExprStaticFieldAccess(FieldInfo Field, string FieldName = null)
+		{
+			if (Field == null) throw (new Exception(String.Format("Field can't be null '{0}'", FieldName)));
+			this.Field = Field;
+		}
+
+		protected override Type UncachedType
+		{
+			get { return Field.FieldType; }
+		}
+
+		public override void TransformNodes(TransformNodesDelegate Transformer)
+		{
+		}
+	}
+
 }

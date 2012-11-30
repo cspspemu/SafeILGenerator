@@ -186,5 +186,10 @@ namespace SafeILGenerator.Ast
 		{
 			return Statement(CallStatic((Action<string>)Console.WriteLine, Text));
 		}
+
+		public AstNodeExprLValue StaticFieldAccess(FieldInfo FieldInfo)
+		{
+			return new AstNodeExprStaticFieldAccess(FieldInfo);
+		}
 	}
 }

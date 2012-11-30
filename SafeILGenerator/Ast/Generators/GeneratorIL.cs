@@ -229,6 +229,11 @@ namespace SafeILGenerator.Ast.Generators
 			Emit(OpCodes.Ldfld, FieldAccess.Field);
 		}
 
+		protected virtual void _Generate(AstNodeExprStaticFieldAccess FieldAccess)
+		{
+			Emit(OpCodes.Ldsfld, FieldAccess.Field);
+		}
+
 		protected virtual void _Generate(AstNodeExprArrayAccess ArrayAccess)
 		{
 			Generate(ArrayAccess.ArrayInstance);
@@ -280,6 +285,7 @@ namespace SafeILGenerator.Ast.Generators
 			var AstNodeExprLocal = (Assign.LValue as AstNodeExprLocal);
 			var AstNodeExprArgument = (Assign.LValue as AstNodeExprArgument);
 			var AstNodeExprFieldAccess = (Assign.LValue as AstNodeExprFieldAccess);
+			var AstNodeExprStaticFieldAccess = (Assign.LValue as AstNodeExprStaticFieldAccess);
 			var AstNodeExprIndirect = (Assign.LValue as AstNodeExprIndirect);
 
 			if (AstNodeExprLocal != null)
@@ -298,6 +304,11 @@ namespace SafeILGenerator.Ast.Generators
 				Generate(Assign.Value);
 				Emit(OpCodes.Stfld, AstNodeExprFieldAccess.Field);
 			}
+			else if (AstNodeExprStaticFieldAccess != null)
+			{
+				Generate(Assign.Value);
+				Emit(OpCodes.Stsfld, AstNodeExprStaticFieldAccess.Field);
+			}
 			else if (AstNodeExprIndirect != null)
 			{
 				var PointerType = AstUtils.GetSignedType(AstNodeExprIndirect.PointerExpression.Type.GetElementType());
@@ -311,7 +322,7 @@ namespace SafeILGenerator.Ast.Generators
 				else if (PointerType == typeof(long)) Emit(OpCodes.Stind_I8);
 				else if (PointerType == typeof(float)) Emit(OpCodes.Stind_R4);
 				else if (PointerType == typeof(double)) Emit(OpCodes.Stind_R8);
-                else if (PointerType == typeof(bool)) Emit(OpCodes.Stind_I);
+				else if (PointerType == typeof(bool)) Emit(OpCodes.Stind_I1);
 				else throw (new NotImplementedException("Can't store indirect value"));
 			}
 			else
@@ -397,7 +408,7 @@ namespace SafeILGenerator.Ast.Generators
 			else if (CastedType == typeof(float)) Emit(OpCodes.Conv_R4);
 			else if (CastedType == typeof(double)) Emit(OpCodes.Conv_R8);
 
-            else if (CastedType == typeof(bool)) Emit(OpCodes.Conv_I);
+            else if (CastedType == typeof(bool)) Emit(OpCodes.Conv_I1);
 
 			else if (CastedType.IsPointer) Emit(OpCodes.Conv_I);
 			else if (CastedType.IsByRef) Emit(OpCodes.Conv_I);
