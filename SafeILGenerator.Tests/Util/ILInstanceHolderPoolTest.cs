@@ -54,9 +54,20 @@ namespace SafeILGenerator.Tests.Util
 		[TestMethod]
 		public void TestGlobalAlloc()
 		{
+			Assert.AreEqual(0, ILInstanceHolder.CapacityCount);
+			Assert.AreEqual(0, ILInstanceHolder.FreeCount);
+			
 			var GlobalKey = ILInstanceHolder.Alloc<int>();
+
+			Assert.AreEqual(4, ILInstanceHolder.CapacityCount);
+			Assert.AreEqual(3, ILInstanceHolder.FreeCount);
+
 			GlobalKey.Value = 10;
 			GlobalKey.Free();
+
+			Assert.AreEqual(4, ILInstanceHolder.CapacityCount);
+			Assert.AreEqual(4, ILInstanceHolder.FreeCount);
+
 		}
 	}
 }

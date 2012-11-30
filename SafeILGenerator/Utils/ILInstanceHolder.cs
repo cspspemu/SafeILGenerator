@@ -8,17 +8,17 @@ namespace SafeILGenerator.Utils
 {
 	public class ILInstanceHolder
 	{
-		private static Dictionary<Type, List<ILInstanceHolderPool>> Pools = new Dictionary<Type, List<ILInstanceHolderPool>>();
+		private static Dictionary<Type, List<ILInstanceHolderPool>> TypePools = new Dictionary<Type, List<ILInstanceHolderPool>>();
 
 		public static ILInstanceHolderPoolItem Alloc(Type Type, object Value = null)
 		{
-			lock (Pools)
+			lock (TypePools)
 			{
-				if (!Pools.ContainsKey(Type))
+				if (!TypePools.ContainsKey(Type))
 				{
-					Pools[Type] = new List<ILInstanceHolderPool>();
+					TypePools[Type] = new List<ILInstanceHolderPool>();
 				}
-				var PoolsType = Pools[Type];
+				var PoolsType = TypePools[Type];
 				var FreePool = PoolsType.Where(Pool => Pool.HasAvailable).FirstOrDefault();
 				if (FreePool == null)
 				{
@@ -31,6 +31,22 @@ namespace SafeILGenerator.Utils
 		public static ILInstanceHolderPoolItem<TType> Alloc<TType>(TType Value = default(TType))
 		{
 			return new ILInstanceHolderPoolItem<TType>(Alloc(typeof(TType), Value));
+		}
+
+		public static int FreeCount
+		{
+			get
+			{
+				return TypePools.Values.Sum(Pools => Pools.Sum(Pool => Pool.FreeCount));
+			}
+		}
+
+		public static int CapacityCount
+		{
+			get
+			{
+				return TypePools.Values.Sum(Pools => Pools.Sum(Pool => Pool.CapacityCount));
+			}
 		}
 	}
 }

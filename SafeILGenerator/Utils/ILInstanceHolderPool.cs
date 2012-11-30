@@ -79,6 +79,7 @@ namespace SafeILGenerator.Utils
 		private LinkedList<int> FreeItems = new LinkedList<int>();
 		private Type HolderType;
 		private static int Autoincrement = 0;
+		public readonly int CapacityCount;
 
 		public int FreeCount
 		{
@@ -126,6 +127,7 @@ namespace SafeILGenerator.Utils
 		public ILInstanceHolderPool(Type ItemType, int Count, string TypeName = null)
 		{
 			this.ItemType = ItemType;
+			this.CapacityCount = Count;
 			if (TypeName == null) TypeName = "DynamicType" + Autoincrement++;
 			var TypeBuilder = ModuleBuilder.DefineType(TypeName, TypeAttributes.Sealed | TypeAttributes.Public | TypeAttributes.Class);
 			FieldInfos = new ILInstanceHolderPoolItem[Count];
