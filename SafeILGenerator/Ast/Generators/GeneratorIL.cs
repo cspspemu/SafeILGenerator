@@ -130,6 +130,11 @@ namespace SafeILGenerator.Ast.Generators
 		protected void Emit(OpCode OpCode, Type Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
 		protected void Emit(OpCode OpCode, AstLabel Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value.Label); }
 
+		protected virtual void _Generate(AstNodeExprNull Null)
+		{
+			Emit(OpCodes.Ldnull);
+		}
+
 		protected virtual void _Generate(AstNodeExprImm Item)
 		{
 			var ItemType = AstUtils.GetSignedType(Item.Type);

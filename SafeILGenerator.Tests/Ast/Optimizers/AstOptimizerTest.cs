@@ -81,6 +81,15 @@ namespace SafeILGenerator.Tests.Ast.Optimizers
 		}
 
 		[TestMethod]
+		public void TestAddNegated()
+		{
+			var Node = (AstNode)ast.Binary(ast.Immediate(1), "+", -ast.Argument<int>(0, "Arg"));
+			Assert.AreEqual("(1 + (-Arg))", new GeneratorCSharp().GenerateRoot(Node).ToString());
+			Node = new AstOptimizer().Optimize(Node);
+			Assert.AreEqual("(1 - Arg)", new GeneratorCSharp().GenerateRoot(Node).ToString());
+		}
+
+		[TestMethod]
 		public void TestCompactStmContainer()
 		{
 			var Node = (AstNode)ast.Statements(

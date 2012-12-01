@@ -130,6 +130,18 @@ namespace SafeILGenerator.Ast.Optimizers
 
 			if ((LeftType == RightType) && !AstUtils.IsTypeFloat(LeftType))
 			{
+				if (Binary.RightNode is AstNodeExprUnop)
+				{
+					var RightUnary = Binary.RightNode as AstNodeExprUnop;
+					if (Operator == "+" || Operator == "-")
+					{
+						if (RightUnary.Operator == "-")
+						{
+							return new AstNodeExprBinop(Binary.LeftNode, (Operator == "+") ? "-" : "+", RightUnary.RightNode);
+						}
+					}
+				}
+
 				var Type = LeftType;
 				// Can optimize just literal values.
 				if ((LeftImm != null) && (RightImm != null))

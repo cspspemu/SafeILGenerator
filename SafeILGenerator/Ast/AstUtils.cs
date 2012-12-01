@@ -21,11 +21,10 @@ namespace SafeILGenerator.Ast
 			if (Type == typeof(long)) return sizeof(long);
 			if (Type == typeof(float)) return sizeof(float);
 			if (Type == typeof(double)) return sizeof(double);
-			if (Type == typeof(IntPtr)) return Marshal.SizeOf(typeof(IntPtr));
-			if (Type.IsPointer) return sizeof(void*);
-			Console.Error.WriteLine("Warning. Trying to get size({0}) for: {1}", Marshal.SizeOf(Type), Type);
-			return Marshal.SizeOf(Type);
-			//throw (new Exception("GetTypeSize: Invalid type"));
+			if (Type == typeof(IntPtr) || Type.IsPointer || Type.IsByRef) return sizeof(void*);
+			if (Type.IsAnsiClass) return sizeof(IntPtr);
+			Console.Error.WriteLine("Warning. Trying to get size for {0}", Type);
+			return Marshal.SizeOf(typeof(IntPtr));
 		}
 
 		static public Type GetSignedType(Type Type)

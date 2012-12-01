@@ -83,6 +83,11 @@ namespace SafeILGenerator.Ast
 			return new AstNodeExprImm(Value);
 		}
 
+		public AstNodeExprNull Null<TType>()
+		{
+			return new AstNodeExprNull(typeof(TType));
+		}
+
 		//public AstNodeExprStaticFieldAccess ImmediateObject<TType>(ILInstanceHolderPool<TType> Pool, TType Value)
 		//{
 		//	return new AstNodeExprImm(Value);

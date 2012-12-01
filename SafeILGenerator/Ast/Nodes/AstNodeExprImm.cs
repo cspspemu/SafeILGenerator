@@ -40,4 +40,34 @@ namespace SafeILGenerator.Ast.Nodes
 			}
 		}
 	}
+
+	public class AstNodeExprNull : AstNodeExpr
+	{
+		public readonly Type Type;
+
+		public AstNodeExprNull(Type Type)
+		{
+			this.Type = Type;
+		}
+
+		public override void TransformNodes(TransformNodesDelegate Transformer)
+		{
+		}
+
+		protected override Type UncachedType
+		{
+			get { return this.Type; }
+		}
+
+		public override Dictionary<string, string> Info
+		{
+			get
+			{
+				return new Dictionary<string, string>()
+				{
+					{ "Type", String.Format("{0}", Type.Name) },
+				};
+			}
+		}
+	}
 }

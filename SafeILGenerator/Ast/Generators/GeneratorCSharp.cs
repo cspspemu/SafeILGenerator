@@ -30,6 +30,11 @@ namespace SafeILGenerator.Ast.Generators
 			Output.Write(Local.AstLocal.Name);
 		}
 
+		protected virtual void _Generate(AstNodeExprNull Null)
+		{
+			Output.Write("null");
+		}
+
 		protected virtual void _Generate(AstNodeExprImm Item)
 		{
 			var ItemType = Item.Type;
