@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SafeILGenerator.Ast.Generators;
 using System.Reflection.Emit;
 using System.Reflection;
 using SafeILGenerator.Ast.Nodes;
 using SafeILGenerator.Ast;
 using SafeILGenerator.Ast.Utils;
+using Xunit;
 
 namespace SafeILGenerator.Tests.Ast.Generators
 {
-	[TestClass]
 	public unsafe class GeneratorILTest
 	{
 		static private AstGenerator ast = AstGenerator.Instance;
@@ -31,7 +30,7 @@ namespace SafeILGenerator.Tests.Ast.Generators
 			return (TDelegate)(object)DynamicMethod.CreateDelegate(typeof(TDelegate));
 		}
 
-		[TestMethod]
+		[Fact]
 		public void TestSimpleReturn()
 		{
 			var Func = GenerateDynamicMethod<Func<int>>("Test", (DynamicMethod, ILGenerator) =>
@@ -40,10 +39,10 @@ namespace SafeILGenerator.Tests.Ast.Generators
 				Generator.GenerateRoot(new AstNodeStmReturn(new AstNodeExprImm(777)));
 			});
 
-			Assert.AreEqual(777, Func());
+			Assert.Equal(777, Func());
 		}
-		
-		[TestMethod]
+
+		[Fact]
 		public void TestSimpleCall()
 		{
 			var Func = GenerateDynamicMethod<Func<int>>("Test", (DynamicMethod, ILGenerator) =>
@@ -59,10 +58,10 @@ namespace SafeILGenerator.Tests.Ast.Generators
 				);
 			});
 
-			Assert.AreEqual(3330, Func());
+			Assert.Equal(3330, Func());
 		}
-		
-		[TestMethod]
+
+		[Fact]
 		public void TestSimpleLocal()
 		{
 			var Func = GenerateDynamicMethod<Func<int>>("Test", (DynamicMethod, ILGenerator) =>
@@ -83,10 +82,10 @@ namespace SafeILGenerator.Tests.Ast.Generators
 				);
 			});
 
-			Assert.AreEqual(123, Func());
+			Assert.Equal(123, Func());
 		}
 
-		[TestMethod]
+		[Fact]
 		public void TestFieldAccess()
 		{
 			var Func = GenerateDynamicMethod<Func<TestClass, int>>("Test", (DynamicMethod, ILGenerator) =>
@@ -110,12 +109,12 @@ namespace SafeILGenerator.Tests.Ast.Generators
 				new GeneratorIL(DynamicMethod, ILGenerator).GenerateRoot(AstNode);
 			});
 
-			Assert.AreEqual(456, Func(new TestClass()));
+			Assert.Equal(456, Func(new TestClass()));
 		}
 
 		delegate void ActionPointer(void* Pointer);
 
-		[TestMethod]
+		[Fact]
 		public void TestPointerWrite()
 		{
 			var Func = GenerateDynamicMethod<ActionPointer>("Test", (DynamicMethod, ILGenerator) =>
@@ -139,10 +138,10 @@ namespace SafeILGenerator.Tests.Ast.Generators
 				Func(DataPtr);
 			}
 
-			Assert.AreEqual(456, Data[0]);
+			Assert.Equal(456, Data[0]);
 		}
 
-        [TestMethod]
+		[Fact]
         public void TestPointerWrite_bool()
         {
             var Func = GenerateDynamicMethod<ActionPointer>("Test", (DynamicMethod, ILGenerator) =>
@@ -171,12 +170,12 @@ namespace SafeILGenerator.Tests.Ast.Generators
 					Func(DataPtr);
 				}
 
-				Assert.AreEqual(true, Data[0]);
-				for (int n = 1; n < 8; n++) Assert.AreEqual(FillValue, Data[n]);
+				Assert.Equal(true, Data[0]);
+				for (int n = 1; n < 8; n++) Assert.Equal(FillValue, Data[n]);
 			}
         }
 
-		[TestMethod]
+		[Fact]
 		public void TestWriteLineLoadString()
 		{
 			var Ast = ast.Statements(
@@ -195,7 +194,7 @@ namespace SafeILGenerator.Tests.Ast.Generators
 				Method("Hello World!");
 			});
 
-			Assert.AreEqual("Hello World!\r\nGoodbye World!\r\n", Output);
+			Assert.Equal("Hello World!\r\nGoodbye World!\r\n", Output);
 		}
 
 		public class TestClass

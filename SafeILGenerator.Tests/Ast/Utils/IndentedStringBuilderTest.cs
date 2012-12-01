@@ -1,13 +1,12 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SafeILGenerator.Ast.Utils;
+using Xunit;
 
 namespace SafeILGenerator.Tests.Ast.Utils
 {
-	[TestClass]
 	public class IndentedStringBuilderTest
 	{
-		[TestMethod]
+		[Fact]
 		public void TestIndentation()
 		{
 			var Output = new IndentedStringBuilder();
@@ -18,7 +17,7 @@ namespace SafeILGenerator.Tests.Ast.Utils
 				Output.Write("Goodbye World!\n");
 			});
 			Output.Write("}\n");
-			Assert.AreEqual(
+			Assert.Equal(
 				@"{\n" +
 				@"    Hello World!\n" +
 				@"    Goodbye World!\n" +

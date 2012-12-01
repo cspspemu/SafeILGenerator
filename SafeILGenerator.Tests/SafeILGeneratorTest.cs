@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace SafeILGenerator.Tests
 {
-	[TestClass]
 	public class SafeILGeneratorTest
 	{
-		[TestMethod]
+		[Fact]
 		public void TestGenerate()
 		{
 			var Adder = CSafeILGenerator.Generate<Func<int, int, int>>("TestGenerate", (Generator) =>
@@ -17,10 +16,10 @@ namespace SafeILGenerator.Tests
 				Generator.BinaryOperation(SafeBinaryOperator.AdditionSigned);
 				Generator.Return<int>();
 			});
-			Assert.AreEqual(3, Adder(1, 2));
+			Assert.Equal(3, Adder(1, 2));
 		}
 
-		[TestMethod]
+		[Fact]
 		public void TestLog()
 		{
 			CSafeILGenerator SafeILGenerator = null;
@@ -36,7 +35,7 @@ namespace SafeILGenerator.Tests
 				Generator.Return<int>();
 			}, DoLog: true);
 
-			Assert.AreEqual(
+			Assert.Equal(
 				String.Join("\r\n", new string[] {
 					"ldarg.0",
 					"ldarg.1",
@@ -49,7 +48,7 @@ namespace SafeILGenerator.Tests
 			);
 		}
 
-		[TestMethod]
+		[Fact]
 		public void TestSwitch()
 		{
 			var Switcher = CSafeILGenerator.Generate<Func<int, int>>("TestSwitch", (Generator) =>
@@ -83,7 +82,8 @@ namespace SafeILGenerator.Tests
 
 			var ExpectedItems = new int[] { -99, 0, -99, 2, 3, -99 };
 			var GeneratedItems = new int[] { -1, 0, 1, 2, 3, 4 }.Select(Item => Switcher(Item));
-			CollectionAssert.AreEquivalent(ExpectedItems.ToArray(), GeneratedItems.ToArray());
+
+			Assert.Equal(ExpectedItems.ToArray(), GeneratedItems.ToArray());
 		}
 	}
 }

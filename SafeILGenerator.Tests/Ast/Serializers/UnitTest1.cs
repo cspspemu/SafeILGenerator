@@ -1,16 +1,15 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SafeILGenerator.Ast.Serializers;
 using SafeILGenerator.Ast;
+using Xunit;
 
 namespace SafeILGenerator.Tests.Ast.Serializers
 {
-	[TestClass]
 	public class UnitTest1
 	{
 		private static AstGenerator ast = AstGenerator.Instance;
 
-		[TestMethod]
+		[Fact]
 		public void TestMethod1()
 		{
 			var Ast = ast.Statements(

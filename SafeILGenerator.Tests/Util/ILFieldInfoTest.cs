@@ -1,18 +1,17 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SafeILGenerator.Utils;
+using Xunit;
 
 namespace SafeILGenerator.Tests.Util
 {
-	[TestClass]
 	public class ILFieldInfoTest
 	{
 		public int Test;
 
-		[TestMethod]
+		[Fact]
 		public void TestGetFieldInfo()
 		{
-			Assert.AreEqual(
+			Assert.Equal(
 				typeof(ILFieldInfoTest).GetField("Test"),
 				ILFieldInfo.GetFieldInfo(() => Test)
 			);

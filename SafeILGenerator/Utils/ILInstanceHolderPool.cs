@@ -25,12 +25,12 @@ namespace SafeILGenerator.Utils
 
 		public TType Value
 		{
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
 			{
 				Item.Value = value;
 			}
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return (TType)Item.Value;
@@ -64,12 +64,12 @@ namespace SafeILGenerator.Utils
 
 		public object Value
 		{
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
 			{
 				FieldInfo.SetValue(null, value);
 			}
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return FieldInfo.GetValue(null);
