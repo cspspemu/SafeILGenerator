@@ -194,7 +194,7 @@ namespace SafeILGenerator.Tests.Ast.Generators
 				Method("Hello World!");
 			});
 
-			Assert.Equal("Hello World!\r\nGoodbye World!\r\n", Output);
+			Assert.Equal("Hello World!" + Environment.NewLine + "Goodbye World!" + Environment.NewLine, Output);
 		}
 
 		public class TestClass
