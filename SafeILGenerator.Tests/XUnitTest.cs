@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Xunit;
+using NUnit.Framework;
 
 namespace SafeILGenerator.Tests
 {
-	public class XUnitTest
+	[TestFixture]
+	public class NUnitTest
 	{
-		[Fact]
+		[Test]
 		public void Test()
 		{
 			Assert.True(true);

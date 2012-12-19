@@ -2,27 +2,28 @@
 using SafeILGenerator.Utils;
 using SafeILGenerator.Ast.Generators;
 using SafeILGenerator.Ast;
-using Xunit;
+using NUnit.Framework;
 
 namespace SafeILGenerator.Tests.Util
 {
+	[TestFixture]
 	public class ILInstanceHolderPoolTest
 	{
 		private static AstGenerator ast = AstGenerator.Instance;
 
-		[Fact]
+		[Test]
 		public void TestAllocAssignGetAndRelease()
 		{
 			var Pool = new ILInstanceHolderPool(typeof(int), 16);
 			var Item = Pool.Alloc();
 			Item.Value = 10;
-			Assert.Equal(10, Item.Value);
-			Assert.Equal(15, Pool.FreeCount);
+			Assert.AreEqual(10, Item.Value);
+			Assert.AreEqual(15, Pool.FreeCount);
 			Item.Free();
-			Assert.Equal(16, Pool.FreeCount);
+			Assert.AreEqual(16, Pool.FreeCount);
 		}
 
-		[Fact]
+		[Test]
 		public void TestMethod2()
 		{
 			var Pool = new ILInstanceHolderPool(typeof(int), 16);
@@ -34,10 +35,10 @@ namespace SafeILGenerator.Tests.Util
 			Console.WriteLine(GeneratorCSharp.GenerateString<GeneratorCSharp>(AstNode));
 			var ItemSet = GeneratorIL.GenerateDelegate<GeneratorIL, Action<int>>("ItemSet", AstNode);
 			ItemSet(10);
-			Assert.Equal(10, Item.Value);
+			Assert.AreEqual(10, Item.Value);
 		}
 
-		[Fact]
+		[Test]
 		public void TestMethod3()
 		{
 			var Pool1 = new ILInstanceHolderPool(typeof(int), 16);
@@ -46,26 +47,26 @@ namespace SafeILGenerator.Tests.Util
 			var Item2 = Pool2.Alloc();
 			Item1.Value = 11;
 			Item2.Value = 22;
-			Assert.Equal(11, Item1.Value);
-			Assert.Equal(22, Item2.Value);
+			Assert.AreEqual(11, Item1.Value);
+			Assert.AreEqual(22, Item2.Value);
 		}
 
-		[Fact]
+		[Test]
 		public void TestGlobalAlloc()
 		{
-			Assert.Equal(0, ILInstanceHolder.CapacityCount);
-			Assert.Equal(0, ILInstanceHolder.FreeCount);
+			Assert.AreEqual(0, ILInstanceHolder.CapacityCount);
+			Assert.AreEqual(0, ILInstanceHolder.FreeCount);
 			
 			var GlobalKey = ILInstanceHolder.TAlloc<int>();
 
-			Assert.Equal(4, ILInstanceHolder.CapacityCount);
-			Assert.Equal(3, ILInstanceHolder.FreeCount);
+			Assert.AreEqual(4, ILInstanceHolder.CapacityCount);
+			Assert.AreEqual(3, ILInstanceHolder.FreeCount);
 
 			GlobalKey.Value = 10;
 			GlobalKey.Free();
 
-			Assert.Equal(4, ILInstanceHolder.CapacityCount);
-			Assert.Equal(4, ILInstanceHolder.FreeCount);
+			Assert.AreEqual(4, ILInstanceHolder.CapacityCount);
+			Assert.AreEqual(4, ILInstanceHolder.FreeCount);
 		}
 
 	}
