@@ -16,7 +16,7 @@ namespace SafeILGenerator.Ast
 		{
 		}
 
-		static public AstGenerator Instance = new AstGenerator();
+		static public readonly AstGenerator Instance = new AstGenerator();
 
 		public AstNodeStmComment Comment(string Comment)
 		{
