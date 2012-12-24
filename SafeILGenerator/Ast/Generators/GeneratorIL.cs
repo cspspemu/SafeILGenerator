@@ -292,15 +292,20 @@ namespace SafeILGenerator.Ast.Generators
 		protected virtual void _Generate(AstNodeExprGetAddress GetAddress)
 		{
 			var AstNodeExprFieldAccess = (GetAddress.Expression as AstNodeExprFieldAccess);
+			var AstNodeExprArgument = (GetAddress.Expression as AstNodeExprArgument);
 
 			if (AstNodeExprFieldAccess != null)
 			{
 				Generate(AstNodeExprFieldAccess.Instance);
 				Emit(OpCodes.Ldflda, AstNodeExprFieldAccess.Field);
 			}
+			else if (AstNodeExprArgument != null)
+			{
+				Emit(OpCodes.Ldarga, AstNodeExprArgument.AstArgument.Index);
+			}
 			else
 			{
-				throw(new NotImplementedException());
+				throw (new NotImplementedException("Can't implement AstNodeExprGetAddress for '" + GetAddress.Expression.GetType() + "'"));
 			}
 		}
 

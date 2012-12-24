@@ -188,6 +188,11 @@ namespace SafeILGenerator.Ast
 			return new AstNodeExprGetAddress(Expr);
 		}
 
+		public AstNodeExprLValue Reinterpret<TType>(AstNodeExprLValue Value)
+		{
+			return Indirect(Cast(typeof(TType).MakePointerType(), GetAddress(Value), Explicit: false));
+		}
+
 		public AstNodeExprIndirect Indirect(AstNodeExpr PointerExpr)
 		{
 			return new AstNodeExprIndirect(PointerExpr);

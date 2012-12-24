@@ -102,6 +102,23 @@ namespace SafeILGenerator.Tests.Ast.Generators
 			Assert.AreEqual(typeof(int).ToString(), Func().ToString());
 		}
 
+		[Test]
+		public void TestReinterpret()
+		{
+			var TestArgument = ast.Argument<float>(0, "Input");
+			var Ast = ast.Statements(
+				ast.Return(
+					ast.Reinterpret<int>(TestArgument)
+				)
+			);
+
+			var Func = GeneratorIL.GenerateDelegate<GeneratorIL, Func<float, int>>("Test", Ast);
+			int b = 1234567;
+			float a = 0;
+			*(int*)&a = b;
+			Assert.AreEqual(b, Func(a));
+		}
+
 		static public Type testReturnType()
 		{
 			return typeof(int);
