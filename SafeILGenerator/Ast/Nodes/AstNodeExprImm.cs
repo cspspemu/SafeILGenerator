@@ -8,11 +8,21 @@ namespace SafeILGenerator.Ast.Nodes
 {
 	public class AstNodeExprImm : AstNodeExpr
 	{
+		public Type Type;
 		public object Value;
 
 		public AstNodeExprImm(object Value)
 		{
 			this.Value = Value;
+			//if (Value is RuntimeTypeHandle) throw (new NotImplementedException("Value is RuntimeTypeHandle"));
+			if (Value is Type)
+			{
+				this.Type = typeof(Type);
+			}
+			else
+			{
+				this.Type = (Value != null) ? Value.GetType() : typeof(object);
+			}
 		}
 
 		public override void TransformNodes(TransformNodesDelegate Transformer)
@@ -21,7 +31,7 @@ namespace SafeILGenerator.Ast.Nodes
 
 		protected override Type UncachedType
 		{
-			get { return this.Value.GetType(); }
+			get { return this.Type; }
 		}
 
 		public static implicit operator AstNodeExprImm(int Value)

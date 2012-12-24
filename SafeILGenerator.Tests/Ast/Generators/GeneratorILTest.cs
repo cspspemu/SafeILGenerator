@@ -7,6 +7,7 @@ using SafeILGenerator.Ast.Nodes;
 using SafeILGenerator.Ast;
 using SafeILGenerator.Ast.Utils;
 using NUnit.Framework;
+using System.Diagnostics;
 
 namespace SafeILGenerator.Tests.Ast.Generators
 {
@@ -87,12 +88,30 @@ namespace SafeILGenerator.Tests.Ast.Generators
 		}
 
 		[Test]
+		public void TestImmediateType()
+		{
+			var Ast = new AstNodeStmContainer(
+				new AstNodeStmReturn(
+					new AstNodeExprImm(typeof(int))
+				)
+			);
+
+			//throw(new Exception(GeneratorIL.GenerateToString<GeneratorIL, Func<Type>>(Ast)));
+
+			var Func = GeneratorIL.GenerateDelegate<GeneratorIL, Func<Type>>("Test", Ast);
+			Assert.AreEqual(typeof(int).ToString(), Func().ToString());
+		}
+
+		static public Type testReturnType()
+		{
+			return typeof(int);
+		}
+
+		[Test]
 		public void TestFieldAccess()
 		{
 			var Func = GenerateDynamicMethod<Func<TestClass, int>>("Test", (DynamicMethod, ILGenerator) =>
 			{
-				var TestLocal = AstLocal.Create(ILGenerator, typeof(int), "TestLocal");
-
 				var TestArgument = ast.Argument<TestClass>(0, "Test");
 
 				var AstNode = ast.Statements(

@@ -71,6 +71,12 @@ namespace SafeILGenerator.Ast.Generators
 			return Generator.Lines.ToArray();
 		}
 
+		static public string GenerateToString<TGenerator, TDelegate>(AstNode AstNode) where TGenerator : GeneratorIL, new()
+		{
+			var MethodInfo = typeof(TDelegate).GetMethod("Invoke");
+			return GenerateToString<TGenerator>(MethodInfo, AstNode);
+		}
+
 		static public TDelegate GenerateDelegate<TGenerator, TDelegate>(string MethodName, AstNode AstNode) where TGenerator : GeneratorIL, new()
 		{
 			var MethodInfo = typeof(TDelegate).GetMethod("Invoke");
@@ -188,6 +194,12 @@ namespace SafeILGenerator.Ast.Generators
 			else if (ItemType == typeof(string))
 			{
 				Emit(OpCodes.Ldstr, (string)Item.Value);
+			}
+			else if (ItemType == typeof(Type))
+			{
+				Emit(OpCodes.Ldtoken, (Type)Item.Value);
+				Emit(OpCodes.Call, ((Func<RuntimeTypeHandle, Type>)Type.GetTypeFromHandle).Method);
+				//IL_0005: call class [mscorlib]System.Type [mscorlib]System.Type::GetTypeFromHandle(valuetype [mscorlib]System.RuntimeTypeHandle)
 			}
 			else
 			{
@@ -349,7 +361,10 @@ namespace SafeILGenerator.Ast.Generators
 		{
 			var ExpressionType = (Return.Expression != null) ? Return.Expression.Type : typeof(void);
 
-			if (ExpressionType != MethodInfo.ReturnType) throw (new Exception("Return type mismatch"));
+			if (ExpressionType != MethodInfo.ReturnType)
+			{
+				throw (new Exception(String.Format("Return type mismatch {0} != {1}", ExpressionType, MethodInfo.ReturnType)));
+			}
 
 			if (Return.Expression != null) Generate(Return.Expression);
 			Emit(OpCodes.Ret);
