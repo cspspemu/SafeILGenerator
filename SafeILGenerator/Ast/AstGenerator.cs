@@ -190,7 +190,12 @@ namespace SafeILGenerator.Ast
 
 		public AstNodeExprLValue Reinterpret<TType>(AstNodeExprLValue Value)
 		{
-			return Indirect(Cast(typeof(TType).MakePointerType(), GetAddress(Value), Explicit: false));
+			return Reinterpret(typeof(TType), Value);
+		}
+
+		public AstNodeExprLValue Reinterpret(Type Type, AstNodeExprLValue Value)
+		{
+			return Indirect(Cast(Type.MakePointerType(), GetAddress(Value), Explicit: false));
 		}
 
 		public AstNodeExprIndirect Indirect(AstNodeExpr PointerExpr)
