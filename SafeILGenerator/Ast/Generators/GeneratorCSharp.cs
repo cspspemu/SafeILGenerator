@@ -88,6 +88,27 @@ namespace SafeILGenerator.Ast.Generators
 			Output.Write(";");
 		}
 
+		protected virtual void _Generate(AstNodeCase Case)
+		{
+			Output.Write("case ");
+			Output.Write(String.Join(", ", Case.CaseValues));
+			Output.Write(":");
+			Generate(Case.Code);
+			Output.Write("break;");
+		}
+
+		protected virtual void _Generate(AstNodeStmSwitch Switch)
+		{
+			Output.Write("switch (");
+			Generate(Switch.SwitchValue);
+			Output.Write(") {");
+			foreach (var Case in Switch.Cases)
+			{
+				Generate(Case);
+			}
+			Output.Write("}");
+		}
+
 		protected virtual void _Generate(AstNodeStmGotoIfFalse Goto)
 		{
 			Output.Write("if (!(");
