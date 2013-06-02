@@ -603,18 +603,21 @@ namespace SafeILGenerator.Ast.Generators
 
 			// Check types and unique values.
 
-			var SwitchVarLocal = AstLocal.Create(AllCaseValues.First().GetType(), "SwitchVarLocal" + SwitchVarCount++);
 			var EndCasesLabel = AstLabel.CreateFromLabel(ILGenerator.DefineLabel(), "EndCasesLabel");
 
-			Generate(new AstNodeStmAssign(new AstNodeExprLocal(SwitchVarLocal), Switch.SwitchValue));
-			//Switch.Cases
-			foreach (var Case in Switch.Cases)
+			if (Switch.Cases.Length > 0)
 			{
-				var LabelSkipThisCase = AstLabel.CreateFromLabel(ILGenerator.DefineLabel(), "LabelCase" + Case.CaseValue);
-				Generate(new AstNodeStmGotoIfFalse(LabelSkipThisCase, new AstNodeExprBinop(new AstNodeExprLocal(SwitchVarLocal), "==", new AstNodeExprImm(Case.CaseValue))));
-				Generate(Case.Code);
-				Generate(new AstNodeStmGotoAlways(EndCasesLabel));
-				Generate(new AstNodeStmLabel(LabelSkipThisCase));
+				var SwitchVarLocal = AstLocal.Create(AllCaseValues.First().GetType(), "SwitchVarLocal" + SwitchVarCount++);
+				Generate(new AstNodeStmAssign(new AstNodeExprLocal(SwitchVarLocal), Switch.SwitchValue));
+				//Switch.Cases
+				foreach (var Case in Switch.Cases)
+				{
+					var LabelSkipThisCase = AstLabel.CreateFromLabel(ILGenerator.DefineLabel(), "LabelCase" + Case.CaseValue);
+					Generate(new AstNodeStmGotoIfFalse(LabelSkipThisCase, new AstNodeExprBinop(new AstNodeExprLocal(SwitchVarLocal), "==", new AstNodeExprImm(Case.CaseValue))));
+					Generate(Case.Code);
+					Generate(new AstNodeStmGotoAlways(EndCasesLabel));
+					Generate(new AstNodeStmLabel(LabelSkipThisCase));
+				}
 			}
 
 			if (Switch.CaseDefault != null)
