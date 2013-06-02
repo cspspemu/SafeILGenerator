@@ -70,6 +70,7 @@
     <Compile Include="Ast\Generators\Generator.cs" />
     <Compile Include="Ast\Generators\GeneratorCSharp.cs" />
     <Compile Include="Ast\Generators\GeneratorIL.cs" />
+    <Compile Include="Ast\Nodes\AstNodeExprNewArray.cs" />
     <Compile Include="Ast\Utils\AstStringUtils.cs" />
     <Compile Include="Ast\Utils\IndentedStringBuilder.cs" />
     <Compile Include="Ast\Generators\NodeTypeAttribute.cs" />

@@ -318,6 +318,17 @@ namespace SafeILGenerator.Ast.Generators
 			Output.Write("}\n");
 		}
 
+		protected virtual void _Generate(AstNodeExprNewArray Array)
+		{
+			Output.Write("new " + Array.ElementType + "[] { ");
+			for (int n = 0; n < Array.Length; n++)
+			{
+				if (n != 0) Output.Write(", ");
+				Generate(Array.Values[n]);
+			}
+			Output.Write(" }");
+		}
+
 		public override string ToString()
 		{
 			return Output.ToString();

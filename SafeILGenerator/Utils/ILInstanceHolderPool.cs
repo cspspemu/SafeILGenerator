@@ -42,10 +42,18 @@ namespace SafeILGenerator.Utils
 			Item.Free();
 		}
 
-		public AstNodeExprStaticFieldAccess GetAstFieldAccess()
+		public AstNodeExprStaticFieldAccess AstFieldAccess
 		{
-			return Item.GetAstFieldAccess();
+			get
+			{
+				return Item.GetAstFieldAccess();
+			}
 		}
+
+		//public AstNodeExprStaticFieldAccess GetAstFieldAccess()
+		//{
+		//	return Item.GetAstFieldAccess();
+		//}
 	}
 
 	public class ILInstanceHolderPoolItem : IDisposable

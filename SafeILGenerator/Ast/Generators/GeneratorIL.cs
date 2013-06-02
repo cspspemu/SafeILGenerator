@@ -322,6 +322,7 @@ namespace SafeILGenerator.Ast.Generators
 			var AstNodeExprFieldAccess = (Assign.LValue as AstNodeExprFieldAccess);
 			var AstNodeExprStaticFieldAccess = (Assign.LValue as AstNodeExprStaticFieldAccess);
 			var AstNodeExprIndirect = (Assign.LValue as AstNodeExprIndirect);
+			var AstNodeExprArrayAccess = (Assign.LValue as AstNodeExprArrayAccess);
 
 			if (AstNodeExprLocal != null)
 			{
@@ -344,6 +345,13 @@ namespace SafeILGenerator.Ast.Generators
 				Generate(Assign.Value);
 				Emit(OpCodes.Stsfld, AstNodeExprStaticFieldAccess.Field);
 			}
+			else if (AstNodeExprArrayAccess != null)
+			{
+				Generate(AstNodeExprArrayAccess.ArrayInstance);
+				Generate(AstNodeExprArrayAccess.Index);
+				Generate(Assign.Value);
+				Emit(OpCodes.Stelem, AstNodeExprArrayAccess.ArrayInstance.Type.GetElementType());
+			}
 			else if (AstNodeExprIndirect != null)
 			{
 				var PointerType = AstUtils.GetSignedType(AstNodeExprIndirect.PointerExpression.Type.GetElementType());
@@ -362,7 +370,7 @@ namespace SafeILGenerator.Ast.Generators
 			}
 			else
 			{
-				throw (new NotImplementedException("Not implemented " + Assign.LValue.GetType()));
+				throw (new NotImplementedException("Not implemented AstNodeStmAssign LValue: " + Assign.LValue.GetType()));
 			}
 			//Assign.Local
 		}
@@ -626,6 +634,19 @@ namespace SafeILGenerator.Ast.Generators
 			}
 
 			Generate(new AstNodeStmLabel(EndCasesLabel));
+		}
+
+		protected virtual void _Generate(AstNodeExprNewArray NewArray)
+		{
+			var TempArrayLocal = AstLocal.Create(NewArray.Type, "$TempArray");
+			Generate(new AstNodeExprImm(NewArray.Length));
+			Emit(OpCodes.Newarr, NewArray.ElementType);
+			Emit(OpCodes.Stloc, TempArrayLocal.GetLocalBuilderForILGenerator(ILGenerator));
+			for (int n = 0; n < NewArray.Length; n++)
+			{
+				Generate(new AstNodeStmAssign(new AstNodeExprArrayAccess(new AstNodeExprLocal(TempArrayLocal), n), NewArray.Values[n]));
+			}
+			Generate(new AstNodeExprLocal(TempArrayLocal));
 		}
 	}
 }
