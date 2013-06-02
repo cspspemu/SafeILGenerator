@@ -217,6 +217,16 @@ namespace SafeILGenerator.Ast.Optimizers
 				}
 			}
 
+			// Special optimizations
+			if ((LeftType == typeof(uint) || LeftType == typeof(int)) && RightType == typeof(int))
+			{
+				if (RightImm != null)
+				{
+					var RightValue = Convert.ToInt64(RightImm.Value);
+					if (Operator == ">>" && (RightValue == 0)) return Binary.LeftNode;
+				}
+			}
+
 			return Binary;
 		}
 	}

@@ -10,17 +10,20 @@ namespace SafeILGenerator.Ast.Nodes
 	{
 		public AstNodeExpr SwitchValue;
 		public AstNodeCase[] Cases;
+		public AstNodeCaseDefault CaseDefault;
 
-		public AstNodeStmSwitch(AstNodeExpr SwitchValue, IEnumerable<AstNodeCase> Cases)
+		public AstNodeStmSwitch(AstNodeExpr SwitchValue, IEnumerable<AstNodeCase> Cases, AstNodeCaseDefault CaseDefault = null)
 		{
 			this.SwitchValue = SwitchValue;
 			this.Cases = Cases.ToArray();
+			this.CaseDefault = CaseDefault;
 		}
 
 		public override void TransformNodes(TransformNodesDelegate Transformer)
 		{
 			Transformer.Ref(ref SwitchValue);
 			Transformer.Ref(ref Cases);
+			if (CaseDefault != null) Transformer.Ref(ref CaseDefault);
 		}
 	}
 }

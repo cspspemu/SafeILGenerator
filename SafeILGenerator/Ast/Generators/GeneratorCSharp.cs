@@ -35,33 +35,35 @@ namespace SafeILGenerator.Ast.Generators
 			Output.Write("null");
 		}
 
-		protected virtual void _Generate(AstNodeExprImm Item)
+		private String ValueAsString(object Value, Type Type = null)
 		{
-			var ItemType = Item.Type;
-			var ItemValue = Item.Value;
-			string StringValue = ItemValue.ToString();
-
-			if (Item.Value is bool)
+			if (Type == null) Type = (Value != null) ? Value.GetType() : typeof(Object);
+			if (Value == null) return "null";
+			
+			if (Value is bool)
 			{
-				StringValue = StringValue.ToLower();
+				return Value.ToString().ToLower();
 			}
-			else if (Item.Value is IntPtr)
+			else if (Value is IntPtr)
 			{
-				StringValue = String.Format("0x{0:X}", ((IntPtr)Item.Value).ToInt64());
+				return String.Format("0x{0:X}", ((IntPtr)Value).ToInt64());
 			}
-			else if (Item.Value is string)
+			else if (Value is string)
 			{
-				StringValue = String.Format("{0}", AstStringUtils.ToLiteral(Item.Value as string));
+				return String.Format("{0}", AstStringUtils.ToLiteral(Value as string));
 			}
-			else if (!AstUtils.IsTypeSigned(ItemType))
+			else if (!AstUtils.IsTypeSigned(Type))
 			{
 				//StringValue = String.Format("0x{0:X8}", ItemValue);
-				if (Convert.ToInt64(ItemValue) > 9)
-				{
-					StringValue = String.Format("0x{0:X}", ItemValue);
-				}
+				if (Convert.ToInt64(Value) > 9) return String.Format("0x{0:X}", Value);
 			}
-			Output.Write(StringValue);
+
+			return Value.ToString();
+		}
+
+		protected virtual void _Generate(AstNodeExprImm Item)
+		{
+			Output.Write(ValueAsString(Item.Value, Item.Type));
 		}
 
 		protected virtual void _Generate(AstNodeStmComment Comment)
@@ -91,10 +93,30 @@ namespace SafeILGenerator.Ast.Generators
 		protected virtual void _Generate(AstNodeCase Case)
 		{
 			Output.Write("case ");
-			Output.Write(String.Join(", ", Case.CaseValues));
+			//Output.Write(String.Join(", ", Case.CaseValues.Select(Item => ValueAsString(Item))));
+			Output.Write(String.Join(", ", ValueAsString(Case.CaseValue)));
 			Output.Write(":");
-			Generate(Case.Code);
+			Output.Write("\n");
+			Output.Indent(() =>
+			{
+				Generate(Case.Code);
+			});
+			Output.Write("\n");
 			Output.Write("break;");
+			Output.Write("\n");
+		}
+
+		protected virtual void _Generate(AstNodeCaseDefault Case)
+		{
+			Output.Write("default:");
+			Output.Write("\n");
+			Output.Indent(() =>
+			{
+				Generate(Case.Code);
+			});
+			Output.Write("\n");
+			Output.Write("break;");
+			Output.Write("\n");
 		}
 
 		protected virtual void _Generate(AstNodeStmSwitch Switch)
@@ -102,10 +124,12 @@ namespace SafeILGenerator.Ast.Generators
 			Output.Write("switch (");
 			Generate(Switch.SwitchValue);
 			Output.Write(") {");
-			foreach (var Case in Switch.Cases)
+			Output.Write("\n");
+			Output.Indent(() =>
 			{
-				Generate(Case);
-			}
+				foreach (var Case in Switch.Cases) Generate(Case);
+				if (Switch.CaseDefault != null) Generate(Switch.CaseDefault);
+			});
 			Output.Write("}");
 		}
 

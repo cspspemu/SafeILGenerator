@@ -8,18 +8,28 @@ namespace SafeILGenerator.Ast.Nodes
 {
 	public class AstNodeCase : AstNode
 	{
-		public object[] CaseValues;
+		public object CaseValue;
 		public AstNodeStm Code;
 
-		public AstNodeCase(object[] Values, AstNodeStm Code)
+		public AstNodeCase(object Value, AstNodeStm Code)
 		{
-			this.CaseValues = Values;
+			this.CaseValue = Value;
 			this.Code = Code;
 		}
 
-		public AstNodeCase(object Value, AstNodeStm Code)
-			: this(new[] { Value}, Code)
+		public override void TransformNodes(TransformNodesDelegate Transformer)
 		{
+			Transformer.Ref(ref Code);
+		}
+	}
+
+	public class AstNodeCaseDefault : AstNode
+	{
+		public AstNodeStm Code;
+
+		public AstNodeCaseDefault(AstNodeStm Code)
+		{
+			this.Code = Code;
 		}
 
 		public override void TransformNodes(TransformNodesDelegate Transformer)

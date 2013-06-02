@@ -7,22 +7,31 @@ using System.Threading.Tasks;
 
 namespace SafeILGenerator.Ast
 {
-	public class AstLocal
+	sealed public class AstLocal
 	{
-		public readonly LocalBuilder LocalBuilder;
-		public readonly string Name;
-
-		public Type Type { get { return LocalBuilder.LocalType; } }
-
-		protected AstLocal(LocalBuilder LocalBuilder, string Name)
+		private LocalBuilder LocalBuilder;
+		public LocalBuilder GetLocalBuilderForILGenerator(ILGenerator ILGenerator)
 		{
-			this.LocalBuilder = LocalBuilder;
+			if (this.LocalBuilder == null)
+			{
+				this.LocalBuilder = ILGenerator.DeclareLocal(Type);
+			}
+			return this.LocalBuilder;
+		}
+		public readonly string Name;
+		public readonly Type Type;
+
+		//public Type Type { get { return LocalBuilder.LocalType; } }
+
+		protected AstLocal(Type Type, string Name)
+		{
 			this.Name = Name;
+			this.Type = Type;
 		}
 
-		static public AstLocal Create(ILGenerator ILGenerator, Type Type, string Name = "<Unknown>")
+		static public AstLocal Create(Type Type, string Name = "<Unknown>")
 		{
-			return new AstLocal(ILGenerator.DeclareLocal(Type), Name);
+			return new AstLocal(Type, Name);
 		}
 	}
 }

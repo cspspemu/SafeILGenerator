@@ -22,25 +22,30 @@ namespace SafeILGenerator.Ast.Generators
 		{
 		}
 
+		private void CreateLabels(AstNode AstNode)
+		{
+			var UsedSet = new HashSet<AstLabel>();
+			foreach (var AstNodeStmLabel in AstNode.Descendant.Where(Node => Node is AstNodeStmLabel).Cast<AstNodeStmLabel>())
+			{
+				if (UsedSet.Contains(AstNodeStmLabel.AstLabel))
+				{
+					throw (new Exception("Label declared twice"));
+				}
+				UsedSet.Add(AstNodeStmLabel.AstLabel);
+			}
+
+			foreach (var AstNodeStmLabel in UsedSet)
+			{
+				//Console.WriteLine("CreateAllUsedLabels: {0}", AstNodeStmLabel);
+				AstNodeStmLabel.Label = ILGenerator.DefineLabel();
+			}
+		}
+
 		public override GeneratorIL GenerateRoot(AstNode AstNode)
 		{
 			if (ILGenerator != null)
 			{
-				var UsedSet = new HashSet<AstLabel>();
-				foreach (var AstNodeStmLabel in AstNode.Descendant.Where(Node => Node is AstNodeStmLabel).Cast<AstNodeStmLabel>())
-				{
-					if (UsedSet.Contains(AstNodeStmLabel.AstLabel))
-					{
-						throw(new Exception("Label declared twice"));
-					}
-					UsedSet.Add(AstNodeStmLabel.AstLabel);
-				}
-
-				foreach (var AstNodeStmLabel in UsedSet)
-				{
-					//Console.WriteLine("CreateAllUsedLabels: {0}", AstNodeStmLabel);
-					AstNodeStmLabel.Label = ILGenerator.DefineLabel();
-				}
+				CreateLabels(AstNode);
 			}
 			return base.GenerateRoot(AstNode);
 		}
@@ -236,7 +241,7 @@ namespace SafeILGenerator.Ast.Generators
 
 		protected virtual void _Generate(AstNodeExprLocal Local)
 		{
-			var LocalBuilder = Local.AstLocal.LocalBuilder;
+			var LocalBuilder = Local.AstLocal.GetLocalBuilderForILGenerator(ILGenerator);
 
 			switch (LocalBuilder.LocalIndex)
 			{
@@ -321,7 +326,7 @@ namespace SafeILGenerator.Ast.Generators
 			if (AstNodeExprLocal != null)
 			{
 				Generate(Assign.Value);
-				Emit(OpCodes.Stloc, AstNodeExprLocal.AstLocal.LocalBuilder);
+				Emit(OpCodes.Stloc, AstNodeExprLocal.AstLocal.GetLocalBuilderForILGenerator(ILGenerator));
 			}
 			else if (AstNodeExprArgument != null)
 			{
@@ -584,6 +589,40 @@ namespace SafeILGenerator.Ast.Generators
 				case "!": Emit(OpCodes.Ldc_I4_0); Emit(OpCodes.Ceq); break;
 				default: throw(new NotImplementedException(String.Format("Not implemented operator '{0}'", Item.Operator)));
 			}
+		}
+
+		private int SwitchVarCount = 0;
+
+		protected virtual void _Generate(AstNodeStmSwitch Switch)
+		{
+			var AllCaseValues = Switch.Cases.Select(Case => Case.CaseValue);
+			if (AllCaseValues.Count() != AllCaseValues.Distinct().Count())
+			{
+				throw(new Exception("Repeated case in switch!"));
+			}
+
+			// Check types and unique values.
+
+			var SwitchVarLocal = AstLocal.Create(AllCaseValues.First().GetType(), "SwitchVarLocal" + SwitchVarCount++);
+			var EndCasesLabel = AstLabel.CreateFromLabel(ILGenerator.DefineLabel(), "EndCasesLabel");
+
+			Generate(new AstNodeStmAssign(new AstNodeExprLocal(SwitchVarLocal), Switch.SwitchValue));
+			//Switch.Cases
+			foreach (var Case in Switch.Cases)
+			{
+				var LabelSkipThisCase = AstLabel.CreateFromLabel(ILGenerator.DefineLabel(), "LabelCase" + Case.CaseValue);
+				Generate(new AstNodeStmGotoIfFalse(LabelSkipThisCase, new AstNodeExprBinop(new AstNodeExprLocal(SwitchVarLocal), "==", new AstNodeExprImm(Case.CaseValue))));
+				Generate(Case.Code);
+				Generate(new AstNodeStmGotoAlways(EndCasesLabel));
+				Generate(new AstNodeStmLabel(LabelSkipThisCase));
+			}
+
+			if (Switch.CaseDefault != null)
+			{
+				Generate(Switch.CaseDefault.Code);
+			}
+
+			Generate(new AstNodeStmLabel(EndCasesLabel));
 		}
 	}
 }
