@@ -20,6 +20,11 @@ namespace SafeILGenerator.Ast.Generators
 			return this;
 		}
 
+		static public string GenerateString(AstNode AstNode)
+		{
+			return GenerateString<GeneratorCSharp>(AstNode);
+		}
+
 		static public string GenerateString<TGeneratorCSharp>(AstNode AstNode) where TGeneratorCSharp : GeneratorCSharp, new()
 		{
 			return new TGeneratorCSharp().GenerateRoot(AstNode).ToString();

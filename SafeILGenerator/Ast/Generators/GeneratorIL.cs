@@ -201,6 +201,10 @@ namespace SafeILGenerator.Ast.Generators
 			{
 				Emit(OpCodes.Ldc_R4, (float)Item.Value);
 			}
+			else if (Item.Value == null)
+			{
+				Emit(OpCodes.Ldnull);
+			}
 			else if (ItemType == typeof(string))
 			{
 				Emit(OpCodes.Ldstr, (string)Item.Value);
@@ -637,8 +641,6 @@ namespace SafeILGenerator.Ast.Generators
 					var CasesLength = (CommonMax - CommonMin) + 1;
 
 					// No processing tables greater than 4096 elements.
-					// TODO: On too large test cases, split them recursively in:
-					// if (Var < Half) { switch(Var - Min) { ... } } else { switch(Var - Half) { ... } }
 					if (CasesLength <= 4096)
 					{
 						var Labels = new AstLabel[CasesLength];
@@ -674,6 +676,12 @@ namespace SafeILGenerator.Ast.Generators
 						}
 
 						DoneSpecialized = true;
+					}
+					else
+					{
+						// TODO: find a common shift and masks for all the values to reduce CasesLength.
+						// TODO: On too large test cases, split them recursively in:
+						// if (Var < Half) { switch(Var - LowerPartMin) { ... } } else { switch(Var - Half - UpperPartMin) { ... } }
 					}
 
 				}

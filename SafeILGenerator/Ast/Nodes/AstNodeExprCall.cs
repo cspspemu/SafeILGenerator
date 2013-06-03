@@ -19,6 +19,8 @@ namespace SafeILGenerator.Ast.Nodes
 
 		public AstNodeExprCall(MethodInfo MethodInfo, params AstNodeExpr[] Parameters)
 		{
+			if (MethodInfo == null) throw (new Exception("MethodInfo can't be null"));
+
 			var MethodParameters = MethodInfo.GetParameters().Select(Parameter => Parameter.ParameterType).ToArray();
 			var ParametersTypes = Parameters.Select(Parameter => Parameter.Type).ToArray();
 

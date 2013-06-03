@@ -78,6 +78,11 @@ namespace SafeILGenerator.Ast
 			return new AstNodeExprArrayAccess(Instance, Index);
 		}
 
+		public AstNodeExprImm Immediate<TType>(TType Value)
+		{
+			return new AstNodeExprImm(Value, typeof(TType));
+		}
+
 		public AstNodeExprImm Immediate(object Value)
 		{
 			return new AstNodeExprImm(Value);

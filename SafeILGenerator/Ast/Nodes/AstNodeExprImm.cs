@@ -11,18 +11,26 @@ namespace SafeILGenerator.Ast.Nodes
 		public Type Type;
 		public object Value;
 
-		public AstNodeExprImm(object Value)
+		public AstNodeExprImm(object Value, Type Type = null)
 		{
 			this.Value = Value;
 			//if (Value is RuntimeTypeHandle) throw (new NotImplementedException("Value is RuntimeTypeHandle"));
-			if (Value is Type)
+
+			if (Type == null && Value != null)
 			{
-				this.Type = typeof(Type);
+				if (Value is Type)
+				{
+					Type = typeof(Type);
+				}
+				else
+				{
+					Type = Value.GetType();
+				}
 			}
-			else
-			{
-				this.Type = (Value != null) ? Value.GetType() : typeof(object);
-			}
+
+			if (Type == null) Type = typeof(object);
+
+			this.Type = Type;
 		}
 
 		public override void TransformNodes(TransformNodesDelegate Transformer)
