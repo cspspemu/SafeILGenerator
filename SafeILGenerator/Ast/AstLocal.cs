@@ -33,5 +33,10 @@ namespace SafeILGenerator.Ast
 		{
 			return new AstLocal(Type, Name);
 		}
+
+		static public AstLocal Create<TType>(string Name = "<Unknown>")
+		{
+			return Create(typeof(TType), Name);
+		}
 	}
 }

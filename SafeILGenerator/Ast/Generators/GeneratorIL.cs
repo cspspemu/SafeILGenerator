@@ -140,6 +140,7 @@ namespace SafeILGenerator.Ast.Generators
 		protected void Emit(OpCode OpCode, FieldInfo Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
 		protected void Emit(OpCode OpCode, Type Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
 		protected void Emit(OpCode OpCode, AstLabel Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value.Label); }
+		protected void Emit(OpCode OpCode, params AstLabel[] Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value.Select(Item => Item.Label).ToArray()); }
 
 		protected virtual void _Generate(AstNodeExprNull Null)
 		{
@@ -173,6 +174,10 @@ namespace SafeILGenerator.Ast.Generators
 					case 8: Emit(OpCodes.Ldc_I4_8); break;
 					default: Emit(OpCodes.Ldc_I4, Value); break;
 				}
+			}
+			else if (ItemType == typeof(long) || ItemType == typeof(ulong))
+			{
+				Emit(OpCodes.Ldc_I8, Convert.ToInt64(ItemValue));
 			}
 			else if (ItemType == typeof(IntPtr))
 			{
@@ -612,22 +617,90 @@ namespace SafeILGenerator.Ast.Generators
 			// Check types and unique values.
 
 			var EndCasesLabel = AstLabel.CreateFromLabel(ILGenerator.DefineLabel(), "EndCasesLabel");
+			var DefaultLabel = AstLabel.CreateFromLabel(ILGenerator.DefineLabel(), "DefaultLabel");
 
 			if (Switch.Cases.Length > 0)
 			{
-				var SwitchVarLocal = AstLocal.Create(AllCaseValues.First().GetType(), "SwitchVarLocal" + SwitchVarCount++);
-				Generate(new AstNodeStmAssign(new AstNodeExprLocal(SwitchVarLocal), Switch.SwitchValue));
-				//Switch.Cases
-				foreach (var Case in Switch.Cases)
+				var CommonType = Switch.Cases.First().CaseValue.GetType();
+				if (!Switch.Cases.All(Case => Case.CaseValue.GetType() == CommonType))
 				{
-					var LabelSkipThisCase = AstLabel.CreateFromLabel(ILGenerator.DefineLabel(), "LabelCase" + Case.CaseValue);
-					Generate(new AstNodeStmGotoIfFalse(LabelSkipThisCase, new AstNodeExprBinop(new AstNodeExprLocal(SwitchVarLocal), "==", new AstNodeExprImm(Case.CaseValue))));
-					Generate(Case.Code);
-					Generate(new AstNodeStmGotoAlways(EndCasesLabel));
-					Generate(new AstNodeStmLabel(LabelSkipThisCase));
+					throw(new Exception("All cases should have the same type"));
+				}
+
+				bool DoneSpecialized = false;
+
+				// Specialized constant-time integer switch (if possible)
+				if (AstUtils.IsIntegerType(CommonType))
+				{
+					var CommonMin = Switch.Cases.Min(Case => AstUtils.CastType<long>(Case.CaseValue));
+					var CommonMax = Switch.Cases.Max(Case => AstUtils.CastType<long>(Case.CaseValue));
+					var CasesLength = (CommonMax - CommonMin) + 1;
+
+					// No processing tables greater than 4096 elements.
+					// TODO: On too large test cases, split them recursively in:
+					// if (Var < Half) { switch(Var - Min) { ... } } else { switch(Var - Half) { ... } }
+					if (CasesLength <= 4096)
+					{
+						var Labels = new AstLabel[CasesLength];
+						for (int n = 0; n < CasesLength; n++) Labels[n] = DefaultLabel;
+
+						foreach (var Case in Switch.Cases)
+						{
+							long RealValue = AstUtils.CastType<long>(Case.CaseValue);
+							long Offset = RealValue - CommonMin;
+							Labels[Offset] = AstLabel.CreateFromLabel(ILGenerator.DefineLabel(), "Case_" + RealValue);
+						}
+
+						/*
+						//var SwitchVarLocal = AstLocal.Create(AllCaseValues.First().GetType(), "SwitchVarLocal" + SwitchVarCount++);
+						//Generate(new AstNodeStmAssign(new AstNodeExprLocal(SwitchVarLocal), Switch.SwitchValue - new AstNodeExprCast(CommonType, CommonMin)));
+						//Generate(new AstNodeStmIfElse(new AstNodeExprBinop(new AstNodeExprLocal(SwitchVarLocal), "<", 0), new AstNodeStmGotoAlways(DefaultLabel)));
+						//Generate(new AstNodeStmIfElse(new AstNodeExprBinop(new AstNodeExprLocal(SwitchVarLocal), ">=", CasesLength), new AstNodeStmGotoAlways(DefaultLabel)));
+						//Generate(new AstNodeExprLocal(SwitchVarLocal));
+						*/
+
+						Generate(Switch.SwitchValue - new AstNodeExprCast(CommonType, CommonMin));
+						Emit(OpCodes.Switch, Labels);
+						Generate(new AstNodeStmGotoAlways(DefaultLabel));
+						foreach (var Case in Switch.Cases)
+						{
+							long RealValue = AstUtils.CastType<long>(Case.CaseValue);
+							long Offset = RealValue - CommonMin;
+							Generate(new AstNodeStmLabel(Labels[Offset]));
+							{
+								Generate(Case.Code);
+							}
+							Generate(new AstNodeStmGotoAlways(EndCasesLabel));
+						}
+
+						DoneSpecialized = true;
+					}
+
+				}
+				// Specialized switch for strings (checking length, then hash, then contents)
+				else if (CommonType == typeof(string))
+				{
+					// TODO!
+				}
+				
+				// Generic if/else
+				if (!DoneSpecialized)
+				{
+					var SwitchVarLocal = AstLocal.Create(AllCaseValues.First().GetType(), "SwitchVarLocal" + SwitchVarCount++);
+					Generate(new AstNodeStmAssign(new AstNodeExprLocal(SwitchVarLocal), Switch.SwitchValue));
+					//Switch.Cases
+					foreach (var Case in Switch.Cases)
+					{
+						var LabelSkipThisCase = AstLabel.CreateFromLabel(ILGenerator.DefineLabel(), "LabelCase" + Case.CaseValue);
+						Generate(new AstNodeStmGotoIfFalse(LabelSkipThisCase, new AstNodeExprBinop(new AstNodeExprLocal(SwitchVarLocal), "==", new AstNodeExprImm(Case.CaseValue))));
+						Generate(Case.Code);
+						Generate(new AstNodeStmGotoAlways(EndCasesLabel));
+						Generate(new AstNodeStmLabel(LabelSkipThisCase));
+					}
 				}
 			}
 
+			Generate(new AstNodeStmLabel(DefaultLabel));
 			if (Switch.CaseDefault != null)
 			{
 				Generate(Switch.CaseDefault.Code);

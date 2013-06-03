@@ -12,6 +12,15 @@ namespace SafeILGenerator.Ast
 {
 	public unsafe class AstUtils
 	{
+		static public bool IsIntegerType(Type Type)
+		{
+			if (Type == typeof(sbyte) || Type == typeof(byte)) return true;
+			if (Type == typeof(short) || Type == typeof(ushort)) return true;
+			if (Type == typeof(int) || Type == typeof(uint)) return true;
+			if (Type == typeof(long) || Type == typeof(ulong)) return true;
+			return false;
+		}
+
 		static public int GetTypeSize(Type Type)
 		{
 			Type = GetSignedType(Type);
@@ -62,6 +71,11 @@ namespace SafeILGenerator.Ast
 				Type == typeof(double) ||
 				Type == typeof(decimal)
 			);
+		}
+
+		static public TType CastType<TType>(object Value)
+		{
+			return (TType)CastType(Value, typeof(TType));
 		}
 
 		static public object CastType(object Value, Type CastType)

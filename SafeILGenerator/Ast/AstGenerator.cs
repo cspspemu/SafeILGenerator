@@ -212,5 +212,25 @@ namespace SafeILGenerator.Ast
 		{
 			return new AstNodeExprStaticFieldAccess(FieldInfo);
 		}
+
+		public AstNodeCase Case(object Value, AstNodeStm Code)
+		{
+			return new AstNodeCase(Value, Code);
+		}
+
+		public AstNodeCaseDefault Default(AstNodeStm Code)
+		{
+			return new AstNodeCaseDefault(Code);
+		}
+
+		public AstNodeStmSwitch Switch(AstNodeExpr ValueToCheck, params AstNodeCase[] Cases)
+		{
+			return new AstNodeStmSwitch(ValueToCheck, Cases);
+		}
+
+		public AstNodeStmSwitch Switch(AstNodeExpr ValueToCheck, AstNodeCaseDefault Default, params AstNodeCase[] Cases)
+		{
+			return new AstNodeStmSwitch(ValueToCheck, Cases, Default);
+		}
 	}
 }

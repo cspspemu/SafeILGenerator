@@ -68,7 +68,7 @@ namespace SafeILGenerator.Tests.Ast.Generators
 		{
 			var Func = GenerateDynamicMethod<Func<int>>("Test", (DynamicMethod, ILGenerator) =>
 			{
-				var TestLocal = AstLocal.Create(ILGenerator, typeof(int), "TestLocal");
+				var TestLocal = AstLocal.Create(typeof(int), "TestLocal");
 
 				var Generator = new GeneratorIL(DynamicMethod, ILGenerator);
 				Generator.GenerateRoot(
@@ -232,6 +232,27 @@ namespace SafeILGenerator.Tests.Ast.Generators
 			});
 
 			Assert.AreEqual("Hello World!" + Environment.NewLine + "Goodbye World!" + Environment.NewLine, Output);
+		}
+
+		[Test]
+		public void TestAstSwitch()
+		{
+			var Argument = AstArgument.Create<int>(0, "Value");
+			var Ast = ast.Statements(
+				ast.Switch(
+					ast.Argument(Argument),
+					ast.Default(ast.Return("-")),
+					ast.Case(1, ast.Return("One")),
+					ast.Case(3, ast.Return("Three"))
+				),
+				ast.Return("Invalid!")
+			);
+			var Method = GeneratorIL.GenerateDelegate<GeneratorIL, Func<int, string>>("TestSwitch", Ast);
+			Assert.AreEqual("-", Method(0));
+			Assert.AreEqual("One", Method(1));
+			Assert.AreEqual("-", Method(2));
+			Assert.AreEqual("Three", Method(3));
+			Assert.AreEqual("-", Method(4));
 		}
 
 		public class TestClass
