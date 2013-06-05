@@ -146,6 +146,7 @@ namespace SafeILGenerator.Ast.Generators
 		protected void Emit(OpCode OpCode, string Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
 		protected void Emit(OpCode OpCode, LocalBuilder Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
 		protected void Emit(OpCode OpCode, MethodInfo Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
+		protected void Emit(OpCode OpCode, ConstructorInfo Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
 		protected void Emit(OpCode OpCode, FieldInfo Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
 		protected void Emit(OpCode OpCode, Type Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
 		protected void Emit(OpCode OpCode, AstLabel Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value.Label); }
@@ -763,6 +764,16 @@ namespace SafeILGenerator.Ast.Generators
 				Generate(new AstNodeStmAssign(new AstNodeExprArrayAccess(new AstNodeExprLocal(TempArrayLocal), n), NewArray.Values[n]));
 			}
 			Generate(new AstNodeExprLocal(TempArrayLocal));
+		}
+
+		protected virtual void _Generate(AstNodeExprNew AstNodeExprNew)
+		{
+			var Constructor = AstNodeExprNew.Type.GetConstructor(AstNodeExprNew.Params.Select(Param => Param.Type).ToArray());
+			foreach (var Param in AstNodeExprNew.Params)
+			{
+				Generate(Param);
+			}
+			Emit(OpCodes.Newobj, Constructor);
 		}
 	}
 }

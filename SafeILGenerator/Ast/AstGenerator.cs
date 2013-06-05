@@ -250,6 +250,16 @@ namespace SafeILGenerator.Ast
 			return new AstNodeStmSwitch(ValueToCheck, Cases, Default);
 		}
 
+		public AstNodeExprNewArray NewArray(Type Type, params AstNodeExpr[] Elements)
+		{
+			return new AstNodeExprNewArray(Type, Elements);
+		}
+
+		public AstNodeExprNewArray NewArray<TType>(params AstNodeExpr[] Elements)
+		{
+			return NewArray(typeof(TType), Elements);
+		}
+
 		public AstNodeExprNew New(Type Type, params AstNodeExpr[] Params)
 		{
 			return new AstNodeExprNew(Type, Params);

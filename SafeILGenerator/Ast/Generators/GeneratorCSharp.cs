@@ -334,6 +334,18 @@ namespace SafeILGenerator.Ast.Generators
 			Output.Write(" }");
 		}
 
+		protected virtual void _Generate(AstNodeExprNew AstNodeExprNew)
+		{
+			var Params = AstNodeExprNew.Params;
+			Output.Write("new " + AstNodeExprNew.Type + "(");
+			for (int n = 0; n < Params.Length; n++)
+			{
+				if (n != 0) Output.Write(", ");
+				Generate(Params[n]);
+			}
+			Output.Write(")");
+		}
+
 		public override string ToString()
 		{
 			return Output.ToString();

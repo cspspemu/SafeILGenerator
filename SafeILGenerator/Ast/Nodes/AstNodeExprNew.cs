@@ -8,8 +8,8 @@ namespace SafeILGenerator.Ast.Nodes
 {
 	public class AstNodeExprNew : AstNodeExpr
 	{
-		private Type ClassType;
-		private AstNodeExpr[] Params;
+		public Type ClassType;
+		public AstNodeExpr[] Params;
 
 		public AstNodeExprNew(Type ClassType, params AstNodeExpr[] Params)
 		{
