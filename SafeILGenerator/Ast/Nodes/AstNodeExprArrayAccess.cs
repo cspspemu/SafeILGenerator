@@ -17,6 +17,14 @@ namespace SafeILGenerator.Ast.Nodes
 			this.Index = Index;
 		}
 
+		public Type ElementType
+		{
+			get
+			{
+				return ArrayInstance.Type;
+			}
+		}
+
 		protected override Type UncachedType
 		{
 			get { return ArrayInstance.Type.GetElementType(); }

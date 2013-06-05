@@ -28,6 +28,11 @@ namespace SafeILGenerator.Ast
 			return new AstLabel(Label, Name);
 		}
 
+		//static public AstLabel CreateNewLabelFromILGenerator(ILGenerator ILGenerator, string Name = "<Unknown>")
+		//{
+		//	return new AstLabel((ILGenerator != null) ? ILGenerator.DefineLabel() : default(Label), Name);
+		//}
+
 		public override string ToString()
 		{
 			return String.Format("AstLabel({0})", Name);

@@ -71,7 +71,16 @@ namespace SafeILGenerator.Ast.Generators
 		static public string[] GenerateToStringList<TGenerator>(MethodInfo MethodInfo, AstNode AstNode) where TGenerator : GeneratorIL, new()
 		{
 			var Generator = new TGenerator();
-			Generator.Init(MethodInfo, null, GenerateLines: true);
+
+			var DynamicMethod = new DynamicMethod(
+				"__dummy",
+				MethodInfo.ReturnType,
+				MethodInfo.GetParameters().Select(Parameter => Parameter.ParameterType).ToArray(),
+				Assembly.GetExecutingAssembly().ManifestModule
+			);
+			var ILGenerator = DynamicMethod.GetILGenerator();
+
+			Generator.Init(MethodInfo, ILGenerator, GenerateLines: true);
 			Generator.Generate(AstNode);
 			return Generator.Lines.ToArray();
 		}
@@ -245,12 +254,23 @@ namespace SafeILGenerator.Ast.Generators
 				case 3: Emit(OpCodes.Ldarg_3); break;
 				default: Emit(OpCodes.Ldarg, ArgumentIndex); break;
 			}
-			
+		}
+
+		//LocalBuilder
+		private Dictionary<AstLocal, LocalBuilder> _LocalBuilderCache = new Dictionary<AstLocal, LocalBuilder>();
+		private LocalBuilder _GetLocalBuilderFromAstLocal(AstLocal AstLocal)
+		{
+			//AstLocal.Create
+			if (!_LocalBuilderCache.ContainsKey(AstLocal))
+			{
+				_LocalBuilderCache[AstLocal] = ILGenerator.DeclareLocal(AstLocal.Type);
+			}
+			return _LocalBuilderCache[AstLocal];
 		}
 
 		protected virtual void _Generate(AstNodeExprLocal Local)
 		{
-			var LocalBuilder = Local.AstLocal.GetLocalBuilderForILGenerator(ILGenerator);
+			var LocalBuilder = _GetLocalBuilderFromAstLocal(Local.AstLocal);
 
 			switch (LocalBuilder.LocalIndex)
 			{
@@ -277,7 +297,22 @@ namespace SafeILGenerator.Ast.Generators
 		{
 			Generate(ArrayAccess.ArrayInstance);
 			Generate(ArrayAccess.Index);
-			Emit(OpCodes.Ldelem_I4);
+
+			if (false) { }
+
+			else if (ArrayAccess.ElementType == typeof(byte)) Emit(OpCodes.Ldelem_U1);
+			else if (ArrayAccess.ElementType == typeof(ushort)) Emit(OpCodes.Ldelem_U2);
+			else if (ArrayAccess.ElementType == typeof(uint)) Emit(OpCodes.Ldelem_U4);
+			else if (ArrayAccess.ElementType == typeof(ulong)) Emit(OpCodes.Ldelem_I8);
+
+			else if (ArrayAccess.ElementType == typeof(sbyte)) Emit(OpCodes.Ldelem_I1);
+			else if (ArrayAccess.ElementType == typeof(short)) Emit(OpCodes.Ldelem_I2);
+			else if (ArrayAccess.ElementType == typeof(int)) Emit(OpCodes.Ldelem_I4);
+			else if (ArrayAccess.ElementType == typeof(long)) Emit(OpCodes.Ldelem_I8);
+
+			else if (ArrayAccess.ElementType.IsPointer) Emit(OpCodes.Ldelem_I);
+
+			else Emit(OpCodes.Ldelem_Ref);
 		}
 
 		protected virtual void _Generate(AstNodeExprIndirect Indirect)
@@ -336,7 +371,7 @@ namespace SafeILGenerator.Ast.Generators
 			if (AstNodeExprLocal != null)
 			{
 				Generate(Assign.Value);
-				Emit(OpCodes.Stloc, AstNodeExprLocal.AstLocal.GetLocalBuilderForILGenerator(ILGenerator));
+				Emit(OpCodes.Stloc, _GetLocalBuilderFromAstLocal(AstNodeExprLocal.AstLocal));
 			}
 			else if (AstNodeExprArgument != null)
 			{
@@ -722,7 +757,7 @@ namespace SafeILGenerator.Ast.Generators
 			var TempArrayLocal = AstLocal.Create(NewArray.Type, "$TempArray");
 			Generate(new AstNodeExprImm(NewArray.Length));
 			Emit(OpCodes.Newarr, NewArray.ElementType);
-			Emit(OpCodes.Stloc, TempArrayLocal.GetLocalBuilderForILGenerator(ILGenerator));
+			Emit(OpCodes.Stloc, _GetLocalBuilderFromAstLocal(TempArrayLocal));
 			for (int n = 0; n < NewArray.Length; n++)
 			{
 				Generate(new AstNodeStmAssign(new AstNodeExprArrayAccess(new AstNodeExprLocal(TempArrayLocal), n), NewArray.Values[n]));

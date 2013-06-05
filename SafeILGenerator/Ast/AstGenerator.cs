@@ -4,6 +4,7 @@ using SafeILGenerator.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -218,6 +219,17 @@ namespace SafeILGenerator.Ast
 			return new AstNodeExprStaticFieldAccess(FieldInfo);
 		}
 
+		public AstNodeExprLValue StaticFieldAccess<T>(Expression<Func<T>> Expression)
+		{
+			return StaticFieldAccess(_fieldof(Expression));
+		}
+
+		private static FieldInfo _fieldof<T>(Expression<Func<T>> expression)
+		{
+			MemberExpression body = (MemberExpression)expression.Body;
+			return (FieldInfo)body.Member;
+		}
+
 		public AstNodeCase Case(object Value, AstNodeStm Code)
 		{
 			return new AstNodeCase(Value, Code);
@@ -236,6 +248,16 @@ namespace SafeILGenerator.Ast
 		public AstNodeStmSwitch Switch(AstNodeExpr ValueToCheck, AstNodeCaseDefault Default, params AstNodeCase[] Cases)
 		{
 			return new AstNodeStmSwitch(ValueToCheck, Cases, Default);
+		}
+
+		public AstNodeExprNew New(Type Type, params AstNodeExpr[] Params)
+		{
+			return new AstNodeExprNew(Type, Params);
+		}
+
+		public AstNodeExprNew New<TType>(params AstNodeExpr[] Params)
+		{
+			return New(typeof(TType), Params);
 		}
 	}
 }
