@@ -269,5 +269,10 @@ namespace SafeILGenerator.Ast
 		{
 			return New(typeof(TType), Params);
 		}
+
+		public AstNodeStm Throw(AstNodeExpr Expression)
+		{
+			return new AstNodeStmThrow(Expression);
+		}
 	}
 }

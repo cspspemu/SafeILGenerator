@@ -85,6 +85,11 @@ namespace SafeILGenerator.Ast.Generators
 			return Generator.Lines.ToArray();
 		}
 
+		static public string GenerateToString<TDelegate>(AstNode AstNode)
+		{
+			return GenerateToString<GeneratorIL, TDelegate>(AstNode);
+		}
+
 		static public string GenerateToString<TGenerator, TDelegate>(AstNode AstNode) where TGenerator : GeneratorIL, new()
 		{
 			var MethodInfo = typeof(TDelegate).GetMethod("Invoke");
@@ -774,6 +779,12 @@ namespace SafeILGenerator.Ast.Generators
 				Generate(Param);
 			}
 			Emit(OpCodes.Newobj, Constructor);
+		}
+
+		protected virtual void _Generate(AstNodeStmThrow AstNodeStmThrow)
+		{
+			Generate(AstNodeStmThrow.AstNodeExpr);
+			Emit(OpCodes.Throw);
 		}
 	}
 }

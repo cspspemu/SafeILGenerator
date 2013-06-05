@@ -346,6 +346,13 @@ namespace SafeILGenerator.Ast.Generators
 			Output.Write(")");
 		}
 
+		protected virtual void _Generate(AstNodeStmThrow AstNodeStmThrow)
+		{
+			Output.Write("throw ");
+			Generate(AstNodeStmThrow);
+			Output.Write(";");
+		}
+
 		public override string ToString()
 		{
 			return Output.ToString();
