@@ -22,31 +22,30 @@ namespace SafeILGenerator.Ast.Generators
 		{
 		}
 
-		private void CreateLabels(AstNode AstNode)
+		//LocalBuilder
+		private Dictionary<AstLocal, LocalBuilder> _LocalBuilderCache = new Dictionary<AstLocal, LocalBuilder>();
+		private LocalBuilder _GetLocalBuilderFromAstLocal(AstLocal AstLocal)
 		{
-			var UsedSet = new HashSet<AstLabel>();
-			foreach (var AstNodeStmLabel in AstNode.Descendant.Where(Node => Node is AstNodeStmLabel).Cast<AstNodeStmLabel>())
+			//AstLocal.Create
+			if (!_LocalBuilderCache.ContainsKey(AstLocal))
 			{
-				if (UsedSet.Contains(AstNodeStmLabel.AstLabel))
-				{
-					throw (new Exception("Label declared twice"));
-				}
-				UsedSet.Add(AstNodeStmLabel.AstLabel);
+				_LocalBuilderCache[AstLocal] = ILGenerator.DeclareLocal(AstLocal.Type);
 			}
+			return _LocalBuilderCache[AstLocal];
+		}
 
-			foreach (var AstNodeStmLabel in UsedSet)
+		private Dictionary<AstLabel, Label> _LabelCache = new Dictionary<AstLabel, Label>();
+		private Label _GetLabelFromAstLabel(AstLabel AstLabel)
+		{
+			if (!_LabelCache.ContainsKey(AstLabel))
 			{
-				//Console.WriteLine("CreateAllUsedLabels: {0}", AstNodeStmLabel);
-				AstNodeStmLabel.Label = ILGenerator.DefineLabel();
+				_LabelCache[AstLabel] = ILGenerator.DefineLabel();
 			}
+			return _LabelCache[AstLabel];
 		}
 
 		public override GeneratorIL GenerateRoot(AstNode AstNode)
 		{
-			if (ILGenerator != null)
-			{
-				CreateLabels(AstNode);
-			}
 			return base.GenerateRoot(AstNode);
 		}
 
@@ -140,8 +139,8 @@ namespace SafeILGenerator.Ast.Generators
 			}
 		}
 
-		protected AstLabel DefineLabel(string Name) { DefineLabelHook(); if (ILGenerator != null) return AstLabel.CreateFromLabel(ILGenerator.DefineLabel(), Name); return AstLabel.CreateDelayedWithName(Name); }
-		protected void MarkLabel(AstLabel Label) { MarkLabelHook(Label); if (ILGenerator != null) ILGenerator.MarkLabel(Label.Label); }
+		protected AstLabel DefineLabel(string Name) { DefineLabelHook(); return AstLabel.CreateLabel(Name); }
+		protected void MarkLabel(AstLabel Label) { MarkLabelHook(Label); if (ILGenerator != null) ILGenerator.MarkLabel(_GetLabelFromAstLabel(Label)); }
 
 		protected void Emit(OpCode OpCode) { EmitHook(OpCode, null); if (ILGenerator != null) ILGenerator.Emit(OpCode); }
 		protected void Emit(OpCode OpCode, int Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
@@ -154,8 +153,8 @@ namespace SafeILGenerator.Ast.Generators
 		protected void Emit(OpCode OpCode, ConstructorInfo Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
 		protected void Emit(OpCode OpCode, FieldInfo Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
 		protected void Emit(OpCode OpCode, Type Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value); }
-		protected void Emit(OpCode OpCode, AstLabel Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value.Label); }
-		protected void Emit(OpCode OpCode, params AstLabel[] Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value.Select(Item => Item.Label).ToArray()); }
+		protected void Emit(OpCode OpCode, AstLabel Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, _GetLabelFromAstLabel(Value)); }
+		protected void Emit(OpCode OpCode, params AstLabel[] Value) { EmitHook(OpCode, Value); if (ILGenerator != null) ILGenerator.Emit(OpCode, Value.Select(Item => _GetLabelFromAstLabel(Item)).ToArray()); }
 
 		protected virtual void _Generate(AstNodeExprNull Null)
 		{
@@ -260,18 +259,6 @@ namespace SafeILGenerator.Ast.Generators
 				case 3: Emit(OpCodes.Ldarg_3); break;
 				default: Emit(OpCodes.Ldarg, ArgumentIndex); break;
 			}
-		}
-
-		//LocalBuilder
-		private Dictionary<AstLocal, LocalBuilder> _LocalBuilderCache = new Dictionary<AstLocal, LocalBuilder>();
-		private LocalBuilder _GetLocalBuilderFromAstLocal(AstLocal AstLocal)
-		{
-			//AstLocal.Create
-			if (!_LocalBuilderCache.ContainsKey(AstLocal))
-			{
-				_LocalBuilderCache[AstLocal] = ILGenerator.DeclareLocal(AstLocal.Type);
-			}
-			return _LocalBuilderCache[AstLocal];
 		}
 
 		protected virtual void _Generate(AstNodeExprLocal Local)
@@ -661,8 +648,8 @@ namespace SafeILGenerator.Ast.Generators
 
 			// Check types and unique values.
 
-			var EndCasesLabel = AstLabel.CreateFromLabel(ILGenerator.DefineLabel(), "EndCasesLabel");
-			var DefaultLabel = AstLabel.CreateFromLabel(ILGenerator.DefineLabel(), "DefaultLabel");
+			var EndCasesLabel = AstLabel.CreateLabel("EndCasesLabel");
+			var DefaultLabel = AstLabel.CreateLabel("DefaultLabel");
 
 			if (Switch.Cases.Length > 0)
 			{
@@ -691,7 +678,7 @@ namespace SafeILGenerator.Ast.Generators
 						{
 							long RealValue = AstUtils.CastType<long>(Case.CaseValue);
 							long Offset = RealValue - CommonMin;
-							Labels[Offset] = AstLabel.CreateFromLabel(ILGenerator.DefineLabel(), "Case_" + RealValue);
+							Labels[Offset] = AstLabel.CreateLabel("Case_" + RealValue);
 						}
 
 						/*
@@ -740,7 +727,7 @@ namespace SafeILGenerator.Ast.Generators
 					//Switch.Cases
 					foreach (var Case in Switch.Cases)
 					{
-						var LabelSkipThisCase = AstLabel.CreateFromLabel(ILGenerator.DefineLabel(), "LabelCase" + Case.CaseValue);
+						var LabelSkipThisCase = AstLabel.CreateLabel("LabelCase" + Case.CaseValue);
 						Generate(new AstNodeStmGotoIfFalse(LabelSkipThisCase, new AstNodeExprBinop(new AstNodeExprLocal(SwitchVarLocal), "==", new AstNodeExprImm(Case.CaseValue))));
 						Generate(Case.Code);
 						Generate(new AstNodeStmGotoAlways(EndCasesLabel));

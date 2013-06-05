@@ -349,7 +349,7 @@ namespace SafeILGenerator.Ast.Generators
 		protected virtual void _Generate(AstNodeStmThrow AstNodeStmThrow)
 		{
 			Output.Write("throw ");
-			Generate(AstNodeStmThrow);
+			Generate(AstNodeStmThrow.AstNodeExpr);
 			Output.Write(";");
 		}
 
