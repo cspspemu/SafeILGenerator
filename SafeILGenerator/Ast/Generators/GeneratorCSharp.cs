@@ -27,6 +27,7 @@ namespace SafeILGenerator.Ast.Generators
 
 		static public string GenerateString<TGeneratorCSharp>(AstNode AstNode) where TGeneratorCSharp : GeneratorCSharp, new()
 		{
+			if (AstNode == null) return "";
 			return new TGeneratorCSharp().GenerateRoot(AstNode).ToString();
 		}
 
