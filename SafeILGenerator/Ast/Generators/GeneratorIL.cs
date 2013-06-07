@@ -278,7 +278,14 @@ namespace SafeILGenerator.Ast.Generators
 		protected virtual void _Generate(AstNodeExprFieldAccess FieldAccess)
 		{
 			Generate(FieldAccess.Instance);
-			Emit(OpCodes.Ldfld, FieldAccess.Field);
+			if (FieldAccess.Field.FieldType.IsValueType)
+			{
+				Emit(OpCodes.Ldflda, FieldAccess.Field);
+			}
+			else
+			{
+				Emit(OpCodes.Ldfld, FieldAccess.Field);
+			}
 		}
 
 		protected virtual void _Generate(AstNodeExprStaticFieldAccess FieldAccess)
