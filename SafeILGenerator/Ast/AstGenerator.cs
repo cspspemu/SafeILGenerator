@@ -74,6 +74,23 @@ namespace SafeILGenerator.Ast
 			return new AstNodeExprFieldAccess(Instance, FieldName);
 		}
 
+		public AstNodeExprLValue FieldPropertyAccess(AstNodeExpr Instance, string FieldPropertyName)
+		{
+			if (Instance.Type.GetField(FieldPropertyName) != null) return FieldAccess(Instance, FieldPropertyName);
+			if (Instance.Type.GetProperty(FieldPropertyName) != null) return PropertyAccess(Instance, FieldPropertyName);
+			throw (new InvalidOperationException(String.Format("Can't find Field/Property '{0}' for type '{1}'", FieldPropertyName, Instance.Type)));
+		}
+
+		public AstNodeExprPropertyAccess PropertyAccess(AstNodeExpr Instance, PropertyInfo PropertyInfo)
+		{
+			return new AstNodeExprPropertyAccess(Instance, PropertyInfo);
+		}
+
+		public AstNodeExprPropertyAccess PropertyAccess(AstNodeExpr Instance, string PropertyName)
+		{
+			return new AstNodeExprPropertyAccess(Instance, PropertyName);
+		}
+
 		public AstNodeExprArrayAccess ArrayAccess(AstNodeExpr Instance, AstNodeExpr Index)
 		{
 			return new AstNodeExprArrayAccess(Instance, Index);

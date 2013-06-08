@@ -275,14 +275,21 @@ namespace SafeILGenerator.Ast.Generators
 			}
 		}
 
+		protected virtual void _Generate(AstNodeExprPropertyAccess PropertyAccess)
+		{
+			Generate(PropertyAccess.Instance);
+			Emit(OpCodes.Callvirt, PropertyAccess.Property.GetMethod);
+		}
+
 		protected virtual void _Generate(AstNodeExprFieldAccess FieldAccess)
 		{
 			Generate(FieldAccess.Instance);
-			if (FieldAccess.Field.FieldType.IsValueType)
-			{
-				Emit(OpCodes.Ldflda, FieldAccess.Field);
-			}
-			else
+			//Console.WriteLine("{0}", FieldAccess.Field);
+			//if (FieldAccess.Field.FieldType.IsValueType)
+			//{
+			//	Emit(OpCodes.Ldflda, FieldAccess.Field);
+			//}
+			//else
 			{
 				Emit(OpCodes.Ldfld, FieldAccess.Field);
 			}
@@ -367,6 +374,8 @@ namespace SafeILGenerator.Ast.Generators
 			var AstNodeExprStaticFieldAccess = (Assign.LValue as AstNodeExprStaticFieldAccess);
 			var AstNodeExprIndirect = (Assign.LValue as AstNodeExprIndirect);
 			var AstNodeExprArrayAccess = (Assign.LValue as AstNodeExprArrayAccess);
+			var AstNodeExprPropertyAccess = (Assign.LValue as AstNodeExprPropertyAccess);
+			
 
 			if (AstNodeExprLocal != null)
 			{
@@ -411,6 +420,12 @@ namespace SafeILGenerator.Ast.Generators
 				else if (PointerType == typeof(double)) Emit(OpCodes.Stind_R8);
 				else if (PointerType == typeof(bool)) Emit(OpCodes.Stind_I1);
 				else throw (new NotImplementedException("Can't store indirect value"));
+			}
+			else if (AstNodeExprPropertyAccess != null)
+			{
+				Generate(AstNodeExprPropertyAccess.Instance);
+				Generate(Assign.Value);
+				Emit(OpCodes.Callvirt, AstNodeExprPropertyAccess.Property.SetMethod);
 			}
 			else
 			{
