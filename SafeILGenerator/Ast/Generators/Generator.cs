@@ -1,5 +1,4 @@
-﻿//#define USE_STATIC_REFERENCE
-#define USE_NORMAL_INVOKE
+﻿//#define USE_NORMAL_INVOKE
 
 using SafeILGenerator.Ast.Nodes;
 using SafeILGenerator.Utils;
@@ -13,31 +12,63 @@ using System.Threading.Tasks;
 
 namespace SafeILGenerator.Ast.Generators
 {
-	public abstract class Generator<TGenerator>
+	public delegate void MapDelegate(object This, AstNode AstNode);
+
+	public class MappingInfo
 	{
-#if !USE_NORMAL_INVOKE
-#if USE_STATIC_REFERENCE
-		delegate void MapDelegate(AstNode AstNode);
-		private ILInstanceHolderPoolItem StaticThisReference;
+#if USE_NORMAL_INVOKE
+		public MethodInfo MethodInfo;
 #else
-		delegate void MapDelegate(object This, AstNode AstNode);
+		public MapDelegate Action;
 #endif
+		
+		public void Call(Object This, AstNode AstNode)
+		{
+#if USE_NORMAL_INVOKE
+			MethodInfo.Invoke(This, new object[] { AstNode });
+#else
+			Action(This, AstNode);
 #endif
+		}
 
 #if USE_NORMAL_INVOKE
-		private Dictionary<Type, MethodInfo> GenerateMappings = new Dictionary<Type, MethodInfo>();
+		static public MappingInfo FromMethodInfo<T>(Generator<T> that, MethodInfo MethodInfo)
+		{
+			return new MappingInfo()
+			{
+				MethodInfo = MethodInfo
+			};
+		}
 #else
-		private Dictionary<Type, MapDelegate> GenerateMappings = new Dictionary<Type, MapDelegate>();
+		static public MappingInfo FromMethodInfo<T>(Generator<T> that, MethodInfo MethodInfo)
+		{
+			var DM = new DynamicMethod("GenerateInvoke_" + MethodInfo.Name, typeof(void), new Type[] { typeof(object), typeof(AstNode) }, that.GetType());
+			var ILGenerator = DM.GetILGenerator();
+			
+			ILGenerator.Emit(OpCodes.Ldarg_0);
+			ILGenerator.Emit(OpCodes.Castclass, that.GetType());
+			
+			ILGenerator.Emit(OpCodes.Ldarg_1);
+			ILGenerator.Emit(OpCodes.Castclass, MethodInfo.GetParameters()[0].ParameterType);
+			ILGenerator.Emit(OpCodes.Call, MethodInfo);
+			if (MethodInfo.ReturnType != typeof(void)) ILGenerator.Emit(OpCodes.Pop);
+			
+			ILGenerator.Emit(OpCodes.Ret);
+			
+			return new MappingInfo()
+			{
+				Action = (MapDelegate)DM.CreateDelegate(typeof(MapDelegate)),
+			};
+		}
 #endif
+	}
+
+	public abstract class Generator<TGenerator>
+	{
+		private Dictionary<Type, MappingInfo> GenerateMappings = new Dictionary<Type, MappingInfo>();
 
 		public Generator()
 		{
-#if !USE_NORMAL_INVOKE
-#if USE_STATIC_REFERENCE
-			this.StaticThisReference = ILInstanceHolder.Alloc(this.GetType(), this);
-#endif
-#endif
-
 			foreach (
 				var Method
 				in
@@ -47,7 +78,7 @@ namespace SafeILGenerator.Ast.Generators
 					.Where(Method => Method.GetParameters().Count() == 1)
 			)
 			{
-				GenerateMappings[Method.GetParameters().First().ParameterType] = GenerateInvoke(Method);
+				GenerateMappings[Method.GetParameters().First().ParameterType] = MappingInfo.FromMethodInfo(this, Method);
 			}
 
 			this.Reset();
@@ -59,36 +90,6 @@ namespace SafeILGenerator.Ast.Generators
 		{
 			Test.MyMethod(AstNode);
 		}
-
-#if USE_NORMAL_INVOKE
-		private MethodInfo GenerateInvoke(MethodInfo MethodInfo)
-		{
-			return MethodInfo;
-		}
-#else
-		private MapDelegate GenerateInvoke(MethodInfo MethodInfo)
-		{
-
-			var DM = new DynamicMethod("GenerateInvoke_" + MethodInfo.Name, typeof(void), new Type[] { typeof(object), typeof(AstNode) }, this.GetType());
-			var ILGenerator = DM.GetILGenerator();
-			
-#if USE_STATIC_REFERENCE
-			ILGenerator.Emit(OpCodes.Ldsfld, StaticThisReference.FieldInfo);
-#else
-			ILGenerator.Emit(OpCodes.Ldarg_0);
-			ILGenerator.Emit(OpCodes.Castclass, this.GetType());
-#endif
-
-			ILGenerator.Emit(OpCodes.Ldarg_1);
-			ILGenerator.Emit(OpCodes.Castclass, MethodInfo.GetParameters()[0].ParameterType);
-			ILGenerator.Emit(OpCodes.Call, MethodInfo);
-			if (MethodInfo.ReturnType != typeof(void)) ILGenerator.Emit(OpCodes.Pop);
-
-			ILGenerator.Emit(OpCodes.Ret);
-
-			return (MapDelegate)DM.CreateDelegate(typeof(MapDelegate));
-		}
-#endif
 
 		public virtual TGenerator Reset()
 		{
@@ -118,15 +119,8 @@ namespace SafeILGenerator.Ast.Generators
 				}
 				throw (new NotImplementedException(String.Format("Don't know how to generate {0} for {1}", AstNodeType, this.GetType())));
 			}
-#if USE_NORMAL_INVOKE
-			GenerateMappings[AstNodeType].Invoke(this, new object[] { AstNode });
-#else
-#if USE_STATIC_REFERENCE
-			GenerateMappings[AstNodeType](AstNode);
-#else
-			GenerateMappings[AstNodeType](this, AstNode);
-#endif
-#endif
+
+			GenerateMappings[AstNodeType].Call(this, AstNode);
 		}
 	}
 }

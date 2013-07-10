@@ -28,7 +28,7 @@ namespace SafeILGenerator.Ast.Generators
 		static public string GenerateString<TGeneratorCSharp>(AstNode AstNode) where TGeneratorCSharp : GeneratorCSharp, new()
 		{
 			if (AstNode == null) return "";
-			return new TGeneratorCSharp().GenerateRoot(AstNode).ToString();
+			return new TGeneratorCSharp().Reset().GenerateRoot(AstNode).ToString();
 		}
 
 		protected virtual void _Generate(AstNodeExprLocal Local)
@@ -74,7 +74,8 @@ namespace SafeILGenerator.Ast.Generators
 
 		protected virtual void _Generate(AstNodeStmComment Comment)
 		{
-			Output.Write("// " + Comment.CommentText + "\n");
+			Output.Write("// " + Comment.CommentText);
+			Output.WriteNewLine();
 		}
 
 		protected virtual void _Generate(AstNodeExprBinop Item)
@@ -102,35 +103,34 @@ namespace SafeILGenerator.Ast.Generators
 			//Output.Write(String.Join(", ", Case.CaseValues.Select(Item => ValueAsString(Item))));
 			Output.Write(String.Join(", ", ValueAsString(Case.CaseValue)));
 			Output.Write(":");
-			Output.Write("\n");
+			Output.WriteNewLine();
 			Output.Indent(() =>
 			{
 				Generate(Case.Code);
 			});
-			Output.Write("\n");
+			Output.WriteNewLine();
 			Output.Write("break;");
-			Output.Write("\n");
+			Output.WriteNewLine();
 		}
 
 		protected virtual void _Generate(AstNodeCaseDefault Case)
 		{
 			Output.Write("default:");
-			Output.Write("\n");
+			Output.WriteNewLine();
 			Output.Indent(() =>
 			{
 				Generate(Case.Code);
 			});
-			Output.Write("\n");
+			Output.WriteNewLine();
 			Output.Write("break;");
-			Output.Write("\n");
+			Output.WriteNewLine();
 		}
 
 		protected virtual void _Generate(AstNodeStmSwitch Switch)
 		{
 			Output.Write("switch (");
 			Generate(Switch.SwitchValue);
-			Output.Write(") {");
-			Output.Write("\n");
+			Output.Write(") {").WriteNewLine();
 			Output.Indent(() =>
 			{
 				foreach (var Case in Switch.Cases) Generate(Case);
@@ -312,16 +312,16 @@ namespace SafeILGenerator.Ast.Generators
 
 		protected virtual void _Generate(AstNodeStmContainer Container)
 		{
-			Output.Write("{\n");
+			Output.Write("{").WriteNewLine();
 			Output.Indent(() =>
 			{
 				foreach (var Node in Container.Nodes)
 				{
 					Generate(Node);
-					Output.Write("\n");
+					Output.WriteNewLine();
 				}
 			});
-			Output.Write("}\n");
+			Output.Write("}").WriteNewLine();
 		}
 
 		protected virtual void _Generate(AstNodeExprNewArray Array)

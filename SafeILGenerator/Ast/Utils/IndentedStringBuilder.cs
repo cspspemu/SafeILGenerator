@@ -39,7 +39,7 @@ namespace SafeILGenerator.Ast.Utils
 			}
 		}
 
-		private void WriteNormalText(string InlineText)
+		public IndentedStringBuilder Write(string InlineText)
 		{
 			if (InlineText.Length > 0)
 			{
@@ -50,14 +50,17 @@ namespace SafeILGenerator.Ast.Utils
 				}
 				StringBuilder.Append(InlineText);
 			}
+			return this;
 		}
 
-		private void WriteNewLine()
+		public IndentedStringBuilder WriteNewLine()
 		{
 			StartingLine = true;
 			StringBuilder.Append("\n");
+			return this;
 		}
 
+		/*
 		public void Write(string Text)
 		{
 			var Lines = Text.Split('\n');
@@ -67,9 +70,10 @@ namespace SafeILGenerator.Ast.Utils
 				{
 					WriteNewLine();
 				}
-				WriteNormalText(Lines[n]);
+				WriteTextWithoutLineBreaks(Lines[n]);
 			}
 		}
+		*/
 
 		public override string ToString()
 		{

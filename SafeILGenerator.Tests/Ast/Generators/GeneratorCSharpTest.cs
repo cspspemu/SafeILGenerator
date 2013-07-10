@@ -1,39 +1,39 @@
 ﻿using System;
 using SafeILGenerator.Ast.Generators;
 using SafeILGenerator.Ast.Nodes;
-using NUnit.Framework;
 using SafeILGenerator.Ast;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace SafeILGenerator.Tests.Ast.Generators
 {
-	[TestFixture]
+	[TestClass]
 	public class GeneratorCSharpTest
 	{
 		GeneratorCSharp GeneratorCSharp;
 
-		[SetUp]
+		[TestInitialize]
 		public void SetUp()
 		{
 			GeneratorCSharp = new GeneratorCSharp();
 		}
 
-		[Test]
+		[TestMethod]
 		public void TestAstExpression()
 		{
 			GeneratorCSharp.GenerateRoot(new AstNodeExprBinop(new AstNodeExprImm(3), "+", new AstNodeExprImm(5)));
 			Assert.AreEqual("(3 + 5)", GeneratorCSharp.ToString());
 		}
 
-		[Test]
+		[TestMethod]
 		public void TestAstIf()
 		{
 			GeneratorCSharp.GenerateRoot(new AstNodeStmIfElse(new AstNodeExprImm(true), new AstNodeStmReturn(), new AstNodeStmReturn()));
 			Assert.AreEqual("if (true) return; else return;", GeneratorCSharp.ToString());
 		}
 
-		[Test]
+		[TestMethod]
 		public void TestSimpleCall()
 		{
 			GeneratorCSharp.GenerateRoot(
@@ -50,7 +50,7 @@ namespace SafeILGenerator.Tests.Ast.Generators
 
 		static private AstGenerator ast = AstGenerator.Instance;
 
-		[Test]
+		[TestMethod]
 		public void TestAstSwitch()
 		{
 			var Local = AstLocal.Create<int>("Local");

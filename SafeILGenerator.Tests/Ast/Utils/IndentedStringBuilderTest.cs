@@ -1,13 +1,13 @@
 ﻿using System;
 using SafeILGenerator.Ast.Utils;
-using NUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace SafeILGenerator.Tests.Ast.Utils
 {
-	[TestFixture]
+	[TestClass]
 	public class IndentedStringBuilderTest
 	{
-		[Test]
+		[TestMethod]
 		public void TestIndentation()
 		{
 			var Output = new IndentedStringBuilder();

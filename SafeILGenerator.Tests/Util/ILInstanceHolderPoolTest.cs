@@ -2,16 +2,16 @@
 using SafeILGenerator.Utils;
 using SafeILGenerator.Ast.Generators;
 using SafeILGenerator.Ast;
-using NUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace SafeILGenerator.Tests.Util
 {
-	[TestFixture]
+	[TestClass]
 	public class ILInstanceHolderPoolTest
 	{
 		private static AstGenerator ast = AstGenerator.Instance;
 
-		[Test]
+		[TestMethod]
 		public void TestAllocAssignGetAndRelease()
 		{
 			var Pool = new ILInstanceHolderPool(typeof(int), 16);
@@ -23,7 +23,7 @@ namespace SafeILGenerator.Tests.Util
 			Assert.AreEqual(16, Pool.FreeCount);
 		}
 
-		[Test]
+		[TestMethod]
 		public void TestMethod2()
 		{
 			var Pool = new ILInstanceHolderPool(typeof(int), 16);
@@ -38,7 +38,7 @@ namespace SafeILGenerator.Tests.Util
 			Assert.AreEqual(10, Item.Value);
 		}
 
-		[Test]
+		[TestMethod]
 		public void TestMethod3()
 		{
 			var Pool1 = new ILInstanceHolderPool(typeof(int), 16);
@@ -51,7 +51,7 @@ namespace SafeILGenerator.Tests.Util
 			Assert.AreEqual(22, Item2.Value);
 		}
 
-		[Test]
+		[TestMethod]
 		public void TestGlobalAlloc()
 		{
 			Assert.AreEqual(0, ILInstanceHolder.CapacityCount);
