@@ -33,7 +33,8 @@ namespace SafeILGenerator.Tests.Util
 				ast.Return()
 			);
 			Console.WriteLine(GeneratorCSharp.GenerateString<GeneratorCSharp>(AstNode));
-			var ItemSet = GeneratorIL.GenerateDelegate<GeneratorIL, Action<int>>("ItemSet", AstNode);
+			var GeneratorIL = new GeneratorIL();
+			var ItemSet = GeneratorIL.GenerateDelegate<Action<int>>("ItemSet", AstNode);
 			ItemSet(10);
 			Assert.AreEqual(10, Item.Value);
 		}

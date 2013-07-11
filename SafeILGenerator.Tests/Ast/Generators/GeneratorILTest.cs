@@ -98,7 +98,8 @@ namespace SafeILGenerator.Tests.Ast.Generators
 
 			//throw(new Exception(GeneratorIL.GenerateToString<GeneratorIL, Func<Type>>(Ast)));
 
-			var Func = GeneratorIL.GenerateDelegate<GeneratorIL, Func<Type>>("Test", Ast);
+			var GeneratorIL = new GeneratorIL();
+			var Func = GeneratorIL.GenerateDelegate<Func<Type>>("Test", Ast);
 			Assert.AreEqual(typeof(int).ToString(), Func().ToString());
 		}
 
@@ -112,7 +113,8 @@ namespace SafeILGenerator.Tests.Ast.Generators
 				)
 			);
 
-			var Func = GeneratorIL.GenerateDelegate<GeneratorIL, Func<float, int>>("Test", Ast);
+			var GeneratorIL = new GeneratorIL();
+			var Func = GeneratorIL.GenerateDelegate<Func<float, int>>("Test", Ast);
 			int b = 1234567;
 			float a = 0;
 			*(int*)&a = b;
@@ -221,7 +223,8 @@ namespace SafeILGenerator.Tests.Ast.Generators
 				ast.Return()
 			);
 
-			var Method = GeneratorIL.GenerateDelegate<GeneratorIL, Action<string>>("TestWriteLine", Ast);
+			var GeneratorIL = new GeneratorIL();
+			var Method = GeneratorIL.GenerateDelegate<Action<string>>("TestWriteLine", Ast);
 
 			Console.WriteLine(new GeneratorCSharp().GenerateRoot(Ast).ToString());
 			Console.WriteLine("{0}", GeneratorIL.GenerateToString<GeneratorIL>(Method.Method, Ast));
@@ -247,7 +250,8 @@ namespace SafeILGenerator.Tests.Ast.Generators
 				),
 				ast.Return("Invalid!")
 			);
-			var Method = GeneratorIL.GenerateDelegate<GeneratorIL, Func<int, string>>("TestSwitch", Ast);
+			var GeneratorIL = new GeneratorIL();
+			var Method = GeneratorIL.GenerateDelegate<Func<int, string>>("TestSwitch", Ast);
 			Assert.AreEqual("-", Method(0));
 			Assert.AreEqual("One", Method(1));
 			Assert.AreEqual("-", Method(2));
