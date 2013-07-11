@@ -9,14 +9,17 @@ namespace SafeILGenerator.Ast.Nodes
 	public class AstNodeStmContainer : AstNodeStm
 	{
 		public List<AstNodeStm> Nodes;
+		public readonly bool Inline = false;
 
-		public AstNodeStmContainer(params AstNodeStm[] Nodes)
+		public AstNodeStmContainer(bool Inline, params AstNodeStm[] Nodes)
 		{
+			this.Inline = Inline;
 			this.Nodes = Nodes.ToList();
 		}
 
-		public AstNodeStmContainer(IEnumerable<AstNodeStm> Nodes)
+		public AstNodeStmContainer(params AstNodeStm[] Nodes)
 		{
+			this.Inline = false;
 			this.Nodes = Nodes.ToList();
 		}
 
@@ -28,6 +31,17 @@ namespace SafeILGenerator.Ast.Nodes
 		public override void TransformNodes(TransformNodesDelegate Transformer)
 		{
 			Transformer.Ref(ref Nodes);
+		}
+
+		public override Dictionary<string, string> Info
+		{
+			get
+			{
+				return new Dictionary<string, string>()
+				{
+					{ "Inline", Inline.ToString() },
+				};
+			}
 		}
 	}
 }

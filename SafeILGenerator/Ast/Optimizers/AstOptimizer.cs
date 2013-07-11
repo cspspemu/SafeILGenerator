@@ -51,9 +51,9 @@ namespace SafeILGenerator.Ast.Optimizers
 
 		protected virtual AstNode _Optimize(AstNodeStmContainer Container)
 		{
-			var NewContainer = new AstNodeStmContainer();
-
 			if (Container.Nodes.Count == 1) return Container.Nodes[0];
+
+			var NewContainer = new AstNodeStmContainer(Container.Inline);
 
 			foreach (var Node in Container.Nodes)
 			{

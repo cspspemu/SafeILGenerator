@@ -93,7 +93,7 @@ namespace SafeILGenerator.Ast.Generators
 			Generate(Goto.Condition);
 			Output.Write(") ");
 			Output.Write("goto ");
-			Output.Write("Label_" + Goto.AstLabel.Name);
+			Output.Write(Goto.AstLabel.Name);
 			Output.Write(";");
 		}
 
@@ -145,14 +145,14 @@ namespace SafeILGenerator.Ast.Generators
 			Generate(Goto.Condition);
 			Output.Write(")) ");
 			Output.Write("goto ");
-			Output.Write("Label_" + Goto.AstLabel.Name);
+			Output.Write(Goto.AstLabel.Name);
 			Output.Write(";");
 		}
 
 		protected virtual void _Generate(AstNodeStmGotoAlways Goto)
 		{
 			Output.Write("goto ");
-			Output.Write("Label_" + Goto.AstLabel.Name);
+			Output.Write(Goto.AstLabel.Name);
 			Output.Write(";");
 		}
 
@@ -160,7 +160,7 @@ namespace SafeILGenerator.Ast.Generators
 		{
 			Output.UnIndent(() =>
 			{
-				Output.Write("Label_" + Label.AstLabel.Name);
+				Output.Write(Label.AstLabel.Name);
 				Output.Write(":;");
 			});
 		}
@@ -267,10 +267,17 @@ namespace SafeILGenerator.Ast.Generators
 
 		protected virtual void _Generate(AstNodeExprCast Cast)
 		{
-			Output.Write("(");
-			Output.Write("(" + Cast.CastedType.Name + ")");
-			Generate(Cast.Expr);
-			Output.Write(")");
+			if (Cast.Explicit)
+			{
+				Output.Write("(");
+				Output.Write("(" + Cast.CastedType.Name + ")");
+				Generate(Cast.Expr);
+				Output.Write(")");
+			}
+			else
+			{
+				Generate(Cast.Expr);
+			}
 		}
 
 		protected virtual void _Generate(AstNodeExprCallTail Tail)
@@ -312,16 +319,28 @@ namespace SafeILGenerator.Ast.Generators
 
 		protected virtual void _Generate(AstNodeStmContainer Container)
 		{
-			Output.Write("{").WriteNewLine();
-			Output.Indent(() =>
+			if (Container.Inline)
 			{
 				foreach (var Node in Container.Nodes)
 				{
 					Generate(Node);
-					Output.WriteNewLine();
+					Output.Write(" ");
 				}
-			});
-			Output.Write("}").WriteNewLine();
+				//Output.WriteNewLine();
+			}
+			else
+			{
+				Output.Write("{").WriteNewLine();
+				Output.Indent(() =>
+				{
+					foreach (var Node in Container.Nodes)
+					{
+						Generate(Node);
+						Output.WriteNewLine();
+					}
+				});
+				Output.Write("}").WriteNewLine();
+			}
 		}
 
 		protected virtual void _Generate(AstNodeExprNewArray Array)

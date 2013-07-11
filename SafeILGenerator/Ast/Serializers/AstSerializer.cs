@@ -42,7 +42,7 @@ namespace SafeILGenerator.Ast.Serializers
 			if (Node.Childs.Count() > 0)
 			{
 				Out.Write(">");
-				if (Spaces) Out.Write("\n");
+				if (Spaces) Out.WriteNewLine();
 				if (Spaces)
 				{
 					Out.Indent(() =>
@@ -55,12 +55,12 @@ namespace SafeILGenerator.Ast.Serializers
 					foreach (var Child in Node.Childs) SerializeAsXml(Child, Out, Spaces);
 				}
 				Out.Write("</" + NodeName + ">");
-				if (Spaces) Out.Write("\n");
+				if (Spaces) Out.WriteNewLine();
 			}
 			else
 			{
 				Out.Write(" />");
-				if (Spaces) Out.Write("\n");
+				if (Spaces) Out.WriteNewLine();
 			}
 		}
 	}

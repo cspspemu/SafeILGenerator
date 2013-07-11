@@ -161,19 +161,34 @@ namespace SafeILGenerator.Ast
 			return new AstNodeExprTerop(Condition, True, False);
 		}
 
-		public AstNodeStmIfElse IfElse(AstNodeExpr Condition, AstNodeStm True, AstNodeStm False = null)
+		public AstNodeStmIfElse If(AstNodeExpr Condition, AstNodeStm True)
+		{
+			return new AstNodeStmIfElse(Condition, True);
+		}
+
+		public AstNodeStmIfElse IfElse(AstNodeExpr Condition, AstNodeStm True, AstNodeStm False)
 		{
 			return new AstNodeStmIfElse(Condition, True, False);
 		}
 
 		public AstNodeStmContainer Statements(IEnumerable<AstNodeStm> Statements)
 		{
-			return new AstNodeStmContainer(Statements);
+			return new AstNodeStmContainer(Statements.ToArray());
 		}
 
 		public AstNodeStmContainer Statements(params AstNodeStm[] Statements)
 		{
 			return new AstNodeStmContainer(Statements);
+		}
+
+		public AstNodeStmContainer StatementsInline(IEnumerable<AstNodeStm> Statements)
+		{
+			return new AstNodeStmContainer(true, Statements.ToArray());
+		}
+
+		public AstNodeStmContainer StatementsInline(params AstNodeStm[] Statements)
+		{
+			return new AstNodeStmContainer(true, Statements);
 		}
 
 		public AstNodeStmEmpty Statement()
