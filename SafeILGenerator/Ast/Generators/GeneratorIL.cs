@@ -18,7 +18,7 @@ namespace SafeILGenerator.Ast.Generators
 		protected bool GenerateLines;
 		protected List<string> Lines = new List<string>();
 
-		public GeneratorIL()
+		public GeneratorIL() : base()
 		{
 		}
 
@@ -95,7 +95,12 @@ namespace SafeILGenerator.Ast.Generators
 			return GenerateToString<TGenerator>(MethodInfo, AstNode);
 		}
 
-		static public TDelegate GenerateDelegate<TGenerator, TDelegate>(string MethodName, AstNode AstNode) where TGenerator : GeneratorIL, new()
+		//static public TDelegate GenerateDelegate<TGenerator, TDelegate>(string MethodName, AstNode AstNode) where TGenerator : GeneratorIL, new()
+		//{
+		//	return new TGenerator()._GenerateDelegate<TDelegate>(MethodName, AstNode);
+		//}
+
+		public TDelegate GenerateDelegate<TDelegate>(string MethodName, AstNode AstNode)
 		{
 			var MethodInfo = typeof(TDelegate).GetMethod("Invoke");
 			var DynamicMethod = new DynamicMethod(
@@ -105,9 +110,9 @@ namespace SafeILGenerator.Ast.Generators
 				Assembly.GetExecutingAssembly().ManifestModule
 			);
 			var ILGenerator = DynamicMethod.GetILGenerator();
-			var Generator = new TGenerator();
-			Generator.Init(MethodInfo, ILGenerator, GenerateLines: false);
-			Generator.Generate(AstNode);
+			this.Reset();
+			this.Init(MethodInfo, ILGenerator, GenerateLines: false);
+			this.Generate(AstNode);
 			return (TDelegate)(object)DynamicMethod.CreateDelegate(typeof(TDelegate));
 		}
 

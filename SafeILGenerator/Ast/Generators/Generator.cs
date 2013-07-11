@@ -42,7 +42,7 @@ namespace SafeILGenerator.Ast.Generators
 #else
 		static public MappingInfo FromMethodInfo<T>(Generator<T> that, MethodInfo MethodInfo)
 		{
-			var DM = new DynamicMethod("GenerateInvoke_" + MethodInfo.Name, typeof(void), new Type[] { typeof(object), typeof(AstNode) }, that.GetType());
+			var DM = new DynamicMethod("MappingInfo.FromMethodInfo::" + typeof(T).Name + "::" + MethodInfo.Name + "(" + MethodInfo.GetParameters().First().ParameterType.Name + ")", typeof(void), new Type[] { typeof(object), typeof(AstNode) }, that.GetType());
 			var ILGenerator = DM.GetILGenerator();
 			
 			ILGenerator.Emit(OpCodes.Ldarg_0);
@@ -84,12 +84,12 @@ namespace SafeILGenerator.Ast.Generators
 			this.Reset();
 		}
 
-		static Generator<GeneratorCSharp> Test;
-
-		private void MyMethod(AstNode AstNode)
-		{
-			Test.MyMethod(AstNode);
-		}
+		//static Generator<GeneratorCSharp> Test;
+		//
+		//private void MyMethod(AstNode AstNode)
+		//{
+		//	Test.MyMethod(AstNode);
+		//}
 
 		public virtual TGenerator Reset()
 		{

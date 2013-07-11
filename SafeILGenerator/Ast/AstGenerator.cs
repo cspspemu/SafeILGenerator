@@ -13,7 +13,7 @@ namespace SafeILGenerator.Ast
 {
 	public class AstGenerator
 	{
-		private AstGenerator()
+		protected AstGenerator()
 		{
 		}
 
