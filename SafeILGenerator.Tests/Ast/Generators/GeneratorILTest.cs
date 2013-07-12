@@ -37,7 +37,7 @@ namespace SafeILGenerator.Tests.Ast.Generators
 		{
 			var Func = GenerateDynamicMethod<Func<int>>("Test", (DynamicMethod, ILGenerator) =>
 			{
-				var Generator = new GeneratorIL(DynamicMethod, ILGenerator);
+				var Generator = new GeneratorIL().Init(DynamicMethod, ILGenerator);
 				Generator.GenerateRoot(new AstNodeStmReturn(new AstNodeExprImm(777)));
 			});
 
@@ -49,7 +49,7 @@ namespace SafeILGenerator.Tests.Ast.Generators
 		{
 			var Func = GenerateDynamicMethod<Func<int>>("Test", (DynamicMethod, ILGenerator) =>
 			{
-				var Generator = new GeneratorIL(DynamicMethod, ILGenerator);
+				var Generator = new GeneratorIL().Init(DynamicMethod, ILGenerator);
 				Generator.GenerateRoot(
 					new AstNodeStmReturn(
 						new AstNodeExprCallStatic(
@@ -70,7 +70,7 @@ namespace SafeILGenerator.Tests.Ast.Generators
 			{
 				var TestLocal = AstLocal.Create(typeof(int), "TestLocal");
 
-				var Generator = new GeneratorIL(DynamicMethod, ILGenerator);
+				var Generator = new GeneratorIL().Init(DynamicMethod, ILGenerator);
 				Generator.GenerateRoot(
 					new AstNodeStmContainer(
 						new AstNodeStmAssign(
@@ -145,7 +145,7 @@ namespace SafeILGenerator.Tests.Ast.Generators
 	
 				Console.WriteLine(new GeneratorCSharp().GenerateRoot((AstNode)AstNode).ToString());
 
-				new GeneratorIL(DynamicMethod, ILGenerator).GenerateRoot(AstNode);
+				new GeneratorIL().Init(DynamicMethod, ILGenerator).GenerateRoot(AstNode);
 			});
 
 			Assert.AreEqual(456, Func(new TestClass()));
@@ -168,7 +168,7 @@ namespace SafeILGenerator.Tests.Ast.Generators
 
 				Console.WriteLine(new GeneratorCSharp().GenerateRoot((AstNode)AstNode).ToString());
 
-				new GeneratorIL(DynamicMethod, ILGenerator).GenerateRoot(AstNode);
+				new GeneratorIL().Init(DynamicMethod, ILGenerator).GenerateRoot(AstNode);
 			});
 
 			var Data = new int[1];
@@ -195,7 +195,7 @@ namespace SafeILGenerator.Tests.Ast.Generators
 
                 Console.WriteLine(new GeneratorCSharp().GenerateRoot((AstNode)AstNode).ToString());
 
-                new GeneratorIL(DynamicMethod, ILGenerator).GenerateRoot(AstNode);
+				new GeneratorIL().Init(DynamicMethod, ILGenerator).GenerateRoot(AstNode);
             });
 
 			foreach (var FillValue in new bool[] { false, true })
@@ -227,7 +227,7 @@ namespace SafeILGenerator.Tests.Ast.Generators
 			var Method = GeneratorIL.GenerateDelegate<Action<string>>("TestWriteLine", Ast);
 
 			Console.WriteLine(new GeneratorCSharp().GenerateRoot(Ast).ToString());
-			Console.WriteLine("{0}", GeneratorIL.GenerateToString<GeneratorIL>(Method.Method, Ast));
+			Console.WriteLine("{0}", new GeneratorIL().GenerateToString(Method.Method, Ast));
 
 			var Output = AstStringUtils.CaptureOutput(() =>
 			{

@@ -100,8 +100,9 @@ namespace SafeILGenerator.Ast.Generators
 		/// Determine dinamically which method to call.
 		/// </summary>
 		/// <param name="AstNode"></param>
-		public virtual TGenerator GenerateRoot(AstNode AstNode)
+		public TGenerator GenerateRoot(AstNode AstNode)
 		{
+			Reset();
 			Generate(AstNode);
 			return (TGenerator)(object)this;
 		}

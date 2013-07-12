@@ -44,16 +44,6 @@ namespace SafeILGenerator.Ast.Generators
 			return _LabelCache[AstLabel];
 		}
 
-		public override GeneratorIL GenerateRoot(AstNode AstNode)
-		{
-			return base.GenerateRoot(AstNode);
-		}
-
-		public GeneratorIL(MethodInfo MethodInfo, ILGenerator ILGenerator, bool GenerateLines = false)
-		{
-			Init(MethodInfo, ILGenerator, GenerateLines);
-		}
-
 		public GeneratorIL Init(MethodInfo MethodInfo, ILGenerator ILGenerator, bool GenerateLines = false)
 		{
 			this.MethodInfo = MethodInfo;
@@ -62,37 +52,21 @@ namespace SafeILGenerator.Ast.Generators
 			return this;
 		}
 
-		static public string GenerateToString<TGenerator>(MethodInfo MethodInfo, AstNode AstNode) where TGenerator : GeneratorIL, new()
+		public string GenerateToString(MethodInfo MethodInfo, AstNode AstNode)
 		{
-			return String.Join("\n", GenerateToStringList<TGenerator>(MethodInfo, AstNode));
+			return String.Join("\n", GenerateToStringList(MethodInfo, AstNode));
 		}
 
-		static public string[] GenerateToStringList<TGenerator>(MethodInfo MethodInfo, AstNode AstNode) where TGenerator : GeneratorIL, new()
+		public string[] GenerateToStringList(MethodInfo MethodInfo, AstNode AstNode)
 		{
-			var Generator = new TGenerator();
-
-			var DynamicMethod = new DynamicMethod(
-				"__dummy",
-				MethodInfo.ReturnType,
-				MethodInfo.GetParameters().Select(Parameter => Parameter.ParameterType).ToArray(),
-				Assembly.GetExecutingAssembly().ManifestModule
-			);
-			var ILGenerator = DynamicMethod.GetILGenerator();
-
-			Generator.Init(MethodInfo, ILGenerator, GenerateLines: true);
-			Generator.Generate(AstNode);
-			return Generator.Lines.ToArray();
+			this.Init(MethodInfo, null, GenerateLines: true).GenerateRoot(AstNode);
+			return this.Lines.ToArray();
 		}
 
-		static public string GenerateToString<TDelegate>(AstNode AstNode)
-		{
-			return GenerateToString<GeneratorIL, TDelegate>(AstNode);
-		}
-
-		static public string GenerateToString<TGenerator, TDelegate>(AstNode AstNode) where TGenerator : GeneratorIL, new()
+		public string GenerateToString<TDelegate>(AstNode AstNode)
 		{
 			var MethodInfo = typeof(TDelegate).GetMethod("Invoke");
-			return GenerateToString<TGenerator>(MethodInfo, AstNode);
+			return GenerateToString(MethodInfo, AstNode);
 		}
 
 		//static public TDelegate GenerateDelegate<TGenerator, TDelegate>(string MethodName, AstNode AstNode) where TGenerator : GeneratorIL, new()

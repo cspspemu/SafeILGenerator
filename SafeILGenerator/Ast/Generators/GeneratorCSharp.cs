@@ -238,6 +238,13 @@ namespace SafeILGenerator.Ast.Generators
 			Generate(GetAddress.Expression);
 		}
 
+		protected virtual void _Generate(AstNodeExprPropertyAccess PropertyAccess)
+		{
+			Generate(PropertyAccess.Instance);
+			Output.Write(".");
+			Output.Write(PropertyAccess.Property.Name);
+		}
+
 		protected virtual void _Generate(AstNodeExprFieldAccess FieldAccess)
 		{
 			Generate(FieldAccess.Instance);
