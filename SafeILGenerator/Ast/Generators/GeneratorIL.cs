@@ -344,6 +344,20 @@ namespace SafeILGenerator.Ast.Generators
 			}
 		}
 
+		private Stack<AstNodeExpr> PlaceholderStack = new Stack<AstNodeExpr>();
+
+		protected virtual void _Generate(AstNodeExprSetGetLValuePlaceholder Placeholder)
+		{
+			var AstExpr = PlaceholderStack.Pop();
+			if (AstExpr.Type != Placeholder.Type) throw (new Exception("Invalid Expression for placeholder " + AstExpr.Type + " != " + Placeholder.Type + "."));
+			Generate(AstExpr);
+		}
+
+		protected virtual void _Generate(AstNodeExprSetGetLValue SetGetLValue)
+		{
+			Generate(SetGetLValue.GetExpression);
+		}
+
 		protected virtual void _Generate(AstNodeStmAssign Assign)
 		{
 			//Assign.Local.LocalBuilder.LocalIndex
@@ -354,6 +368,7 @@ namespace SafeILGenerator.Ast.Generators
 			var AstNodeExprIndirect = (Assign.LValue as AstNodeExprIndirect);
 			var AstNodeExprArrayAccess = (Assign.LValue as AstNodeExprArrayAccess);
 			var AstNodeExprPropertyAccess = (Assign.LValue as AstNodeExprPropertyAccess);
+			var AstNodeExprSetGetLValue = (Assign.LValue as AstNodeExprSetGetLValue);
 			
 
 			if (AstNodeExprLocal != null)
@@ -405,6 +420,15 @@ namespace SafeILGenerator.Ast.Generators
 				Generate(AstNodeExprPropertyAccess.Instance);
 				Generate(Assign.Value);
 				Emit(OpCodes.Callvirt, AstNodeExprPropertyAccess.Property.SetMethod);
+			}
+			else if (AstNodeExprSetGetLValue != null)
+			{
+				PlaceholderStack.Push(Assign.Value);
+				Generate(AstNodeExprSetGetLValue.SetExpression);
+				if (AstNodeExprSetGetLValue.SetExpression.Type != typeof(void))
+				{
+					Emit(OpCodes.Pop);
+				}
 			}
 			else
 			{

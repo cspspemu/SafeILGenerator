@@ -302,6 +302,21 @@ namespace SafeILGenerator.Ast
 			return New(typeof(TType), Params);
 		}
 
+		public AstNodeExprSetGetLValuePlaceholder SetGetLValuePlaceholder<TType>()
+		{
+			return SetGetLValuePlaceholder(typeof(TType));
+		}
+
+		public AstNodeExprSetGetLValuePlaceholder SetGetLValuePlaceholder(Type Type)
+		{
+			return new AstNodeExprSetGetLValuePlaceholder(Type);
+		}
+
+		public AstNodeExprSetGetLValue SetGetLValue(AstNodeExpr SetExpression, AstNodeExpr GetExpression)
+		{
+			return new AstNodeExprSetGetLValue(SetExpression, GetExpression);
+		}
+
 		public AstNodeStm Throw(AstNodeExpr Expression)
 		{
 			return new AstNodeStmThrow(Expression);

@@ -217,12 +217,37 @@ namespace SafeILGenerator.Ast.Generators
 			Output.Write(";");
 		}
 
+		private Stack<AstNodeExpr> PlaceholderStack = new Stack<AstNodeExpr>();
+
+		protected virtual void _Generate(AstNodeExprSetGetLValuePlaceholder Placeholder)
+		{
+			var AstExpr = PlaceholderStack.Pop();
+			if (AstExpr.Type != Placeholder.Type) throw (new Exception("Invalid Expression for placeholder " + AstExpr.Type + " != " + Placeholder.Type + "."));
+			Generate(AstExpr);
+		}
+
+		protected virtual void _Generate(AstNodeExprSetGetLValue SetGetLValue)
+		{
+			Generate(SetGetLValue.GetExpression);
+		}
+
 		protected virtual void _Generate(AstNodeStmAssign Assign)
 		{
-			Generate(Assign.LValue);
-			Output.Write(" = ");
-			Generate(Assign.Value);
-			Output.Write(";");
+			var AstNodeExprSetGetLValue = Assign.LValue as AstNodeExprSetGetLValue;
+			
+			if (AstNodeExprSetGetLValue != null)
+			{
+				PlaceholderStack.Push(Assign.Value);
+				Generate(AstNodeExprSetGetLValue.SetExpression);
+				Output.Write(";");
+			}
+			else
+			{
+				Generate(Assign.LValue);
+				Output.Write(" = ");
+				Generate(Assign.Value);
+				Output.Write(";");
+			}
 		}
 
 		protected virtual void _Generate(AstNodeExprIndirect Assign)

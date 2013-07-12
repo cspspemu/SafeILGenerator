@@ -72,6 +72,8 @@
     <Compile Include="Ast\Generators\GeneratorIL.cs" />
     <Compile Include="Ast\Nodes\AstNodeExprNew.cs" />
     <Compile Include="Ast\Nodes\AstNodeExprNewArray.cs" />
+    <Compile Include="Ast\Nodes\AstNodeExprPropertyAccess.cs" />
+    <Compile Include="Ast\Nodes\AstNodeExprSetGetLValue.cs" />
     <Compile Include="Ast\Nodes\AstNodeStmThrow.cs" />
     <Compile Include="Ast\Utils\AstStringUtils.cs" />
     <Compile Include="Ast\Utils\IndentedStringBuilder.cs" />

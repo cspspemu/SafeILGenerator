@@ -15,31 +15,55 @@ namespace SafeILGenerator.Tests.Ast.Generators
 	public unsafe class GeneratorILTest
 	{
 		static private AstGenerator ast = AstGenerator.Instance;
+		private GeneratorIL GeneratorIL = new GeneratorIL();
 
-		static public TDelegate GenerateDynamicMethod<TDelegate>(string MethodName, Action<DynamicMethod, ILGenerator> Generator, bool CheckTypes = true, bool DoDebug = false, bool DoLog = false)
+		static public void TestAstSetGetLValue_Set(int Index, int Value)
 		{
-			var MethodInfo = typeof(TDelegate).GetMethod("Invoke");
-			var DynamicMethod = new DynamicMethod(
-				MethodName,
-				MethodInfo.ReturnType,
-				MethodInfo.GetParameters().Select(Parameter => Parameter.ParameterType).ToArray(),
-				Assembly.GetExecutingAssembly().ManifestModule
+			Console.WriteLine("Set: {0}, {1}", Index, Value);
+		}
+
+		static public int TestAstSetGetLValue_Get(int Index)
+		{
+			Console.WriteLine("Get: {0}", Index);
+			return 999;
+		}
+
+		[TestMethod]
+		public void TestAstSetGetLValue()
+		{
+			var AstIndex = ast.Immediate(777);
+			var AstSetGet = ast.SetGetLValue(
+				ast.CallStatic((Action<int, int>)TestAstSetGetLValue_Set, AstIndex, ast.SetGetLValuePlaceholder<int>()),
+				ast.CallStatic((Func<int, int>)TestAstSetGetLValue_Get, AstIndex)
 			);
-			var ILGenerator = DynamicMethod.GetILGenerator();
+			var AstFunc = ast.Statements(
+				ast.Assign(AstSetGet, 11),
+				ast.Assign(AstSetGet, 12),
+				ast.Assign(AstSetGet, AstSetGet + 3),
+				ast.Return()
+			);
+
+			//Console.WriteLine(GeneratorIL.GenerateToString<Action>(AstFunc));
+
+			var RealOutput = TestUtils.CaptureOutput(() =>
 			{
-				Generator(DynamicMethod, ILGenerator);
-			}
-			return (TDelegate)(object)DynamicMethod.CreateDelegate(typeof(TDelegate));
+				GeneratorIL.GenerateDelegate<Action>("Test", AstFunc)();
+			});
+
+			var ExpectedOutput = String.Join("\r\n", new[] {
+				"Set: 777, 11",
+				"Set: 777, 12",
+				"Get: 777",
+				"Set: 777, 1002",
+			});
+
+			Assert.AreEqual(ExpectedOutput.Trim(), RealOutput.Trim());
 		}
 
 		[TestMethod]
 		public void TestSimpleReturn()
 		{
-			var Func = GenerateDynamicMethod<Func<int>>("Test", (DynamicMethod, ILGenerator) =>
-			{
-				var Generator = new GeneratorIL().Init(DynamicMethod, ILGenerator);
-				Generator.GenerateRoot(new AstNodeStmReturn(new AstNodeExprImm(777)));
-			});
+			var Func = GeneratorIL.GenerateDelegate<Func<int>>("Test", ast.Return(777));
 
 			Assert.AreEqual(777, Func());
 		}
@@ -47,18 +71,7 @@ namespace SafeILGenerator.Tests.Ast.Generators
 		[TestMethod]
 		public void TestSimpleCall()
 		{
-			var Func = GenerateDynamicMethod<Func<int>>("Test", (DynamicMethod, ILGenerator) =>
-			{
-				var Generator = new GeneratorIL().Init(DynamicMethod, ILGenerator);
-				Generator.GenerateRoot(
-					new AstNodeStmReturn(
-						new AstNodeExprCallStatic(
-							(Func<int, int>)GetTestValue,
-							new AstNodeExprImm(10)
-						)
-					)
-				);
-			});
+			var Func = GeneratorIL.GenerateDelegate<Func<int>>("Test", ast.Return(ast.CallStatic((Func<int, int>)GetTestValue, 10)));
 
 			Assert.AreEqual(3330, Func());
 		}
@@ -66,23 +79,16 @@ namespace SafeILGenerator.Tests.Ast.Generators
 		[TestMethod]
 		public void TestSimpleLocal()
 		{
-			var Func = GenerateDynamicMethod<Func<int>>("Test", (DynamicMethod, ILGenerator) =>
-			{
-				var TestLocal = AstLocal.Create(typeof(int), "TestLocal");
-
-				var Generator = new GeneratorIL().Init(DynamicMethod, ILGenerator);
-				Generator.GenerateRoot(
-					new AstNodeStmContainer(
-						new AstNodeStmAssign(
-							new AstNodeExprLocal(TestLocal),
-							new AstNodeExprImm(123)
-						),
-						new AstNodeStmReturn(
-							new AstNodeExprLocal(TestLocal)
-						)
-					)
-				);
-			});
+			var TestLocal = AstLocal.Create<int>("TestLocal");
+			var Func = GeneratorIL.GenerateDelegate<Func<int>>("Test", new AstNodeStmContainer(
+				new AstNodeStmAssign(
+					new AstNodeExprLocal(TestLocal),
+					new AstNodeExprImm(123)
+				),
+				new AstNodeStmReturn(
+					new AstNodeExprLocal(TestLocal)
+				)
+			));
 
 			Assert.AreEqual(123, Func());
 		}
@@ -90,16 +96,7 @@ namespace SafeILGenerator.Tests.Ast.Generators
 		[TestMethod]
 		public void TestImmediateType()
 		{
-			var Ast = new AstNodeStmContainer(
-				new AstNodeStmReturn(
-					new AstNodeExprImm(typeof(int))
-				)
-			);
-
-			//throw(new Exception(GeneratorIL.GenerateToString<GeneratorIL, Func<Type>>(Ast)));
-
-			var GeneratorIL = new GeneratorIL();
-			var Func = GeneratorIL.GenerateDelegate<Func<Type>>("Test", Ast);
+			var Func = GeneratorIL.GenerateDelegate<Func<Type>>("Test", ast.Statements(ast.Return(ast.Immediate(typeof(int)))));
 			Assert.AreEqual(typeof(int).ToString(), Func().ToString());
 		}
 
@@ -113,7 +110,6 @@ namespace SafeILGenerator.Tests.Ast.Generators
 				)
 			);
 
-			var GeneratorIL = new GeneratorIL();
 			var Func = GeneratorIL.GenerateDelegate<Func<float, int>>("Test", Ast);
 			int b = 1234567;
 			float a = 0;
@@ -129,47 +125,32 @@ namespace SafeILGenerator.Tests.Ast.Generators
 		[TestMethod]
 		public void TestFieldAccess()
 		{
-			var Func = GenerateDynamicMethod<Func<TestClass, int>>("Test", (DynamicMethod, ILGenerator) =>
-			{
-				var TestArgument = ast.Argument<TestClass>(0, "Test");
-
-				var AstNode = ast.Statements(
-					ast.Assign(
-						ast.FieldAccess(TestArgument, "Test"),
-						ast.Immediate(456)
-					),
-					ast.Return(
-						ast.FieldAccess(TestArgument, "Test")
-					)
-				);
-	
-				Console.WriteLine(new GeneratorCSharp().GenerateRoot((AstNode)AstNode).ToString());
-
-				new GeneratorIL().Init(DynamicMethod, ILGenerator).GenerateRoot(AstNode);
-			});
+			var TestArgument = ast.Argument<TestClass>(0, "Test");
+			var Func = GeneratorIL.GenerateDelegate<Func<TestClass, int>>("Test", ast.Statements(
+				ast.Assign(
+					ast.FieldAccess(TestArgument, "Test"),
+					ast.Immediate(456)
+				),
+				ast.Return(
+					ast.FieldAccess(TestArgument, "Test")
+				)
+			));
 
 			Assert.AreEqual(456, Func(new TestClass()));
 		}
 
-		delegate void ActionPointer(void* Pointer);
+		delegate void ActionPointerDelegate(void* Pointer);
 
 		[TestMethod]
 		public void TestPointerWrite()
 		{
-			var Func = GenerateDynamicMethod<ActionPointer>("Test", (DynamicMethod, ILGenerator) =>
-			{
-				var AstNode = ast.Statements(
-					ast.Assign(
-					ast.Indirect(ast.Cast(typeof(int*), ast.Argument(typeof(int*), 0, "Ptr"))),
-						ast.Immediate(456)
-					),
-					ast.Return()
-				);
-
-				Console.WriteLine(new GeneratorCSharp().GenerateRoot((AstNode)AstNode).ToString());
-
-				new GeneratorIL().Init(DynamicMethod, ILGenerator).GenerateRoot(AstNode);
-			});
+			var Func = GeneratorIL.GenerateDelegate<ActionPointerDelegate>("Test", ast.Statements(
+				ast.Assign(
+				ast.Indirect(ast.Cast(typeof(int*), ast.Argument(typeof(int*), 0, "Ptr"))),
+					ast.Immediate(456)
+				),
+				ast.Return()
+			));
 
 			var Data = new int[1];
 			fixed (int* DataPtr = Data)
@@ -183,20 +164,13 @@ namespace SafeILGenerator.Tests.Ast.Generators
 		[TestMethod]
         public void TestPointerWrite_bool()
         {
-            var Func = GenerateDynamicMethod<ActionPointer>("Test", (DynamicMethod, ILGenerator) =>
-            {
-                var AstNode = ast.Statements(
-                    ast.Assign(
-                    ast.Indirect(ast.Cast(typeof(bool*), ast.Argument(typeof(bool*), 0, "Ptr"))),
-                        ast.Immediate(true)
-                    ),
-                    ast.Return()
-                );
-
-                Console.WriteLine(new GeneratorCSharp().GenerateRoot((AstNode)AstNode).ToString());
-
-				new GeneratorIL().Init(DynamicMethod, ILGenerator).GenerateRoot(AstNode);
-            });
+			var Func = GeneratorIL.GenerateDelegate<ActionPointerDelegate>("Test", ast.Statements(
+                ast.Assign(
+                ast.Indirect(ast.Cast(typeof(bool*), ast.Argument(typeof(bool*), 0, "Ptr"))),
+                    ast.Immediate(true)
+                ),
+                ast.Return()
+            ));
 
 			foreach (var FillValue in new bool[] { false, true })
 			{

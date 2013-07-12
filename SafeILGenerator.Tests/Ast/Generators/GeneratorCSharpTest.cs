@@ -12,18 +12,41 @@ namespace SafeILGenerator.Tests.Ast.Generators
 	public class GeneratorCSharpTest
 	{
 		GeneratorCSharp GeneratorCSharp;
-
+		static private readonly AstGenerator ast = AstGenerator.Instance;
+		
 		[TestInitialize]
 		public void SetUp()
 		{
 			GeneratorCSharp = new GeneratorCSharp();
 		}
 
+		static public void TestAstSetGetLValue_Set(int Index, int Value)
+		{
+		}
+
+		static public int TestAstSetGetLValue_Get(int Index)
+		{
+			return 0;
+		}
+
+		[TestMethod]
+		public void TestAstSetGetLValue()
+		{
+			var AstIndex = ast.Immediate(777);
+			var AstSetGet = ast.SetGetLValue(
+				ast.CallStatic((Action<int, int>)TestAstSetGetLValue_Set, AstIndex, ast.SetGetLValuePlaceholder<int>()),
+				ast.CallStatic((Func<int, int>)TestAstSetGetLValue_Get, AstIndex)
+			);
+			Assert.AreEqual("GeneratorCSharpTest.TestAstSetGetLValue_Set(777, 11);", GeneratorCSharp.Reset().GenerateRoot(ast.Assign(AstSetGet, 11)).ToString());
+			Assert.AreEqual("GeneratorCSharpTest.TestAstSetGetLValue_Set(777, 12);", GeneratorCSharp.Reset().GenerateRoot(ast.Assign(AstSetGet, 12)).ToString());
+			Assert.AreEqual("GeneratorCSharpTest.TestAstSetGetLValue_Set(777, (GeneratorCSharpTest.TestAstSetGetLValue_Get(777) + 1));", GeneratorCSharp.Reset().GenerateRoot(ast.Assign(AstSetGet, AstSetGet + 1)).ToString());
+		}
+
 		[TestMethod]
 		public void TestAstExpression()
 		{
-			GeneratorCSharp.GenerateRoot(new AstNodeExprBinop(new AstNodeExprImm(3), "+", new AstNodeExprImm(5)));
-			Assert.AreEqual("(3 + 5)", GeneratorCSharp.ToString());
+			;
+			Assert.AreEqual("(3 + 5)", GeneratorCSharp.GenerateRoot(ast.Binary(3, "+", 5)).ToString());
 		}
 
 		[TestMethod]
@@ -47,8 +70,6 @@ namespace SafeILGenerator.Tests.Ast.Generators
 
 			Assert.AreEqual("return GeneratorCSharpTest.GetTestValue(10);", GeneratorCSharp.ToString());
 		}
-
-		static private AstGenerator ast = AstGenerator.Instance;
 
 		[TestMethod]
 		public void TestAstSwitch()
