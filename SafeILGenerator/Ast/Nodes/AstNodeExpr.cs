@@ -24,6 +24,7 @@ namespace SafeILGenerator.Ast.Nodes
 		//public static AstNodeExprBinop operator <<(AstNodeExpr Left, AstNodeExpr Right) { return new AstNodeExprBinop(Left, "<<", Right); }
 		//public static AstNodeExprBinop operator >>(AstNodeExpr Left, AstNodeExpr Right) { return new AstNodeExprBinop(Left, ">>", Right); }
 
+		public static AstNodeExprUnop operator +(AstNodeExpr Right) { return new AstNodeExprUnop("+", Right); }
 		public static AstNodeExprUnop operator -(AstNodeExpr Right) { return new AstNodeExprUnop("-", Right); }
 		public static AstNodeExprUnop operator ~(AstNodeExpr Right) { return new AstNodeExprUnop("~", Right); }
 

@@ -93,6 +93,8 @@ namespace SafeILGenerator.Ast
 			if (CastType == typeof(float)) return Convert.ToSingle(Value);
 			if (CastType == typeof(double)) return Convert.ToDouble(Value);
 
+			if (CastType.IsEnum) return Enum.ToObject(CastType, Value);
+			
 			throw(new NotImplementedException());
 		}
 	}

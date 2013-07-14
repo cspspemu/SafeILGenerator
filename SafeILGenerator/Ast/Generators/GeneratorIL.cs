@@ -145,6 +145,12 @@ namespace SafeILGenerator.Ast.Generators
 			var ItemType = AstUtils.GetSignedType(Item.Type);
 			var ItemValue = Item.Value;
 
+			if (ItemType.IsEnum)
+			{
+				ItemType = ItemType.GetEnumUnderlyingType();
+				ItemValue = AstUtils.CastType(ItemValue, ItemType);
+			}
+
 			if (
 				ItemType == typeof(int)
 				|| ItemType == typeof(sbyte)
@@ -460,7 +466,7 @@ namespace SafeILGenerator.Ast.Generators
 		{
 			if (Call.MethodInfo.CallingConvention.HasFlag(CallingConventions.HasThis))
 			{
-				throw (new Exception("CallString calling convention shouldn't have this"));
+				throw (new Exception("CallString calling convention shouldn't have this '" + Call.MethodInfo + "'"));
 			}
 			switch (Call.MethodInfo.CallingConvention & CallingConventions.Any)
 			{
@@ -587,22 +593,35 @@ namespace SafeILGenerator.Ast.Generators
 			this.Generate(Item.LeftNode);
 			this.Generate(Item.RightNode);
 
+			//switch (Item.Operator)
+			//{
+			//	case "||":
+			//	case "&&":
+			//		if (LeftType != typeof(bool) || RightType != typeof(bool))
+			//		{
+			//			throw(new InvalidOperationException(String.Format("Operator '{0}' requires boolean types but found {1}, {2}", Item.Operator, LeftType, RightType)));
+			//		}
+			//		break;
+			//}
+
 			switch (Item.Operator)
 			{
-				case "+": Emit(AstUtils.IsTypeSigned(LeftType) ? OpCodes.Add : OpCodes.Add); break;
-				case "-": Emit(AstUtils.IsTypeSigned(LeftType) ? OpCodes.Sub : OpCodes.Sub); break;
-				case "*": Emit(AstUtils.IsTypeSigned(LeftType) ? OpCodes.Mul : OpCodes.Mul); break;
-				case "/": Emit(AstUtils.IsTypeSigned(LeftType) ? OpCodes.Div : OpCodes.Div_Un); break;
-				case "%": Emit(AstUtils.IsTypeSigned(LeftType) ? OpCodes.Rem : OpCodes.Rem_Un); break;
+				case "+" : Emit(AstUtils.IsTypeSigned(LeftType) ? OpCodes.Add : OpCodes.Add); break;
+				case "-" : Emit(AstUtils.IsTypeSigned(LeftType) ? OpCodes.Sub : OpCodes.Sub); break;
+				case "*" : Emit(AstUtils.IsTypeSigned(LeftType) ? OpCodes.Mul : OpCodes.Mul); break;
+				case "/" : Emit(AstUtils.IsTypeSigned(LeftType) ? OpCodes.Div : OpCodes.Div_Un); break;
+				case "%" : Emit(AstUtils.IsTypeSigned(LeftType) ? OpCodes.Rem : OpCodes.Rem_Un); break;
 				case "==": Emit(OpCodes.Ceq); break;
 				case "!=": Emit(OpCodes.Ceq); Emit(OpCodes.Ldc_I4_0); Emit(OpCodes.Ceq); break;
-				case "<": Emit(AstUtils.IsTypeSigned(LeftType) ? OpCodes.Clt : OpCodes.Clt_Un); break;
-				case ">": Emit(AstUtils.IsTypeSigned(LeftType) ? OpCodes.Cgt : OpCodes.Cgt_Un); break;
+				case "<" : Emit(AstUtils.IsTypeSigned(LeftType) ? OpCodes.Clt : OpCodes.Clt_Un); break;
+				case ">" : Emit(AstUtils.IsTypeSigned(LeftType) ? OpCodes.Cgt : OpCodes.Cgt_Un); break;
 				case "<=": Emit(AstUtils.IsTypeSigned(LeftType) ? OpCodes.Cgt : OpCodes.Cgt_Un); Emit(OpCodes.Ldc_I4_0); Emit(OpCodes.Ceq); break;
 				case ">=": Emit(AstUtils.IsTypeSigned(LeftType) ? OpCodes.Clt : OpCodes.Clt_Un); Emit(OpCodes.Ldc_I4_0); Emit(OpCodes.Ceq); break;
-				case "&": Emit(OpCodes.And); break;
-				case "|": Emit(OpCodes.Or); break;
-				case "^": Emit(OpCodes.Xor); break;
+				case "&":
+				case "&&": Emit(OpCodes.And); break;
+				case "|":
+				case "||": Emit(OpCodes.Or); break;
+				case "^" : Emit(OpCodes.Xor); break;
 				case "<<": Emit(OpCodes.Shl); break;
 				case ">>": Emit(AstUtils.IsTypeSigned(LeftType) ? OpCodes.Shr : OpCodes.Shr_Un); break;
 				default: throw(new NotImplementedException(String.Format("Not implemented operator '{0}'", Item.Operator)));
@@ -655,6 +674,7 @@ namespace SafeILGenerator.Ast.Generators
 			switch (Item.Operator)
 			{
 				case "~": Emit(OpCodes.Not); break;
+				case "+": break;
 				case "-": Emit(OpCodes.Neg); break;
 				case "!": Emit(OpCodes.Ldc_I4_0); Emit(OpCodes.Ceq); break;
 				default: throw(new NotImplementedException(String.Format("Not implemented operator '{0}'", Item.Operator)));
