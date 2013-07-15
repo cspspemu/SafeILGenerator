@@ -557,6 +557,21 @@ namespace SafeILGenerator.Ast.Generators
 			}
 		}
 
+		protected virtual void _Generate(AstNodeExprTerop Terop)
+		{
+			if (Terop.True.Type != Terop.False.Type) throw (new InvalidOperationException(String.Format("AstNodeExprTerop '?:' types must match {0} != {1}", Terop.True.Type, Terop.False.Type)));
+			var TernaryType = Terop.True.Type;
+			var TernaryTempAstLocal = AstLocal.Create(TernaryType);
+
+			Generate(new AstNodeStmIfElse(
+				Terop.Cond,
+				new AstNodeStmAssign(new AstNodeExprLocal(TernaryTempAstLocal), Terop.True),
+				new AstNodeStmAssign(new AstNodeExprLocal(TernaryTempAstLocal), Terop.False)
+			));
+
+			Generate(new AstNodeExprLocal(TernaryTempAstLocal));
+		}
+
 		protected virtual void _Generate(AstNodeStmIfElse IfElse)
 		{
 			var AfterIfLabel = DefineLabel("AfterIf");
