@@ -77,7 +77,31 @@ namespace SafeILGenerator.Ast.Optimizers
 					}
 				}
 			}
-			return NewContainer;
+
+			bool Rebuild = false;
+			for (int n = 0; n < NewContainer.Nodes.Count - 1; n++)
+			{
+				var CurrentNode = NewContainer.Nodes[n];
+				var NextNode = NewContainer.Nodes[n + 1];
+				if ((CurrentNode is AstNodeStmGotoAlways) && (NextNode is AstNodeStmLabel))
+				{
+					if ((CurrentNode as AstNodeStmGotoAlways).AstLabel == (NextNode as AstNodeStmLabel).AstLabel)
+					{
+						NewContainer.Nodes[n] = null;
+						//NewContainer.Nodes[n + 1] = null;
+						Rebuild = true;
+					}
+				}
+			}
+
+			if (Rebuild)
+			{
+				return new AstNodeStmContainer(Container.Inline, NewContainer.Nodes.Where(Node => Node != null).ToArray());
+			}
+			else
+			{
+				return NewContainer;
+			}
 		}
 
 		protected virtual AstNode _Optimize(AstNodeExprCast Cast)
@@ -204,7 +228,10 @@ namespace SafeILGenerator.Ast.Optimizers
 					{
 						case "0": if (RightValue == 0) return new AstNodeExprImm(0); break;
 						case "|": if (RightValue == 0) return Binary.LeftNode; break;
-						case "+": if (RightValue == 0) return Binary.LeftNode; break;
+						case "+":
+							if (RightValue == 0) return Binary.LeftNode;
+							if (RightValue < 0) return new AstNodeExprBinop(Binary.LeftNode, "-", new AstNodeExprImm(AstUtils.Negate(RightImm.Value)));
+							break;
 						case "-": if (RightValue == 0) return Binary.LeftNode; break;
 						case "*":
 							if (RightValue == 1) return Binary.LeftNode;

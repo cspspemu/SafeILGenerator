@@ -95,7 +95,20 @@ namespace SafeILGenerator.Ast
 
 			if (CastType.IsEnum) return Enum.ToObject(CastType, Value);
 			
-			throw(new NotImplementedException());
+			throw(new NotImplementedException("CastType for type '" + CastType + "'"));
+		}
+
+		static public object Negate(object Value)
+		{
+			var ValueType = Value.GetType();
+			if (ValueType == typeof(sbyte)) return -(sbyte)Value;
+			if (ValueType == typeof(short)) return -(short)Value;
+			if (ValueType == typeof(int)) return -(int)Value;
+			if (ValueType == typeof(long)) return -(long)Value;
+			if (ValueType == typeof(float)) return -(float)Value;
+			if (ValueType == typeof(double)) return -(double)Value;
+
+			throw (new NotImplementedException("Negate for type '" + ValueType + "'"));
 		}
 	}
 }

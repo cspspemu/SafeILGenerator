@@ -17,24 +17,31 @@ namespace SafeILGenerator.Ast.Generators
 		protected ILGenerator ILGenerator;
 		protected bool GenerateLines;
 		protected List<string> Lines = new List<string>();
+		private Dictionary<AstLocal, LocalBuilder> _LocalBuilderCache = new Dictionary<AstLocal, LocalBuilder>();
+		private Dictionary<AstLabel, Label> _LabelCache = new Dictionary<AstLabel, Label>();
+		private Stack<AstNodeExpr> PlaceholderStack = new Stack<AstNodeExpr>();
+		private int SwitchVarCount = 0;
 
 		public GeneratorIL() : base()
 		{
 		}
 
 		//LocalBuilder
-		private Dictionary<AstLocal, LocalBuilder> _LocalBuilderCache = new Dictionary<AstLocal, LocalBuilder>();
 		private LocalBuilder _GetLocalBuilderFromAstLocal(AstLocal AstLocal)
 		{
 			//AstLocal.Create
 			if (!_LocalBuilderCache.ContainsKey(AstLocal))
 			{
-				_LocalBuilderCache[AstLocal] = ILGenerator.DeclareLocal(AstLocal.Type);
+				var LocalBuilder = ILGenerator.DeclareLocal(AstLocal.Type);
+				_LocalBuilderCache[AstLocal] = LocalBuilder;
+				if (!(MethodInfo is DynamicMethod))
+				{
+					//LocalBuilder.SetLocalSymInfo(AstLocal.Name);
+				}
 			}
 			return _LocalBuilderCache[AstLocal];
 		}
 
-		private Dictionary<AstLabel, Label> _LabelCache = new Dictionary<AstLabel, Label>();
 		private Label _GetLabelFromAstLabel(AstLabel AstLabel)
 		{
 			if (!_LabelCache.ContainsKey(AstLabel))
@@ -50,6 +57,16 @@ namespace SafeILGenerator.Ast.Generators
 			this.ILGenerator = ILGenerator;
 			this.GenerateLines = GenerateLines;
 			return this;
+		}
+
+		public override GeneratorIL Reset()
+		{
+			this._LocalBuilderCache = new Dictionary<AstLocal, LocalBuilder>();
+			this._LabelCache = new Dictionary<AstLabel, Label>();
+			this.PlaceholderStack = new Stack<AstNodeExpr>();
+			this.Lines = new List<string>();
+			this.SwitchVarCount = 0;
+			return base.Reset();
 		}
 
 		public string GenerateToString(MethodInfo MethodInfo, AstNode AstNode)
@@ -85,7 +102,7 @@ namespace SafeILGenerator.Ast.Generators
 			);
 			var ILGenerator = DynamicMethod.GetILGenerator();
 			this.Reset();
-			this.Init(MethodInfo, ILGenerator, GenerateLines: false);
+			this.Init(DynamicMethod, ILGenerator, GenerateLines: false);
 			this.Generate(AstNode);
 			return (TDelegate)(object)DynamicMethod.CreateDelegate(typeof(TDelegate));
 		}
@@ -349,8 +366,6 @@ namespace SafeILGenerator.Ast.Generators
 				throw (new NotImplementedException("Can't implement AstNodeExprGetAddress for '" + GetAddress.Expression.GetType() + "'"));
 			}
 		}
-
-		private Stack<AstNodeExpr> PlaceholderStack = new Stack<AstNodeExpr>();
 
 		protected virtual void _Generate(AstNodeExprSetGetLValuePlaceholder Placeholder)
 		{
@@ -695,8 +710,6 @@ namespace SafeILGenerator.Ast.Generators
 				default: throw(new NotImplementedException(String.Format("Not implemented operator '{0}'", Item.Operator)));
 			}
 		}
-
-		private int SwitchVarCount = 0;
 
 		protected virtual void _Generate(AstNodeStmSwitch Switch)
 		{
