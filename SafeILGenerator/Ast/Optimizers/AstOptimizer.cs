@@ -152,96 +152,147 @@ namespace SafeILGenerator.Ast.Optimizers
 			var RightType = Binary.RightNode.Type;
 			var Operator = Binary.Operator;
 
-			if ((LeftType == RightType) && !AstUtils.IsTypeFloat(LeftType))
+			if ((LeftType == RightType))
 			{
-				if (Binary.RightNode is AstNodeExprUnop)
+				if (AstUtils.IsTypeFloat(LeftType))
 				{
-					var RightUnary = Binary.RightNode as AstNodeExprUnop;
-					if (Operator == "+" || Operator == "-")
+					var Type = LeftType;
+
+					if ((LeftImm != null) && (RightImm != null))
 					{
-						if (RightUnary.Operator == "-")
+						var LeftValue = Convert.ToDouble(LeftImm.Value);
+						var RightValue = Convert.ToDouble(RightImm.Value);
+
+						switch (Operator)
 						{
-							return new AstNodeExprBinop(Binary.LeftNode, (Operator == "+") ? "-" : "+", RightUnary.RightNode);
+							case "+": return new AstNodeExprImm(AstUtils.CastType(LeftValue + RightValue, Type));
+							case "-": return new AstNodeExprImm(AstUtils.CastType(LeftValue - RightValue, Type));
+							case "*": return new AstNodeExprImm(AstUtils.CastType(LeftValue * RightValue, Type));
+							case "/": return new AstNodeExprImm(AstUtils.CastType(LeftValue / RightValue, Type));
 						}
 					}
-				}
-
-				var Type = LeftType;
-				// Can optimize just literal values.
-				if ((LeftImm != null) && (RightImm != null))
-				{
-					if (AstUtils.IsTypeSigned(LeftType))
+					else if (LeftImm != null)
 					{
 						var LeftValue = Convert.ToInt64(LeftImm.Value);
+						switch (Operator)
+						{
+							case "+": if (LeftValue == 0) return Binary.RightNode; break;
+							case "-": if (LeftValue == 0) return new AstNodeExprUnop("-", Binary.RightNode); break;
+							case "*":
+								//if (LeftValue == 0) return new AstNodeExprImm(AstUtils.CastType(0, Type));
+								if (LeftValue == 1) return Binary.RightNode;
+								break;
+							case "/":
+								//if (LeftValue == 0) return new AstNodeExprImm(AstUtils.CastType(0, Type));
+								break;
+						}
+					}
+					else if (RightImm != null)
+					{
 						var RightValue = Convert.ToInt64(RightImm.Value);
-
-						// Optimize adding 0
 						switch (Operator)
 						{
-							case "+": return new AstNodeExprImm(AstUtils.CastType(LeftValue + RightValue, Type));
-							case "-": return new AstNodeExprImm(AstUtils.CastType(LeftValue - RightValue, Type));
-							case "*": return new AstNodeExprImm(AstUtils.CastType(LeftValue * RightValue, Type));
-							case "/": return new AstNodeExprImm(AstUtils.CastType(LeftValue / RightValue, Type));
-							case "<<": return new AstNodeExprImm(AstUtils.CastType(LeftValue << (int)RightValue, Type));
-							case ">>": return new AstNodeExprImm(AstUtils.CastType(LeftValue >> (int)RightValue, Type));
-						}
-					}
-					else
-					{
-						var LeftValue = Convert.ToUInt64(LeftImm.Value);
-						var RightValue = Convert.ToUInt64(RightImm.Value);
-
-						// Optimize adding 0
-						switch (Operator)
-						{
-							case "+": return new AstNodeExprImm(AstUtils.CastType(LeftValue + RightValue, Type));
-							case "-": return new AstNodeExprImm(AstUtils.CastType(LeftValue - RightValue, Type));
-							case "*": return new AstNodeExprImm(AstUtils.CastType(LeftValue * RightValue, Type));
-							case "/": return new AstNodeExprImm(AstUtils.CastType(LeftValue / RightValue, Type));
-							case "<<": return new AstNodeExprImm(AstUtils.CastType(LeftValue << (int)RightValue, Type));
-							case ">>": return new AstNodeExprImm(AstUtils.CastType(LeftValue >> (int)RightValue, Type));
+							case "+": if (RightValue == 0) return Binary.LeftNode; break;
+							case "-": if (RightValue == 0) return Binary.LeftNode; break;
+							case "*":
+								if (RightValue == 1) return Binary.LeftNode;
+								break;
+							case "/":
+								//if (LeftValue == 0) return new AstNodeExprImm(AstUtils.CastType(0, Type));
+								break;
 						}
 					}
 				}
-				else if (LeftImm != null)
+				else
 				{
-					var LeftValue = Convert.ToInt64(LeftImm.Value);
-					switch (Operator)
+					if (Binary.RightNode is AstNodeExprUnop)
 					{
-						case "&": if (LeftValue == 0) return new AstNodeExprImm(0); break;
-						case "|": if (LeftValue == 0) return Binary.RightNode; break;
-						case "+": if (LeftValue == 0) return Binary.RightNode; break;
-						case "-": if (LeftValue == 0) return new AstNodeExprUnop("-", Binary.RightNode); break;
-						case "*":
-							//if (LeftValue == 0) return new AstNodeExprImm(AstUtils.CastType(0, Type));
-							if (LeftValue == 1) return Binary.RightNode;
-							break;
-						case "/":
-							//if (LeftValue == 0) return new AstNodeExprImm(AstUtils.CastType(0, Type));
-							break;
+						var RightUnary = Binary.RightNode as AstNodeExprUnop;
+						if (Operator == "+" || Operator == "-")
+						{
+							if (RightUnary.Operator == "-")
+							{
+								return new AstNodeExprBinop(Binary.LeftNode, (Operator == "+") ? "-" : "+", RightUnary.RightNode);
+							}
+						}
 					}
-				}
-				else if (RightImm != null)
-				{
-					var RightValue = Convert.ToInt64(RightImm.Value);
-					switch (Operator)
+
+					var Type = LeftType;
+					// Can optimize just literal values.
+					if ((LeftImm != null) && (RightImm != null))
 					{
-						case "0": if (RightValue == 0) return new AstNodeExprImm(0); break;
-						case "|": if (RightValue == 0) return Binary.LeftNode; break;
-						case "+":
-							if (RightValue == 0) return Binary.LeftNode;
-							if (RightValue < 0) return new AstNodeExprBinop(Binary.LeftNode, "-", new AstNodeExprImm(AstUtils.Negate(RightImm.Value)));
-							break;
-						case "-": if (RightValue == 0) return Binary.LeftNode; break;
-						case "*":
-							if (RightValue == 1) return Binary.LeftNode;
-							break;
-						case "/":
-							//if (RightValue == 0) throw(new Exception("Can't divide by 0"));
-							if (RightValue == 1) return Binary.LeftNode;
-							break;
+						if (AstUtils.IsTypeSigned(LeftType))
+						{
+							var LeftValue = Convert.ToInt64(LeftImm.Value);
+							var RightValue = Convert.ToInt64(RightImm.Value);
+
+							switch (Operator)
+							{
+								case "+": return new AstNodeExprImm(AstUtils.CastType(LeftValue + RightValue, Type));
+								case "-": return new AstNodeExprImm(AstUtils.CastType(LeftValue - RightValue, Type));
+								case "*": return new AstNodeExprImm(AstUtils.CastType(LeftValue * RightValue, Type));
+								case "/": return new AstNodeExprImm(AstUtils.CastType(LeftValue / RightValue, Type));
+								case "<<": return new AstNodeExprImm(AstUtils.CastType(LeftValue << (int)RightValue, Type));
+								case ">>": return new AstNodeExprImm(AstUtils.CastType(LeftValue >> (int)RightValue, Type));
+							}
+						}
+						else
+						{
+							var LeftValue = Convert.ToUInt64(LeftImm.Value);
+							var RightValue = Convert.ToUInt64(RightImm.Value);
+
+							// Optimize adding 0
+							switch (Operator)
+							{
+								case "+": return new AstNodeExprImm(AstUtils.CastType(LeftValue + RightValue, Type));
+								case "-": return new AstNodeExprImm(AstUtils.CastType(LeftValue - RightValue, Type));
+								case "*": return new AstNodeExprImm(AstUtils.CastType(LeftValue * RightValue, Type));
+								case "/": return new AstNodeExprImm(AstUtils.CastType(LeftValue / RightValue, Type));
+								case "<<": return new AstNodeExprImm(AstUtils.CastType(LeftValue << (int)RightValue, Type));
+								case ">>": return new AstNodeExprImm(AstUtils.CastType(LeftValue >> (int)RightValue, Type));
+							}
+						}
 					}
-				}
+					else if (LeftImm != null)
+					{
+						var LeftValue = Convert.ToInt64(LeftImm.Value);
+						switch (Operator)
+						{
+							case "&": if (LeftValue == 0) return new AstNodeExprImm(0); break;
+							case "|": if (LeftValue == 0) return Binary.RightNode; break;
+							case "+": if (LeftValue == 0) return Binary.RightNode; break;
+							case "-": if (LeftValue == 0) return new AstNodeExprUnop("-", Binary.RightNode); break;
+							case "*":
+								//if (LeftValue == 0) return new AstNodeExprImm(AstUtils.CastType(0, Type));
+								if (LeftValue == 1) return Binary.RightNode;
+								break;
+							case "/":
+								//if (LeftValue == 0) return new AstNodeExprImm(AstUtils.CastType(0, Type));
+								break;
+						}
+					}
+					else if (RightImm != null)
+					{
+						var RightValue = Convert.ToInt64(RightImm.Value);
+						switch (Operator)
+						{
+							case "0": if (RightValue == 0) return new AstNodeExprImm(0); break;
+							case "|": if (RightValue == 0) return Binary.LeftNode; break;
+							case "+":
+								if (RightValue == 0) return Binary.LeftNode;
+								if (RightValue < 0) return new AstNodeExprBinop(Binary.LeftNode, "-", new AstNodeExprImm(AstUtils.Negate(RightImm.Value)));
+								break;
+							case "-": if (RightValue == 0) return Binary.LeftNode; break;
+							case "*":
+								if (RightValue == 1) return Binary.LeftNode;
+								break;
+							case "/":
+								//if (RightValue == 0) throw(new Exception("Can't divide by 0"));
+								if (RightValue == 1) return Binary.LeftNode;
+								break;
+						}
+					}
+				} // !AstUtils.IsTypeFloat(LeftType)
 			}
 
 			// Special optimizations

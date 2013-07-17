@@ -76,7 +76,8 @@ namespace SafeILGenerator.Ast.Generators
 
 		public string[] GenerateToStringList(MethodInfo MethodInfo, AstNode AstNode)
 		{
-			this.Init(MethodInfo, null, GenerateLines: true).GenerateRoot(AstNode);
+			var ILGenerator = new DynamicMethod("test", MethodInfo.ReturnType, MethodInfo.GetParameters().Select(Param => Param.ParameterType).ToArray()).GetILGenerator();
+			this.Init(MethodInfo, ILGenerator, GenerateLines: true).GenerateRoot(AstNode);
 			return this.Lines.ToArray();
 		}
 
