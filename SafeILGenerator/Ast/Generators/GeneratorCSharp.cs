@@ -312,7 +312,7 @@ namespace SafeILGenerator.Ast.Generators
 			}
 		}
 
-		protected virtual void _Generate(AstNodeExprCallTail Tail)
+		protected virtual void _Generate(AstNodeExprCallTailCall Tail)
 		{
 			Output.Write("__tail_call(");
 			Generate(Tail.Call);

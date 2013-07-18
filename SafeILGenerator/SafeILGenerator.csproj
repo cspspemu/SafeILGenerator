@@ -85,7 +85,7 @@
     <Compile Include="Ast\Nodes\AstNodeExprCall.cs" />
     <Compile Include="Ast\Nodes\AstNodeExprCallInstance.cs" />
     <Compile Include="Ast\Nodes\AstNodeExprCallStatic.cs" />
-    <Compile Include="Ast\Nodes\AstNodeExprCallTail.cs" />
+    <Compile Include="Ast\Nodes\AstNodeExprCallTailCall.cs" />
     <Compile Include="Ast\Nodes\AstNodeExprCast.cs" />
     <Compile Include="Ast\Nodes\AstNodeExprFieldAccess.cs" />
     <Compile Include="Ast\Nodes\AstNodeExprGetAddress.cs" />

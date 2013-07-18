@@ -472,7 +472,7 @@ namespace SafeILGenerator.Ast.Generators
 			Emit(OpCodes.Ret);
 		}
 
-		protected virtual void _Generate(AstNodeExprCallTail Call)
+		protected virtual void _Generate(AstNodeExprCallTailCall Call)
 		{
 			Generate(Call.Call);
 			Emit(OpCodes.Ret);

@@ -64,9 +64,9 @@ namespace SafeILGenerator.Ast
 			return new AstNodeStmLabel(AstLabel);
 		}
 
-		public AstNodeExprFieldAccess FieldAccess(AstNodeExpr Instance, FieldInfo FieldInfo)
+		public AstNodeExprFieldAccess FieldAccess(AstNodeExpr Instance, FieldInfo FieldInfo, string FieldName = "")
 		{
-			return new AstNodeExprFieldAccess(Instance, FieldInfo);
+			return new AstNodeExprFieldAccess(Instance, FieldInfo, FieldName);
 		}
 
 		public AstNodeExprFieldAccess FieldAccess(AstNodeExpr Instance, string FieldName)
@@ -116,9 +116,9 @@ namespace SafeILGenerator.Ast
 		//	return new AstNodeExprImm(Value);
 		//}
 
-		public AstNodeExprCallTail CallTail(AstNodeExprCall Call)
+		public AstNodeExprCallTailCall TailCall(AstNodeExprCall Call)
 		{
-			return new AstNodeExprCallTail(Call);
+			return new AstNodeExprCallTailCall(Call);
 		}
 
 		public AstNodeExprCallStatic CallStatic(Delegate Delegate, params AstNodeExpr[] Parameters)

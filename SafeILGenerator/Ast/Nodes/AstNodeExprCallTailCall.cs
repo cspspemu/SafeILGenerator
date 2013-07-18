@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace SafeILGenerator.Ast.Nodes
 {
-	public class AstNodeExprCallTail : AstNodeExpr
+	public class AstNodeExprCallTailCall : AstNodeExpr
 	{
 		public AstNodeExprCall Call;
 
-		public AstNodeExprCallTail(AstNodeExprCall Call)
+		public AstNodeExprCallTailCall(AstNodeExprCall Call)
 		{
 			this.Call = Call;
 			Call.Parent = this;
