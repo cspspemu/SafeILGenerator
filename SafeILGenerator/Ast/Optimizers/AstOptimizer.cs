@@ -176,6 +176,7 @@ namespace SafeILGenerator.Ast.Optimizers
 						var LeftValue = Convert.ToInt64(LeftImm.Value);
 						switch (Operator)
 						{
+							case "|": if (LeftValue == 0) return Binary.RightNode; break;
 							case "+": if (LeftValue == 0) return Binary.RightNode; break;
 							case "-": if (LeftValue == 0) return new AstNodeExprUnop("-", Binary.RightNode); break;
 							case "*":
@@ -192,6 +193,7 @@ namespace SafeILGenerator.Ast.Optimizers
 						var RightValue = Convert.ToInt64(RightImm.Value);
 						switch (Operator)
 						{
+							case "|": if (RightValue == 0) return Binary.LeftNode; break;
 							case "+": if (RightValue == 0) return Binary.LeftNode; break;
 							case "-": if (RightValue == 0) return Binary.LeftNode; break;
 							case "*":
