@@ -78,7 +78,11 @@ namespace SafeILGenerator.Ast.Generators
 					.Where(Method => Method.GetParameters().Count() == 1)
 			)
 			{
-				GenerateMappings[Method.GetParameters().First().ParameterType] = MappingInfo.FromMethodInfo(this, Method);
+				var ParameterType = Method.GetParameters().First().ParameterType;
+				if (ParameterType.IsSubclassOf(typeof(AstNode)))
+				{
+					GenerateMappings[ParameterType] = MappingInfo.FromMethodInfo(this, Method);
+				}
 			}
 
 			this.Reset();
