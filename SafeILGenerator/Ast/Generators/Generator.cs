@@ -42,8 +42,8 @@ namespace SafeILGenerator.Ast.Generators
 #else
 		static public MappingInfo FromMethodInfo<T>(Generator<T> that, MethodInfo MethodInfo)
 		{
-			var DM = new DynamicMethod("MappingInfo.FromMethodInfo::" + typeof(T).Name + "::" + MethodInfo.Name + "(" + MethodInfo.GetParameters().First().ParameterType.Name + ")", typeof(void), new Type[] { typeof(object), typeof(AstNode) }, that.GetType());
-			var ILGenerator = DM.GetILGenerator();
+			var DynamicMethod = new DynamicMethod("MappingInfo.FromMethodInfo::" + typeof(T).Name + "::" + MethodInfo.Name + "(" + MethodInfo.GetParameters().First().ParameterType.Name + ")", typeof(void), new Type[] { typeof(object), typeof(AstNode) }, that.GetType());
+			var ILGenerator = DynamicMethod.GetILGenerator();
 			
 			ILGenerator.Emit(OpCodes.Ldarg_0);
 			ILGenerator.Emit(OpCodes.Castclass, that.GetType());
@@ -57,7 +57,7 @@ namespace SafeILGenerator.Ast.Generators
 			
 			return new MappingInfo()
 			{
-				Action = (MapDelegate)DM.CreateDelegate(typeof(MapDelegate)),
+				Action = (MapDelegate)DynamicMethod.CreateDelegate(typeof(MapDelegate)),
 			};
 		}
 #endif
