@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -26,11 +27,13 @@ namespace SafeILGenerator.Utils
 		public TType Value
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			[TargetedPatchingOptOut("Performance critical to inline across NGen image boundaries")]
 			set
 			{
 				Item.Value = value;
 			}
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			[TargetedPatchingOptOut("Performance critical to inline across NGen image boundaries")]
 			get
 			{
 				return (TType)Item.Value;
@@ -73,11 +76,13 @@ namespace SafeILGenerator.Utils
 		public object Value
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			[TargetedPatchingOptOut("Performance critical to inline across NGen image boundaries")]
 			set
 			{
 				FieldInfo.SetValue(null, value);
 			}
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			[TargetedPatchingOptOut("Performance critical to inline across NGen image boundaries")]
 			get
 			{
 				return FieldInfo.GetValue(null);
@@ -157,7 +162,7 @@ namespace SafeILGenerator.Utils
 				AssemblyBuilderAccess.RunAndCollect,
 				DllName
 			);
-			ModuleBuilder = AssemblyBuilder.DefineDynamicModule(AssemblyBuilder.GetName().Name, DllName, true);
+			ModuleBuilder = AssemblyBuilder.DefineDynamicModule(AssemblyBuilder.GetName().Name, DllName, false);
 		}
 
 		public ILInstanceHolderPool(Type ItemType, int Count, string TypeName = null)
@@ -167,16 +172,19 @@ namespace SafeILGenerator.Utils
 			if (TypeName == null) TypeName = "DynamicType" + Autoincrement++;
 			var TypeBuilder = ModuleBuilder.DefineType(TypeName, TypeAttributes.Sealed | TypeAttributes.Public | TypeAttributes.Class);
 			FieldInfos = new ILInstanceHolderPoolItem[Count];
+			var Names = new string[Count];
 			for (int n = 0; n < Count; n++)
 			{
-				TypeBuilder.DefineField("V" + n, ItemType, FieldAttributes.Public | FieldAttributes.Static);
+				Names[n] = String.Format("V{0}", n);
+				TypeBuilder.DefineField(Names[n], ItemType, FieldAttributes.Public | FieldAttributes.Static);
 			}
 
 			HolderType = TypeBuilder.CreateType();
 
+			var Fields = HolderType.GetFields();
 			for (int n = 0; n < Count; n++)
 			{
-				FieldInfos[n] = new ILInstanceHolderPoolItem(this, n, HolderType.GetField("V" + n));
+				FieldInfos[n] = new ILInstanceHolderPoolItem(this, n, Fields[n]);
 				FreeItems.AddLast(n);
 			}
 		}

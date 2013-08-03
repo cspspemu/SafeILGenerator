@@ -1,4 +1,6 @@
-﻿using System;
+﻿//#define DEBUG_ILINSTANCEHOLDERPOOL_TIME
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,7 +24,20 @@ namespace SafeILGenerator.Utils
 				var FreePool = PoolsType.Where(Pool => Pool.HasAvailable).FirstOrDefault();
 				if (FreePool == null)
 				{
-					PoolsType.Add(FreePool = new ILInstanceHolderPool(Type, 1 << (PoolsType.Count + 2)));
+					int NextPoolSize = 1 << (PoolsType.Count + 2);
+					//if (NextPoolSize < 2048) NextPoolSize = 2048;
+
+#if DEBUG_ILINSTANCEHOLDERPOOL_TIME
+					Console.BackgroundColor = ConsoleColor.DarkRed;
+					Console.Error.Write("Create ILInstanceHolderPool({0})[{1}]...", Type, NextPoolSize);
+					var Start = DateTime.UtcNow;
+#endif
+					PoolsType.Add(FreePool = new ILInstanceHolderPool(Type, NextPoolSize));
+#if DEBUG_ILINSTANCEHOLDERPOOL_TIME
+					var End = DateTime.UtcNow;
+					Console.Error.WriteLine("Ok({0})", End - Start);
+					Console.ResetColor();
+#endif
 				}
 				var Item = FreePool.Alloc();
 				Item.Value = Value;
