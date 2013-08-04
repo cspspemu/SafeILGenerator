@@ -514,8 +514,7 @@ namespace SafeILGenerator.Ast.Generators
 					Generate(Call.Instance);
 					foreach (var Parameter in Call.Parameters) Generate(Parameter);
 					if (Call.IsTail) Emit(OpCodes.Tailcall);
-					//OpCodes.Calli
-					Emit(OpCodes.Call, Call.MethodInfo);
+					Emit(OpCodes.Callvirt, Call.MethodInfo);
 					break;
 				default:
 					throw (new Exception(String.Format("Can't handle calling convention {0}", Call.MethodInfo.CallingConvention)));
