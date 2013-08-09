@@ -26,13 +26,13 @@ namespace SafeILGenerator.Utils
 
 		public TType Value
 		{
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			[TargetedPatchingOptOut("Performance critical to inline across NGen image boundaries")]
 			set
 			{
 				Item.Value = value;
 			}
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			[TargetedPatchingOptOut("Performance critical to inline across NGen image boundaries")]
 			get
 			{
@@ -75,13 +75,13 @@ namespace SafeILGenerator.Utils
 
 		public object Value
 		{
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			[TargetedPatchingOptOut("Performance critical to inline across NGen image boundaries")]
 			set
 			{
 				FieldInfo.SetValue(null, value);
 			}
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			[TargetedPatchingOptOut("Performance critical to inline across NGen image boundaries")]
 			get
 			{
